@@ -80,6 +80,8 @@ const formattedConfigData = computed(() => {
       kuaishouClientSecret: props.generalConfigForm.kuaishouClientSecret,
       mineLoginType: props.generalConfigForm.mineLoginType,
       iaaMode: props.generalConfigForm.iaaMode,
+      iaaDialogStyle: props.generalConfigForm.iaaDialogStyle,
+      hidePayEntry: props.generalConfigForm.hidePayEntry,
       payCardStyle: props.generalConfigForm.payCardStyle,
       readerLoginType: props.generalConfigForm.readerLoginType,
       weixinAppToken: props.generalConfigForm.weixinAppToken,

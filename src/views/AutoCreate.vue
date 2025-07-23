@@ -172,6 +172,8 @@ const generalConfigForm = ref({
   kuaishouClientSecret: '',
   kuaishouAppToken: '',
   iaaMode: false,
+  iaaDialogStyle: null,
+  hidePayEntry:false
 })
 
 const resetWizard = () => {

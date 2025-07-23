@@ -77,6 +77,25 @@
         <span class="form-tip">是否开启IAA(In-App-Advertising)模式</span>
       </el-form-item>
 
+      <el-form-item v-if="form.iaaMode" label="IAA弹窗样式">
+        <el-radio-group v-model="form.iaaDialogStyle" class="iaa-dialog-style-card-group">
+          <el-radio-button
+            v-for="item in iaaDialogStyleOptions"
+            :key="item.value"
+            :label="item.value"
+            class="iaa-dialog-style-card"
+          >
+            <div class="iaa-dialog-style-card-inner" :class="{ selected: form.iaaDialogStyle === item.value }">
+              <img :src="item.img" :alt="item.label" />
+              <div class="iaa-dialog-style-label">{{ item.label }}</div>
+            </div>
+          </el-radio-button>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="屏蔽支付入口">
+        <el-switch v-model="form.hidePayEntry" />
+        <span class="form-tip">除微信IOS的非投流渠道，默认不屏蔽。审核失败时候可尝试屏蔽处理</span>
+      </el-form-item>
       <el-form-item label="我的页登录类型" class="login-type-item">
         <el-radio-group v-model="form.mineLoginType">
           <el-radio value="anonymousLogin">静默登录</el-radio>
@@ -133,6 +152,22 @@ watch(form, (newVal) => {
     emit('update:modelValue', { ...newVal });
   }
 }, { deep: true });
+
+// IAA弹窗样式选项
+const iaaDialogStyleOptions = [
+  { value: 1, label: '样式1', img: '/images/iaaDialogStyle/iaa_dialog_style1.jpg' },
+  { value: 2, label: '样式2', img: '/images/iaaDialogStyle/iaa_dialog_style2.jpg' }
+]
+
+// IAA模式切换时，自动选中样式1
+watch(() => form.value.iaaMode, (val) => {
+  if (val && !form.value.iaaDialogStyle) {
+    form.value.iaaDialogStyle = 1
+  }
+  if (!val) {
+    form.value.iaaDialogStyle = null
+  }
+})
 
 // 表单校验规则
 const formRules = {
@@ -209,12 +244,60 @@ defineExpose({ validate });
 
 <style scoped>
 .narrow-form-container {
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
 .pay-card-style-item {
   /* Removed display: flex; flex-direction: column; to restore original layout */
+}
+
+/* 新增IAA弹窗样式卡片布局 */
+.iaa-dialog-style-card-group {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0 32px 0;
+}
+
+.iaa-dialog-style-card {
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+}
+.iaa-dialog-style-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  background: #fff;
+  padding: 2px 8px 2px 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  min-width: 140px;
+  min-height: 180px;
+}
+.iaa-dialog-style-card-inner.selected,
+.iaa-dialog-style-card-inner:hover {
+  border-color: #409eff;
+  box-shadow: 0 2px 8px 0 rgba(64,158,255,0.06); /* 只做轻微阴影，不要蓝色 */
+}
+.iaa-dialog-style-card-inner img {
+  width: 160px;
+  height: 240px;
+  object-fit: contain;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  background: #f8fafc;
+  border: 1px solid #ebeef5;
+}
+.iaa-dialog-style-label {
+  font-size: 15px;
+  color: #333;
+  margin-top: 2px;
+  font-weight: 500;
+  text-align: center;
 }
 
 .pay-card-image-preview {
