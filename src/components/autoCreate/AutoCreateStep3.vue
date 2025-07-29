@@ -24,7 +24,7 @@
       </el-form-item>
 
       <el-form-item label="构建命令" prop="buildCode">
-        <el-input v-model="form.buildCode" placeholder="请输入构建命令（输入npm run build:xxx 的xxx即可）" />
+        <el-input v-model="form.buildCode" placeholder="请输入构建命令（输入npm run build:platform(tt/ks/wx..)-xx  的xx即可）" />
       </el-form-item>
 
       <!-- Conditionally show Douyin field -->
@@ -77,12 +77,12 @@
         <span class="form-tip">是否开启IAA(In-App-Advertising)模式</span>
       </el-form-item>
 
-      <el-form-item v-if="form.iaaMode" label="IAA弹窗样式">
+      <el-form-item v-if="form.iaaMode" label="IAA弹窗样式" prop="iaaDialogStyle">
         <el-radio-group v-model="form.iaaDialogStyle" class="iaa-dialog-style-card-group">
           <el-radio-button
             v-for="item in iaaDialogStyleOptions"
             :key="item.value"
-            :label="item.value"
+            :value="item.value"
             class="iaa-dialog-style-card"
           >
             <div class="iaa-dialog-style-card-inner" :class="{ selected: form.iaaDialogStyle === item.value }">
@@ -162,12 +162,18 @@ const iaaDialogStyleOptions = [
 // IAA模式切换时，自动选中样式1
 watch(() => form.value.iaaMode, (val) => {
   if (val && !form.value.iaaDialogStyle) {
-    form.value.iaaDialogStyle = 1
+    
+    nextTick(() => {
+      console.log('自动选中第一个IAA弹窗样式');
+      form.value.iaaDialogStyle = 1;
+      console.log('界面更新后，form.value.iaaDialogStyle:', form.value.iaaDialogStyle);
+    });
   }
   if (!val) {
-    form.value.iaaDialogStyle = null
+    form.value.iaaDialogStyle = null;
+    console.log('关闭IAA模式，清空IAA弹窗样式选择');
   }
-})
+});
 
 // 表单校验规则
 const formRules = {
@@ -191,6 +197,18 @@ const formRules = {
   ],
   mineLoginType: [{ required: true, message: '请选择我的页登录类型', trigger: 'change' }],
   readerLoginType: [{ required: true, message: '请选择阅读页登录类型', trigger: 'change' }],
+  iaaDialogStyle: [
+    {
+      validator: (rule, value, callback) => {
+        if (form.value.iaaMode && !value) {
+          callback(new Error('请选择IAA弹窗样式'));
+        } else {
+          callback();
+        }
+      },
+      trigger: 'change'
+    }
+  ],
   'douyinImId': [{
     validator: (rule, value, callback) => {
       if (props.platform === 'douyin' && !value) {
@@ -324,4 +342,4 @@ defineExpose({ validate });
   color: #909399;
   margin-left: 8px;
 }
-</style> 
+</style>
