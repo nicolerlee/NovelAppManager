@@ -196,54 +196,54 @@
                 </div>
               </el-card>
 
-              <!-- 信息流广告配置 -->
-              <el-card class="ad-type-card" :body-style="{ padding: '0' }">
+              <!-- Banner广告配置 -->
+              <el-card class="ad-type-card" :body-style="{ padding: '0' }" v-if="selectedApp.platform === '快手'">
                 <div class="ad-card-wrapper">
                   <!-- 广告类型标题区 -->
-                  <div class="ad-card-header" :class="{ 'configured': adConfig?.native }">
+                  <div class="ad-card-header" :class="{ 'configured': adConfig?.banner }">
                     <div class="ad-type-info">
                       <i class="el-icon-document"></i>
                       <div class="ad-type-title">
-                        <h4>信息流广告</h4>
-                        <span class="ad-type-desc">原生广告</span>
+                        <h4>Banner广告</h4>
+                        <span class="ad-type-desc">横幅展示广告</span>
                       </div>
                     </div>
-                    <el-tag size="small" :type="adConfig?.native ? 'success' : 'info'" effect="plain">
-                      {{ adConfig?.native ? '已配置' : '未配置' }}
+                    <el-tag size="small" :type="adConfig?.banner ? 'success' : 'info'" effect="plain">
+                      {{ adConfig?.banner ? '已配置' : '未配置' }}
                     </el-tag>
                   </div>
 
                   <!-- 广告配置内容区 -->
                   <div class="ad-card-content" v-loading="loadingAdConfig">
-                    <template v-if="adConfig?.native">
+                    <template v-if="adConfig?.banner">
                       <div class="ad-info-list">
-                        <el-empty 
-                          description="暂未配置信息流广告" 
-                          :image-size="60"
-                        >
-                          <template #description>
-                            <div class="empty-description">
-                              <p>暂未配置信息流广告</p>
-                            </div>
-                          </template>
-                        </el-empty>
+                        <div class="ad-info-item">
+                          <span class="label">广告位ID</span>
+                          <span class="value">{{ adConfig.banner.bannerAdId }}</span>
+                        </div>
+                        <div class="ad-info-item">
+                          <span class="label">状态</span>
+                          <el-tag size="small" :type="adConfig.banner.isBannerAdEnabled ? 'success' : 'danger'" effect="light">
+                            {{ adConfig.banner.isBannerAdEnabled ? '已启用' : '未启用' }}
+                          </el-tag>
+                        </div>
                       </div>
                     </template>
-                    <el-empty v-else description="暂未配置信息流广告" :image-size="60" />
+                    <el-empty v-else description="暂未配置Banner广告" :image-size="60" />
                   </div>
 
                   <!-- 操作按钮区 -->
                   <div class="ad-card-footer">
-                    <template v-if="adConfig?.native">
-                      <el-button type="primary" link disabled title="暂不支持编辑">
+                    <template v-if="adConfig?.banner">
+                      <el-button type="primary" link @click="handleEditAd('banner')">
                         <el-icon><Edit /></el-icon>编辑
                       </el-button>
-                      <el-button type="danger" link @click="handleDeleteAd('native')">
+                      <el-button type="danger" link @click="handleDeleteAd('banner')">
                         <el-icon><Delete /></el-icon>删除
                       </el-button>
                     </template>
                     <template v-else>
-                      <el-button type="primary" @click="handleCreateAd('native')">
+                      <el-button type="primary" @click="handleCreateAd('banner')">
                         <el-icon><Plus /></el-icon>新建配置
                       </el-button>
                     </template>
@@ -309,10 +309,13 @@
             <el-switch v-model="adForm.isInterstitialAdEnabled" />
           </el-form-item>
         </template>
-        <!-- 信息流广告表单 -->
-        <template v-if="currentAdType === 'native'">
-          <el-form-item label="广告位ID" prop="adId">
-            <el-input v-model="adForm.adId" placeholder="请输入广告位ID" />
+        <!-- Banner广告表单 -->
+        <template v-if="currentAdType === 'banner'">
+          <el-form-item label="广告位ID" prop="bannerAdId">
+            <el-input v-model="adForm.bannerAdId" placeholder="请输入Banner广告位ID" />
+          </el-form-item>
+          <el-form-item label="是否启用" prop="isBannerAdEnabled">
+            <el-switch v-model="adForm.isBannerAdEnabled" />
           </el-form-item>
         </template>
       </el-form>
@@ -502,7 +505,7 @@ const handleRefresh = () => {
 
 // 修改编辑广告配置的方法
 const handleEditAd = (type) => {
-  if (type !== 'reward' && type !== 'interstitial') {
+  if (type !== 'reward' && type !== 'interstitial'&& type !== 'banner') {
     ElMessage.warning('该类型广告暂不支持编辑')
     return
   }
@@ -538,6 +541,16 @@ const handleEditAd = (type) => {
         { required: true, message: '请输入展示次数', trigger: 'blur' }
       ]
     }
+  }else if (type === 'banner') { 
+    adForm.value = {
+      bannerAdId: adConfig.value.banner.bannerAdId || '',
+      isBannerAdEnabled: adConfig.value.banner.isBannerAdEnabled || false
+    }
+    adFormRules.value = {
+      bannerAdId: [
+        { required: true, message: '请输入广告位ID', trigger: 'blur' }
+      ]
+    } 
   }
   dialogVisible.value = true
 }
@@ -547,7 +560,7 @@ const getAdTypeName = (type) => {
   const names = {
     'reward': '激励广告',
     'interstitial': '插屏广告',
-    'native': '信息流广告'
+    'banner': 'Banner广告'
   }
   return names[type] || type
 }
@@ -622,13 +635,15 @@ const handleCreateAd = async (type) => {
         { required: true, message: '请输入展示次数', trigger: 'blur' }
       ]
     }
-  } else {
-    // 信息流广告表单只显示广告位ID
+  } else  if (type === 'banner'){
+    // Banner广告表单只显示广告位ID
     adForm.value = {
-      adId: ''
+      bannerAdId: '',
+      isBannerAdEnabled: false
+
     }
     adFormRules.value = {
-      adId: [
+      bannerAdId: [
         { required: true, message: '请输入广告位ID', trigger: 'blur' }
       ]
     }
@@ -663,10 +678,11 @@ const handleSubmitAd = async () => {
           interstitialCount: adForm.value.interstitialCount,
           isInterstitialAdEnabled: adForm.value.isInterstitialAdEnabled
         }
-      } else {
+      } else if (currentAdType.value === 'banner'){
         submitData = {
           ...submitData,
-          adId: adForm.value.adId
+          bannerAdId: adForm.value.bannerAdId,
+          isBannerAdEnabled: adForm.value.isBannerAdEnabled
         }
       }
       const apiUrl = isEditMode.value
