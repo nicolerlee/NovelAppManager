@@ -66,6 +66,12 @@ const routes = [
     path: '/wenqu-ai',
     name: 'WenquAi',
     component: () => import('../views/WenquAi.vue')
+  },
+  {
+    path: '/wenqu-agent',
+    name: 'WenquAgent',
+    component: () => import('../components/wenquAi/WenquAgent.vue'),
+    meta: { title: '文曲下凡 - 内测版' }
   }
 ]
 
@@ -74,4 +80,4 @@ const router = createRouter({
   routes
 })
 
-export default router 
+export default router

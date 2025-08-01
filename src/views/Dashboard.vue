@@ -1,78 +1,86 @@
 <template>
   <div class="app-list">
-    <el-row :gutter="20">
-      <el-col :span="6">
-        <el-card 
-          class="data-card douyin-card"
-          :class="{ 'is-active': selectedPlatform === '抖音' }"
-          @click="handlePlatformSelect('抖音')"
-        >
-          <template #header>
-            <div class="card-header">
-              <span>抖音小程序</span>
-            </div>
-          </template>
-          <div class="card-value">{{ statistics.douyin }}</div>
-          <div class="card-trend">
-            小程序总数 <span class="count">{{ statistics.douyinCount }}</span>
+    <div class="card-container">
+      <el-card 
+        class="data-card douyin-card"
+        :class="{ 'is-active': selectedPlatform === '抖音' }"
+        @click="handlePlatformSelect('抖音')"
+      >
+        <template #header>
+          <div class="card-header">
+            <span>抖音小程序</span>
           </div>
-        </el-card>
-      </el-col>
-      
-      <el-col :span="6">
-        <el-card 
-          class="data-card kuaishou-card"
-          :class="{ 'is-active': selectedPlatform === '快手' }"
-          @click="handlePlatformSelect('快手')"
-        >
-          <template #header>
-            <div class="card-header">
-              <span>快手小程序</span>
-            </div>
-          </template>
-          <div class="card-value">{{ statistics.kuaishou }}</div>
-          <div class="card-trend">
-            小程序总数 <span class="count">{{ statistics.kuaishouCount }}</span>
+        </template>
+        <div class="card-value">{{ statistics.douyin }}</div>
+        <div class="card-trend">
+          小程序总数 <span class="count">{{ statistics.douyinCount }}</span>
+        </div>
+      </el-card>
+
+      <el-card 
+        class="data-card kuaishou-card"
+        :class="{ 'is-active': selectedPlatform === '快手' }"
+        @click="handlePlatformSelect('快手')"
+      >
+        <template #header>
+          <div class="card-header">
+            <span>快手小程序</span>
           </div>
-        </el-card>
-      </el-col>
-      
-      <el-col :span="6">
-        <el-card 
-          class="data-card weixin-card"
-          :class="{ 'is-active': selectedPlatform === '微信' }"
-          @click="handlePlatformSelect('微信')"
-        >
-          <template #header>
-            <div class="card-header">
-              <span>微信小程序</span>
-            </div>
-          </template>
-          <div class="card-value">{{ statistics.weixin }}</div>
-          <div class="card-trend">
-            小程序总数 <span class="count">{{ statistics.weixinCount }}</span>
+        </template>
+        <div class="card-value">{{ statistics.kuaishou }}</div>
+        <div class="card-trend">
+          小程序总数 <span class="count">{{ statistics.kuaishouCount }}</span>
+        </div>
+      </el-card>
+
+      <el-card 
+        class="data-card weixin-card"
+        :class="{ 'is-active': selectedPlatform === '微信' }"
+        @click="handlePlatformSelect('微信')"
+      >
+        <template #header>
+          <div class="card-header">
+            <span>微信小程序</span>
           </div>
-        </el-card>
-      </el-col>
-      
-      <el-col :span="6">
-        <el-card 
-          class="data-card baidu-card"
-          :class="{ 'is-active': selectedPlatform === '百度' }"
-          @click="handlePlatformSelect('百度')"
-        >
-          <template #header>
-            <div class="card-header">
-              <span>百度小程序</span>
-            </div>
-          </template>
-          <div class="card-value">{{ statistics.baidu }}</div>
-          <div class="card-trend">
-            小程序总数 <span class="count">{{ statistics.baiduCount }}</span>
+        </template>
+        <div class="card-value">{{ statistics.weixin }}</div>
+        <div class="card-trend">
+          小程序总数 <span class="count">{{ statistics.weixinCount }}</span>
+        </div>
+      </el-card>
+
+      <el-card 
+        class="data-card bilibili-card"
+        :class="{ 'is-active': selectedPlatform === 'B站' }"
+        @click="handlePlatformSelect('B站')"
+      >
+        <template #header>
+          <div class="card-header">
+            <span>B站小程序</span>
           </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </template>
+        <div class="card-value">{{ statistics.bilibili }}</div>
+        <div class="card-trend">
+          小程序总数 <span class="count">{{ statistics.bilibiliCount }}</span>
+        </div>
+      </el-card>
+
+      <el-card 
+        class="data-card baidu-card"
+        :class="{ 'is-active': selectedPlatform === '百度' }"
+        @click="handlePlatformSelect('百度')"
+      >
+        <template #header>
+          <div class="card-header">
+            <span>百度小程序</span>
+          </div>
+        </template>
+        <div class="card-value">{{ statistics.baidu }}</div>
+        <div class="card-trend">
+          小程序总数 <span class="count">{{ statistics.baiduCount }}</span>
+        </div>
+      </el-card>
+    </div>
 
     <el-card class="app-table">
       <template #header>
@@ -177,6 +185,7 @@
             <el-option label="快手小程序" value="快手" />
             <el-option label="微信小程序" value="微信" />
             <el-option label="百度小程序" value="百度" />
+            <el-option label="B站小程序" value="B站" />
           </el-select>
         </el-form-item>
         
@@ -264,7 +273,8 @@ const platformMap = {
   'douyin': '抖音',
   'kuaishou': '快手',
   'weixin': '微信',
-  'baidu': '百度'
+  'baidu': '百度',
+  'bilibili': 'B站'
 }
 
 // 统计数据
@@ -276,7 +286,9 @@ const statistics = ref({
   weixin: '微信小程序',
   weixinCount: 0,
   baidu: '百度小程序',
-  baiduCount: 0
+  baiduCount: 0,
+  bilibili: 'B站小程序',
+  bilibiliCount: 0
 })
 
 // 小程序列表数据
@@ -405,7 +417,8 @@ const getPlatformType = (platform) => {
     '抖音': 'info',
     '快手': 'danger',
     '微信': 'success',
-    '百度': 'primary'
+    '百度': 'primary',
+    'B站': 'primary'
   }
   return types[platform] || 'info'
 }
@@ -656,13 +669,30 @@ onMounted(() => {
 
 <style scoped>
 .app-list {
-  padding: 20px;
+  width: 100%;
+  max-width: none;
+  overflow-x: auto;
+  padding: 0 10px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.card-container {
+  display: flex;
+  width: auto;
+  padding: 10px;
+  padding-right: 20px;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: nowrap;
+  box-sizing: border-box;
 }
 
 .data-card {
-  margin-bottom: 20px;
-  transition: all 0.3s;
-  cursor: pointer;
+  width: 305px;
+  flex-shrink: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .data-card:hover {
@@ -716,6 +746,12 @@ onMounted(() => {
   color: white;
 }
 
+.bilibili-card :deep(.el-card__header) {
+  background-color: #FB7299;
+  color: white;
+
+}
+
 /* 卡片选中态样式 */
 .data-card.is-active {
   transform: translateY(-5px);
@@ -736,6 +772,9 @@ onMounted(() => {
 
 .baidu-card.is-active {
   border-color: #4e6ef2;
+}
+.bilibili-card.is-active {
+  border-color: #FB7299;
 }
 
 .platform-tag {
@@ -792,4 +831,4 @@ onMounted(() => {
   margin-right: 8px;
   vertical-align: middle;
 }
-</style> 
+</style>

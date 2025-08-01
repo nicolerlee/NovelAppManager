@@ -7,25 +7,25 @@
         </div>
       </template>
       <div class="feature-grid">
-        <el-card class="feature-card" shadow="hover" disabled>
-          <div class="feature-icon not-open">
-            <el-icon><Lock /></el-icon>
+        <el-card class="feature-card" shadow="hover" @click="navigateToWenquAgent">
+          <div class="feature-icon">
+            <el-icon><ChatDotRound /></el-icon>
           </div>
-          <div class="feature-title">小文问答</div>
-          <div class="feature-desc">文曲AI驱动的智能对话/向导能力。</div>
-          <el-button type="info" plain disabled>暂未开放</el-button>
+          <div class="feature-title">文曲下凡</div>
+          <div class="feature-desc">文曲智能对话/向导能力。</div>
+          <el-button class="内测-button" type="primary" plain>内测中</el-button>
         </el-card>
         <el-card class="feature-card" shadow="hover" disabled>
           <div class="feature-icon not-open">
-            <el-icon><Lock /></el-icon>
+            <el-icon><Position/></el-icon>
           </div>
-          <div class="feature-title">文曲智能体</div>
-          <div class="feature-desc">由文曲提供支持的智能体能力。</div>
-          <el-button type="info" plain disabled>暂未开放</el-button>
+          <div class="feature-title">文曲工作流</div>
+          <div class="feature-desc">由文曲提供支持的各种工作流</div>
+          <el-button type="info" plain disabled>即将开放</el-button>
         </el-card>
         <el-card class="feature-card" shadow="hover" disabled>
           <div class="feature-icon not-open">
-            <el-icon><Lock /></el-icon>
+            <el-icon><Link/></el-icon>
           </div>
           <div class="feature-title">MCP能力</div>
           <div class="feature-desc">MCP相关AI能力即将开放。</div>
@@ -45,7 +45,15 @@
 </template>
 
 <script setup>
-import { Lock } from '@element-plus/icons-vue'
+import { ChatDotRound } from '@element-plus/icons-vue'
+import { Position } from '@element-plus/icons-vue'
+import { Link } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const navigateToWenquAgent = () => {
+  router.push('/wenqu-agent')
+}
 </script>
 
 <style scoped>
@@ -76,6 +84,14 @@ import { Lock } from '@element-plus/icons-vue'
   cursor: pointer;
   position: relative;
   overflow: hidden;
+}
+.内测-button {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 500;
+  margin-top: 10px;
+  margin: 0 auto;
+  display: block;
 }
 .feature-card:hover {
   box-shadow: 0 6px 24px 0 rgba(64,158,255,0.12);
@@ -124,4 +140,4 @@ import { Lock } from '@element-plus/icons-vue'
   opacity: 0.7;
   cursor: not-allowed;
 }
-</style> 
+</style>

@@ -250,6 +250,61 @@
                   </div>
                 </div>
               </el-card>
+
+              <!-- 信息流广告配置 -->
+              <el-card class="ad-type-card" :body-style="{ padding: '0' }" v-if="selectedApp.platform === '快手'">
+                <div class="ad-card-wrapper">
+                  <!-- 广告类型标题区 -->
+                  <div class="ad-card-header" :class="{ 'configured': adConfig?.feed }">
+                    <div class="ad-type-info">
+                      <i class="el-icon-list"></i>
+                      <div class="ad-type-title">
+                        <h4>信息流广告</h4>
+                        <span class="ad-type-desc">信息流中展示的广告</span>
+                      </div>
+                    </div>
+                    <el-tag size="small" :type="adConfig?.feed ? 'success' : 'info'" effect="plain">
+                      {{ adConfig?.feed ? '已配置' : '未配置' }}
+                    </el-tag>
+                  </div>
+
+                  <!-- 广告配置内容区 -->
+                  <div class="ad-card-content" v-loading="loadingAdConfig">
+                    <template v-if="adConfig?.feed">
+                      <div class="ad-info-list">
+                        <div class="ad-info-item">
+                          <span class="label">广告位ID</span>
+                          <span class="value">{{ adConfig.feed.feedAdId }}</span>
+                        </div>
+                        <div class="ad-info-item">
+                          <span class="label">状态</span>
+                          <el-tag size="small" :type="adConfig.feed.isFeedAdEnabled ? 'success' : 'danger'" effect="light">
+                            {{ adConfig.feed.isFeedAdEnabled ? '已启用' : '未启用' }}
+                          </el-tag>
+                        </div>
+                      </div>
+                    </template>
+                    <el-empty v-else description="暂未配置信息流广告" :image-size="60" />
+                  </div>
+
+                  <!-- 操作按钮区 -->
+                  <div class="ad-card-footer">
+                    <template v-if="adConfig?.feed">
+                      <el-button type="primary" link @click="handleEditAd('feed')">
+                        <el-icon><Edit /></el-icon>编辑
+                      </el-button>
+                      <el-button type="danger" link @click="handleDeleteAd('feed')">
+                        <el-icon><Delete /></el-icon>删除
+                      </el-button>
+                    </template>
+                    <template v-else>
+                      <el-button type="primary" @click="handleCreateAd('feed')">
+                        <el-icon><Plus /></el-icon>新建配置
+                      </el-button>
+                    </template>
+                  </div>
+                </div>
+              </el-card>
             </div>
           </template>
           
@@ -316,6 +371,15 @@
           </el-form-item>
           <el-form-item label="是否启用" prop="isBannerAdEnabled">
             <el-switch v-model="adForm.isBannerAdEnabled" />
+          </el-form-item>
+        </template>
+        <!-- 信息流广告表单 -->
+        <template v-if="currentAdType === 'feed'">
+          <el-form-item label="广告位ID" prop="feedAdId">
+            <el-input v-model="adForm.feedAdId" placeholder="请输入信息流广告位ID" />
+          </el-form-item>
+          <el-form-item label="是否启用" prop="isFeedAdEnabled">
+            <el-switch v-model="adForm.isFeedAdEnabled" />
           </el-form-item>
         </template>
       </el-form>
@@ -388,13 +452,13 @@ const filteredApps = computed(() => {
   return apps.value.filter(app => {
     const name = app.appName || ''
     // 获取全拼和首字母
-    const namePinyinFirst = pinyin(name, { 
+    const namePinyinFirst = pinyin(name, {
       pattern: 'first', 
       type: 'array',
       toneType: 'none',
       nonZh: 'consecutive'
     }).join('').toLowerCase()
-    const namePinyinFull = pinyin(name, { 
+    const namePinyinFull = pinyin(name, {
       pattern: 'pinyin', 
       type: 'array',
       toneType: 'none',
@@ -505,7 +569,7 @@ const handleRefresh = () => {
 
 // 修改编辑广告配置的方法
 const handleEditAd = (type) => {
-  if (type !== 'reward' && type !== 'interstitial'&& type !== 'banner') {
+  if (type !== 'reward' && type !== 'interstitial' && type !== 'banner' && type !== 'feed') {
     ElMessage.warning('该类型广告暂不支持编辑')
     return
   }
@@ -541,7 +605,7 @@ const handleEditAd = (type) => {
         { required: true, message: '请输入展示次数', trigger: 'blur' }
       ]
     }
-  }else if (type === 'banner') { 
+  } else if (type === 'banner') {
     adForm.value = {
       bannerAdId: adConfig.value.banner.bannerAdId || '',
       isBannerAdEnabled: adConfig.value.banner.isBannerAdEnabled || false
@@ -550,7 +614,17 @@ const handleEditAd = (type) => {
       bannerAdId: [
         { required: true, message: '请输入广告位ID', trigger: 'blur' }
       ]
-    } 
+    }
+  } else if (type === 'feed') {
+    adForm.value = {
+      feedAdId: adConfig.value.feed.feedAdId || '',
+      isFeedAdEnabled: adConfig.value.feed.isFeedAdEnabled || false
+    }
+    adFormRules.value = {
+      feedAdId: [
+        { required: true, message: '请输入广告位ID', trigger: 'blur' }
+      ]
+    }
   }
   dialogVisible.value = true
 }
@@ -560,7 +634,8 @@ const getAdTypeName = (type) => {
   const names = {
     'reward': '激励广告',
     'interstitial': '插屏广告',
-    'banner': 'Banner广告'
+    'banner': 'Banner广告',
+    'feed': '信息流广告'
   }
   return names[type] || type
 }
@@ -635,7 +710,7 @@ const handleCreateAd = async (type) => {
         { required: true, message: '请输入展示次数', trigger: 'blur' }
       ]
     }
-  } else  if (type === 'banner'){
+  } else if (type === 'banner'){
     // Banner广告表单只显示广告位ID
     adForm.value = {
       bannerAdId: '',
@@ -645,6 +720,20 @@ const handleCreateAd = async (type) => {
     adFormRules.value = {
       bannerAdId: [
         { required: true, message: '请输入广告位ID', trigger: 'blur' }
+      ]
+    }
+  } else if (type === 'feed') {
+    adForm.value = {
+      feedAdId: '',
+      feedInterval: 5,
+      isFeedAdEnabled: false
+    }
+    adFormRules.value = {
+      feedAdId: [
+        { required: true, message: '请输入广告位ID', trigger: 'blur' }
+      ],
+      feedInterval: [
+        { required: true, message: '请输入展示间隔', trigger: 'blur' }
       ]
     }
   }
@@ -683,6 +772,13 @@ const handleSubmitAd = async () => {
           ...submitData,
           bannerAdId: adForm.value.bannerAdId,
           isBannerAdEnabled: adForm.value.isBannerAdEnabled
+        }
+      } else if (currentAdType.value === 'feed') {
+        submitData = {
+          ...submitData,
+          feedAdId: adForm.value.feedAdId,
+          feedInterval: adForm.value.feedInterval,
+          isFeedAdEnabled: adForm.value.isFeedAdEnabled
         }
       }
       const apiUrl = isEditMode.value
