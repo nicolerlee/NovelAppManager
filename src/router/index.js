@@ -62,16 +62,16 @@ const routes = [
       title: '小程序生成'
     }
   },
-  {
+  { 
     path: '/wenqu-ai',
     name: 'WenquAi',
     component: () => import('../views/WenquAi.vue')
   },
-  {
-    path: '/wenqu-agent',
-    name: 'WenquAgent',
-    component: () => import('../components/wenquAi/WenquAgent.vue'),
-    meta: { title: '文曲下凡 - 内测版' }
+  { 
+    path: '/agent-client-test',
+    name: 'AgentClientTest',
+    component: () => import('../views/AgentClientTest.vue'),
+    meta: { title: 'Agent Client 共享测试' }
   }
 ]
 

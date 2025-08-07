@@ -45,14 +45,16 @@
 </template>
 
 <script setup>
+import { inject } from 'vue'
+
 import { ChatDotRound } from '@element-plus/icons-vue'
 import { Position } from '@element-plus/icons-vue'
 import { Link } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 
-const router = useRouter()
+const agentClient = inject('agentClient', null);
 const navigateToWenquAgent = () => {
-  router.push('/wenqu-agent')
+  agentClient.value.showChatBot()
 }
 </script>
 
