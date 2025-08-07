@@ -66,12 +66,6 @@ const routes = [
     path: '/wenqu-ai',
     name: 'WenquAi',
     component: () => import('../views/WenquAi.vue')
-  },
-  { 
-    path: '/agent-client-test',
-    name: 'AgentClientTest',
-    component: () => import('../views/AgentClientTest.vue'),
-    meta: { title: 'Agent Client 共享测试' }
   }
 ]
 
