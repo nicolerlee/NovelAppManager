@@ -52,8 +52,13 @@ import { Position } from '@element-plus/icons-vue'
 import { Link } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 
+const auth = inject('auth')
 const agentClient = inject('agentClient', null);
 const navigateToWenquAgent = () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
   agentClient.value.showChatBot()
 }
 </script>

@@ -259,12 +259,14 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+<script setup lang="ts">
+import { ref, computed, onMounted, watch, inject } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import request from '../utils/request'
 import { pinyin } from 'pinyin-pro'
+
+const auth = inject('auth')
 
 // 状态变量
 const searchQuery = ref('')
@@ -493,6 +495,10 @@ const handleAppSelect = (row) => {
 
 // 保存配置
 const handleSaveConfig = async () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
   if (!selectedApp.value?.appid) {
     ElMessage.warning('请先选择小程序')
     return
@@ -627,6 +633,10 @@ const handleCreateConfig = async () => {
 
 // 显示删除确认对话框
 const handleDeleteConfirm = () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
   deleteDialogVisible.value = true
 }
 
@@ -681,6 +691,10 @@ const handleDeleteConfig = async () => {
 }
 
 const handleCopyGeneralConfig = () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
   try {
     // 复制包含新字段的数据
     const dataToCopy = {
@@ -700,6 +714,10 @@ const handleCopyGeneralConfig = () => {
 }
 
 const handlePasteGeneralConfig = () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
   try {
     const data = localStorage.getItem('generalConfigCopy')
     if (data) {
@@ -954,4 +972,4 @@ onMounted(() => {
   font-weight: 500;
   text-align: center;
 }
-</style> 
+</style>

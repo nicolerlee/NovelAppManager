@@ -262,11 +262,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted ,inject} from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import request from '../utils/request'
 import { pinyin } from 'pinyin-pro'
+
+const auth = inject('auth', null);
+
 
 // 平台映射
 const platformMap = {
@@ -443,7 +446,12 @@ const handleAddApp = () => {
   dialogVisible.value = true
 }
 
+
 const handleEdit = (app) => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
   isEdit.value = true
   appForm.value = {
     id: app.id,
@@ -465,6 +473,10 @@ const handleEdit = (app) => {
 }
 
 const handleDelete = async (app) => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
   try {
     await ElMessageBox.confirm(`确定要删除${app.platform}小程序：${app.appName}吗？`, '提示', {
       confirmButtonText: '确定',

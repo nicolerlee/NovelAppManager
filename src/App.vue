@@ -107,11 +107,11 @@ const getUserTypeDesc = (type) => {
   }
 };
 
-// // 处理退出登录
-// const handleLogout = () => {
-//   auth.logout();
-//   ElMessage.success('退出登录成功');
-// };
+// 处理退出登录
+const handleLogout = () => {
+  auth.logout();
+  ElMessage.success('退出登录成功');
+};
 
 
 

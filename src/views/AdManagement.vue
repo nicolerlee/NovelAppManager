@@ -413,7 +413,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, inject } from 'vue'
+const auth = inject('auth')
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Edit, Delete, Plus } from '@element-plus/icons-vue'
 import request from '../utils/request'
@@ -569,6 +570,11 @@ const handleRefresh = () => {
 
 // 修改编辑广告配置的方法
 const handleEditAd = (type) => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
+
   if (type !== 'reward' && type !== 'interstitial' && type !== 'banner' && type !== 'feed') {
     ElMessage.warning('该类型广告暂不支持编辑')
     return
@@ -642,6 +648,11 @@ const getAdTypeName = (type) => {
 
 // 修改创建广告配置的方法
 const handleCreateAd = async (type) => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
+
   if (!selectedApp.value?.appid) {
     ElMessage.warning('请先选择小程序')
     return
@@ -801,6 +812,11 @@ const handleSubmitAd = async () => {
 
 // 删除广告配置
 const handleDeleteAd = (type) => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
+
   deleteAdType.value = type
   deleteDialogVisible.value = true
 }

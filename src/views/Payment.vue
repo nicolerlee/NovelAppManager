@@ -407,7 +407,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, inject } from 'vue'
+const auth = inject('auth')
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Money, Goods, Calendar, Star, Edit, Delete, Plus, Wallet } from '@element-plus/icons-vue'
 import request from '../utils/request'
@@ -551,6 +552,11 @@ const handleAppSelect = (row) => {
 }
 
 const handleCreatePayment = async (type) => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
+
   if (!selectedApp.value?.appid) {
     ElMessage.warning('请先选择小程序')
     return
@@ -566,6 +572,11 @@ const handleCreatePayment = async (type) => {
 }
 
 const handleEditPayment = (type) => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
+
   isEdit.value = true
   currentPaymentType.value = type
   form.value = {
@@ -577,6 +588,11 @@ const handleEditPayment = (type) => {
 }
 
 const handleDeletePayment = (type) => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
+
   if (!selectedApp.value?.appid) {
     ElMessage.warning('请先选择小程序')
     return
@@ -853,4 +869,4 @@ onMounted(() => {
   color: #303133;
   font-weight: 500;
 }
-</style> 
+</style>

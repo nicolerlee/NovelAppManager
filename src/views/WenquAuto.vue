@@ -54,18 +54,33 @@
 <script setup>
 import { DocumentAdd, Share, Tools, Star } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { inject } from 'vue'
+
+const auth = inject('auth')
 
 const router = useRouter()
 
 const goToBuild = () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
   router.push('/auto-build')
 }
 
 const goToPublish = () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
   router.push('/auto-publish')
 }
 
 const goToCreate = () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
   router.push('/auto-create')
 }
 </script>
@@ -184,4 +199,4 @@ const goToCreate = () => {
   /* transform: translateY(...); */
   /* margin-right: 4px; */
 }
-</style> 
+</style>

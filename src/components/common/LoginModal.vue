@@ -216,9 +216,6 @@ import {
   Cpu,
 } from "@element-plus/icons-vue";
 
-// 定义emits
-const emit = defineEmits(["close", "login", "register"]);
-
 // 当前标签页，login或register
 const currentTab = ref("login");
 // 登录表单数据

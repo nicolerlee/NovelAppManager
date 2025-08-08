@@ -198,7 +198,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, nextTick, watch, inject } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 import request from '../utils/request'
@@ -212,6 +212,7 @@ const selectedApp = ref(null)
 const configCard = ref(null)
 
 // 配置相关
+const auth = inject('auth', null);
 const activeTab = ref('business_type')
 const loadingConfig = ref(false)
 
@@ -582,6 +583,10 @@ const handleCreatePublicSwitch = () => {
 
 // 保存business_type配置 - 根据是否为新建状态决定使用创建还是更新接口
 const handleSaveBusinessType = async () => {
+  if (!auth || !auth.isLogin.value) {
+    auth && auth.showLogin();
+    return;
+  }
   if (!selectedApp.value) {
     ElMessage.warning('请先选择一个有效的小程序')
     return
@@ -656,6 +661,10 @@ const handleSaveBusinessType = async () => {
 
 // 保存public_switch配置
 const handleSavePublicSwitch = async () => {
+  if (!auth || !auth.isLogin.value) {
+    auth && auth.showLogin();
+    return;
+  }
   if (!selectedApp.value) {
     ElMessage.warning('请先选择一个小程序')
     return
@@ -803,6 +812,10 @@ const deleteDialogVisible = ref(false)
 
 // 显示删除确认对话框
 const handleDeleteConfirm = () => {
+  if (!auth || !auth.isLogin.value) {
+    auth && auth.showLogin();
+    return;
+  }
   deleteDialogVisible.value = true
 }
 
@@ -847,6 +860,10 @@ const deleteBannerDialogVisible = ref(false)
 
 // 显示banner删除确认对话框
 const handleDeleteBannerConfirm = () => {
+  if (!auth || !auth.isLogin.value) {
+    auth && auth.showLogin();
+    return;
+  }
   deleteBannerDialogVisible.value = true
 }
 
@@ -890,6 +907,10 @@ const handleDeleteBanner = async () => {
 
 // 在<script setup>中添加如下方法：
 const handleCopyBusinessTypeConfig = () => {
+  if (!auth || !auth.isLogin.value) {
+    auth && auth.showLogin();
+    return;
+  }
   try {
     localStorage.setItem('businessTypeConfigCopy', JSON.stringify(businessTypeConfigs.value))
     ElMessage.success('business_type配置已复制')
@@ -898,6 +919,10 @@ const handleCopyBusinessTypeConfig = () => {
   }
 }
 const handlePasteBusinessTypeConfig = () => {
+  if (!auth || !auth.isLogin.value) {
+    auth && auth.showLogin();
+    return;
+  }
   try {
     const data = localStorage.getItem('businessTypeConfigCopy')
     if (data) {
@@ -911,6 +936,10 @@ const handlePasteBusinessTypeConfig = () => {
   }
 }
 const handleCopyPublicSwitchConfig = () => {
+  if (!auth || !auth.isLogin.value) {
+    auth && auth.showLogin();
+    return;
+  }
   try {
     localStorage.setItem('publicSwitchConfigCopy', JSON.stringify(publicSwitchConfigs.value))
     ElMessage.success('public_switch配置已复制')
@@ -919,6 +948,10 @@ const handleCopyPublicSwitchConfig = () => {
   }
 }
 const handlePastePublicSwitchConfig = () => {
+  if (!auth || !auth.isLogin.value) {
+    auth && auth.showLogin();
+    return;
+  }
   try {
     const data = localStorage.getItem('publicSwitchConfigCopy')
     if (data) {
@@ -1036,4 +1069,4 @@ onMounted(() => {
   object-fit: contain;
   background: #fff;
 }
-</style> 
+</style>
