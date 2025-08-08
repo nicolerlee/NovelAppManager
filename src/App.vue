@@ -56,12 +56,12 @@
           <div v-if="auth.isLogin.value">
             <el-dropdown>
               <span class="admin-info">
-                管理员 <el-icon><ArrowDown /></el-icon>
+                欢迎您{{ auth.userInfo.value?.userName }}（{{ getUserTypeDesc(auth.userInfo.value?.type) }}同学） <el-icon><ArrowDown /></el-icon>
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item>修改密码</el-dropdown-item>
-                  <el-dropdown-item>退出登录</el-dropdown-item>
+                  <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -77,34 +77,43 @@
       </el-main>
     </el-container>
   </el-container>
-
-  <!-- 登录弹窗组件 -->
-  <LoginModal
-    :visible="auth.showLoginModal"
-    @close="auth.hideLogin"
-    @login="handleLogin"
-  />
-</template>
+<!-- 登录弹窗组件 -->
+   <LoginModal v-if="auth.showLoginModal.value"/>
+ </template>
 
 <script setup>
-import { onMounted, onUnmounted, provide, ref } from "vue";
+import { onMounted, onUnmounted, provide, ref } from "vue";import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
 // 导入登录相关的组合式函数
 import { provideAuth } from "./composables/useAuth";
 // 导入登录弹窗组件
-import LoginModal from "./components/common/LoginModal.vue";
-
+ import LoginModal from "./components/common/LoginModal.vue";
 // 提供登录状态
 const auth = provideAuth();
 const TAG="App->";
 
 
-// 页面加载时检查登录状态
-onMounted(() => {
-  // 未登录，显示登录弹窗
-  auth.showLogin();
-  console.log(TAG,"auth.isLogin:",auth.isLogin.value)
-});
+// 用户类型描述转换函数
+const getUserTypeDesc = (type) => {
+  switch(type) {
+    case 0:
+      return '研发';
+    case 1:
+      return '产品';
+    case 2:
+      return '测试';
+    default:
+      return '未知';
+  }
+};
+
+// // 处理退出登录
+// const handleLogout = () => {
+//   auth.logout();
+//   ElMessage.success('退出登录成功');
+// };
+
+
 
 //智能体终端
 const agentClient = ref(null);
@@ -167,12 +176,6 @@ onMounted(() => {
   }
 });
 
-// 处理登录事件
-const handleLogin = (userData) => {
-  auth.login(userData);
-  console.log(TAG,"用户登录成功:", userData);
-  // 这里可以添加登录成功后的逻辑
-};
 
 onUnmounted(async () => {
   console.log(TAG,"unmounted");
