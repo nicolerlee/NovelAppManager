@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { injectAuth } from '../composables/useAuth'
 
+// 创建axios实例
 const request = axios.create({
   baseURL: '/api',
   timeout: 10000
@@ -10,9 +12,18 @@ const request = axios.create({
 request.interceptors.request.use(
   config => {
     // 自动添加Authorization头部
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const auth = injectAuth();
+      if (auth.token.value) {
+        config.headers.Authorization = `Bearer ${auth.token.value}`;
+      }
+    } catch (err) {
+      console.error('无法注入auth对象:', err);
+      // 降级方案：从localStorage获取token
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config
   },
@@ -47,16 +58,26 @@ request.interceptors.response.use(
   },
   error => {
     // 处理认证失败的情况
-    if (error.response?.status === 401) {
-      // Token过期或无效，清除token并重定向到登录页
-      localStorage.removeItem('token');
-      localStorage.removeItem('userInfo');
-      ElMessage.error('登录已过期，请重新登录');
-      // 延迟重定向，确保消息能够显示
+  if (error.response?.status === 401) {
+    // Token过期或无效，清除token并显示登录弹窗
+    localStorage.removeItem('token');
+    localStorage.removeItem('userInfo');
+    ElMessage.error('登录已过期，请重新登录');
+    // 使用auth对象显示登录弹窗
+    try {
+      const auth = injectAuth();
+      auth.logout(); // 确保登出状态一致
       setTimeout(() => {
-        window.location.href = '/'; // 重定向到首页，假设首页有登录入口
+        auth.showLogin();
+      }, 500);
+    } catch (err) {
+      console.error('无法注入auth对象:', err);
+      // 如果无法注入auth对象，降级为重定向到首页
+      setTimeout(() => {
+        window.location.href = '/';
       }, 1500);
-    } else {
+    }
+  } else {
       ElMessage.error(error.message || '请求失败');
     }
     return Promise.reject(error)
