@@ -82,15 +82,27 @@
  </template>
 
 <script setup>
-import { onMounted, onUnmounted, provide, ref } from "vue";import { ElMessage } from "element-plus";
+import { onMounted, onUnmounted, provide, ref, watchEffect } from "vue";
+import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
 // 导入登录相关的组合式函数
 import { provideAuth } from "./composables/useAuth";
+// 导入设置认证token的函数
+import { setAuthToken } from "./utils/request";
 // 导入登录弹窗组件
  import LoginModal from "./components/common/LoginModal.vue";
 // 提供登录状态
 const auth = provideAuth();
 const TAG="App->";
+
+// 监听token变化并更新request.js中的认证token
+watchEffect(() => {
+  if (auth.token && auth.token.value) {
+    setAuthToken(auth.token.value);
+  } else {
+    setAuthToken(null);
+  }
+});
 
 
 // 用户类型描述转换函数
