@@ -57,18 +57,27 @@
       <div class="theme-selection-content">
         <el-form :model="form" label-width="120px">
           <el-form-item label="mainTheme" prop="mainTheme">
-            <el-color-picker v-model="form.mainTheme" show-alpha color-format="hex" />
+            <el-color-picker v-model="form.mainTheme" show-alpha color-format="hex" :disabled="themeConfigured || loadingThemes" />
+            <div v-if="themeConfigured" class="theme-configured-hint">
+              <el-icon size="14"><InfoFilled /></el-icon>
+              <span>主题色已根据历史配置自动填充，不可修改</span>
+            </div>
           </el-form-item>
           <el-form-item label="secondTheme" prop="secondTheme">
-            <el-color-picker v-model="form.secondTheme" show-alpha color-format="hex" />
+            <el-color-picker v-model="form.secondTheme" show-alpha color-format="hex" :disabled="themeConfigured || loadingThemes" />
+          </el-form-item>
+          <el-form-item v-if="loadingThemes">
+            <el-skeleton :loading="loadingThemes" animated>
+              <div class="loading-hint">加载历史主题色配置中...</div>
+            </el-skeleton>
           </el-form-item>
           <el-form-item label="预设主题" prop="predefinedThemes">
             <div class="predefined-themes-container">
               <div
                 v-for="theme in predefinedThemes"
                 :key="theme.name"
-                class="theme-option"
-                @click="selectPredefinedTheme(theme)"
+                :class="['theme-option', { 'disabled': themeConfigured }]"
+                @click="!themeConfigured && selectPredefinedTheme(theme)"
               >
                 <div class="theme-colors">
                   <div class="main-color" :style="{ backgroundColor: theme.main }"></div>
@@ -88,9 +97,10 @@
 </template>
 
 <script setup>
-import { ref, watch, toRefs, nextTick } from 'vue';
+import { ref, watch, toRefs, nextTick, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Platform, Share, ChatDotRound, Connection } from '@element-plus/icons-vue';
+import { Platform, Share, ChatDotRound, Connection, InfoFilled } from '@element-plus/icons-vue';
+import request from '../../utils/request';
 
 const props = defineProps({
   modelValue: {
@@ -150,6 +160,61 @@ const predefinedThemes = ref([
   { name: '漫影主题色', main: '#FF4363FF', second: '#FFE5EBFF', image: 'theme_manying.jpg' },
 ]);
 const selectedThemeImage = ref('');
+const themeConfigured = ref(false);
+const loadingThemes = ref(false);
+
+// 请求主题色配置
+const fetchThemeConfig = async () => {
+  if (!form.value.appName) return;
+
+  loadingThemes.value = true;
+  try {
+    const response = await request.get('/api/novel-apps/getByAppName', {
+      params: { appName: form.value.appName }
+    });
+    
+    if (response.data && response.data.length > 0) {
+      // 有配置，使用第一条数据
+      const firstTheme = response.data[0];
+      form.value.mainTheme = firstTheme.mainTheme;
+      form.value.secondTheme = firstTheme.secondTheme;
+      themeConfigured.value = true;
+      ElMessage.success('已加载历史主题色配置');
+    } else {
+      // 无配置，允许用户设置
+      themeConfigured.value = false;
+    }
+  } catch (error) {
+    console.error('获取主题色配置失败:', error);
+    ElMessage.error('获取主题色配置失败，将使用默认配置');
+  } finally {
+    loadingThemes.value = false;
+  }
+};
+
+// 当子步骤切换到主题色配置时执行
+watch(
+  () => props.currentSubStep,
+  (newVal) => {
+    if (newVal === 1 && form.value.appName) {
+      fetchThemeConfig();
+    }
+  },
+  { immediate: true }
+);
+
+// 为了保持代码结构，这里留空一行
+
+// 监听appName变化，重新获取配置
+watch(
+  () => form.value.appName,
+  (newVal) => {
+    if (newVal && props.currentSubStep === 1) {
+      // 延迟执行，避免频繁请求
+      setTimeout(fetchThemeConfig, 500);
+    }
+  }
+);
 
 // 选择预设主题色
 const selectPredefinedTheme = (theme) => {
@@ -198,6 +263,26 @@ defineExpose({ validate });
   border-radius: 4px;
   padding: 8px 12px;
   transition: all 0.2s ease-in-out;
+}
+
+.theme-option.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.theme-configured-hint {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+  color: #606266;
+  font-size: 12px;
+}
+
+.loading-hint {
+  height: 32px;
+  line-height: 32px;
+  color: #909399;
+  font-size: 12px;
 }
 .theme-option:hover {
   border-color: var(--el-color-primary);
@@ -252,4 +337,4 @@ defineExpose({ validate });
   font-size: 15px;
   padding: 6px 18px;
 }
-</style> 
+</style>

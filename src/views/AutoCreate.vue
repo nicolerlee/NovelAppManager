@@ -205,19 +205,19 @@ const nextStep = async () => {
   } else if (currentStep.value === 1) {
     // 步骤2的子步骤校验
     if (currentSubStep.value === 0) {
-      const valid = await autoCreateStep2Ref.value.validate().catch(() => false);
-      if (!valid) {
-        ElMessage.error('请填写完整的"微距配置"！');
+        const valid = autoCreateStep2Ref.value ? await autoCreateStep2Ref.value.validate().catch(() => false) : false;
+        if (!valid) {
+          ElMessage.error('请填写完整的"微距配置"！');
+          return;
+        }
+        currentSubStep.value++;
         return;
-      }
-      currentSubStep.value++;
-      return;
-    } else if (currentSubStep.value === 1) {
-      const valid = await autoCreateStep2Ref.value.validate().catch(() => false);
-      if (!valid) {
-        ElMessage.error('请填写完整的"支付配置"！');
-        return;
-      }
+      } else if (currentSubStep.value === 1) {
+        const valid = autoCreateStep2Ref.value ? await autoCreateStep2Ref.value.validate().catch(() => false) : false;
+        if (!valid) {
+          ElMessage.error('请填写完整的"支付配置"！');
+          return;
+        }
       
       const hasEnabledPayment = Object.values(step2ConfigForm.value.paymentConfig).some(payment => 
         payment.enabled && 
@@ -234,11 +234,11 @@ const nextStep = async () => {
       currentSubStep.value++;
       return;
     } else if (currentSubStep.value === 2) {
-      const valid = await autoCreateStep2Ref.value.validate().catch(() => false);
-      if (!valid) {
-        ElMessage.error('请填写完整的"广告配置"！');
-        return;
-      }
+        const valid = autoCreateStep2Ref.value ? await autoCreateStep2Ref.value.validate().catch(() => false) : false;
+        if (!valid) {
+          ElMessage.error('请填写完整的"广告配置"！');
+          return;
+        }
       
       const hasEnabledAd = Object.values(step2ConfigForm.value.adConfig).some(ad => 
         ad.enabled && 
@@ -360,4 +360,4 @@ const startGeneration = async () => {
   justify-content: center;
   gap: 15px;
 }
-</style> 
+</style>
