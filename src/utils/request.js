@@ -41,9 +41,11 @@ request.interceptors.response.use(
     const isQrCodeRequest = response.config.url.includes('/api/novel-publish/qrcode/');
     const contentType = response.headers['content-type'];
     const isImageResponse = contentType && contentType.startsWith('image/');
+    // 检查是否为登录请求
+    const isLoginRequest = response.config.url.includes('/api/novel-auth/login');
 
-    // 如果是二维码请求或图片响应，直接返回原始响应（包含data和headers），不进行JSON解析和code检查
-    if (isQrCodeRequest || isImageResponse) {
+    // 如果是二维码请求、图片响应或登录请求，直接返回原始响应
+    if (isQrCodeRequest || isImageResponse || isLoginRequest) {
         return response; // 返回完整的response对象
     }
 

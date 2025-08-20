@@ -10,7 +10,7 @@ export function useAuth() {
   // 登录弹窗显示状态
   const showLoginModal = ref(false);
   // 初始化时检查localStorage中的userInfo
-  const userInfo = ref(JSON.parse(localStorage.getItem('userInfo')) || null);
+  const userInfo = ref(localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : null);
 
   // 初始化时检查localStorage中的token
   const token=ref(localStorage.getItem('token') || null);
@@ -30,23 +30,34 @@ export function useAuth() {
         password: userData.password
       });
       
-      if (res.code === 200) {
+      // 现在res是完整的response对象
+      if (res.data.code === 200) {
         // 登录成功
         isLogin.value = true;
-        token.value = res.data.token;
-        userInfo.value = res.data.user;
+        console.log(TAG,'login success res:',res);
+        // 从header中获取token
+        const authHeader = res.headers['authorization'] || res.headers['Authorization'];
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          token.value = authHeader.substring(7);
+        } else {
+          console.error('登录失败: 未在header中找到有效的Authorization token');
+          ElMessage.error('登录失败: 认证信息获取失败');
+          return null;
+        }
+        
+        userInfo.value = res.data.data;
         showLoginModal.value = false;
         
         // 保存token和userInfo到localStorage
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('userInfo', JSON.stringify(res.data.user));
+        localStorage.setItem('token', token.value);
+        localStorage.setItem('userInfo', JSON.stringify(res.data.data));
         
         ElMessage.success('登录成功');
-        console.log('登录成功:', res.data);
-        return res.data;
+        console.log('登录成功:', res.data.data);
+        return res.data.data;
       } else {
         // 登录失败
-        ElMessage.error('登录失败: ' + (res.message || '用户名或密码错误'));
+        ElMessage.error('登录失败: ' + (res.data.message || '用户名或密码错误'));
         return null;
       }
     } catch (error) {
