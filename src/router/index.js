@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 const routes = [
   {
@@ -66,12 +67,41 @@ const routes = [
     path: '/wenqu-ai',
     name: 'WenquAi',
     component: () => import('../views/WenquAi.vue')
+  },
+  { 
+    path: '/admin',
+    name: 'Admin',
+    component: () => import('../views/Admin.vue'),
+    meta: { 
+      title: '后台管理',
+      requiresAdmin: true
+    }
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  // 检查是否需要管理员权限
+  if (to.meta.requiresAdmin) {
+    // 从localStorage获取用户信息
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'))
+    const token = localStorage.getItem('token')
+    
+    // 检查用户是否登录且类型为研发
+    if (token && userInfo && userInfo.type === 0) {
+      next()
+    } else {
+      ElMessage.error('无权限访问后台管理模块')
+      next(from.path || '/')
+    }
+  } else {
+    next()
+  }
 })
 
 export default router

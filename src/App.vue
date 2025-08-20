@@ -45,6 +45,12 @@
           <el-icon><ChatDotRound /></el-icon>
           <span>文曲AI</span>
         </el-menu-item>
+
+        <!-- 后台管理菜单，仅研发可见 -->
+        <el-menu-item v-if="auth.isLogin.value && auth.userInfo.value?.type === 0" index="/admin">
+          <el-icon><Key /></el-icon>
+          <span>后台管理</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -54,18 +60,25 @@
           <h2>文曲-小说小程序创作中心</h2>
           <!-- <h4>让需求流动更简单</h4> -->
           <div v-if="auth.isLogin.value">
-            <el-dropdown>
-              <span class="admin-info">
-                欢迎您{{ auth.userInfo.value?.userName }}（{{ getUserTypeDesc(auth.userInfo.value?.type) }}同学） <el-icon><ArrowDown /></el-icon>
-              </span>
+            <el-dropdown>              
+              <div class="admin-info">
+                <div class="user-avatar">
+                  <img :src="auth.userInfo.value?.avatar" alt="用户头像" class="avatar-image" />
+                </div>
+                <span>
+                  {{ auth.userInfo.value?.userName }}（{{ getUserTypeDesc(auth.userInfo.value?.type) }}同学） <el-icon><ArrowDown /></el-icon>
+                </span>
+              </div>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item>修改密码</el-dropdown-item>
+                  <el-dropdown-item v-if="auth.userInfo.value?.type === 0" @click="handleNavigateToAdmin">后台管理</el-dropdown-item>
                   <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
           </div>
+          
           <el-button v-else type="primary" @click="auth.showLogin">
             登录
           </el-button>
@@ -94,6 +107,8 @@ import { setAuthToken } from "./utils/request";
 // 提供登录状态
 const auth = provideAuth();
 const TAG="App->";
+// 初始化路由
+const router = useRouter();
 
 // 监听token变化并更新request.js中的认证token
 watchEffect(() => {
@@ -123,6 +138,16 @@ const getUserTypeDesc = (type) => {
 const handleLogout = () => {
   auth.logout();
   ElMessage.success('退出登录成功');
+  
+  // 如果当前在后台管理页面，重定向到小程序列表首页
+  if (router.currentRoute.value.path === '/admin') {
+    router.push('/apps');
+  }
+};
+
+// 处理跳转到后台管理
+const handleNavigateToAdmin = () => {
+  router.push('/admin');
 };
 
 
@@ -236,6 +261,17 @@ onUnmounted(async () => {
   justify-content: space-between;
   align-items: center;
   height: 100%;
+}
+
+.user-avatar {
+  margin-right: 10px;
+}
+
+.avatar-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .admin-info {
