@@ -156,8 +156,6 @@ const subscribeCreateLog = (taskId) => {
           
           if (logData.type === 'finish') {
             setTimeout(disconnectLog, 2000);
-            ElMessage.success('小程序创建完成');
-
           }
         }
       });
