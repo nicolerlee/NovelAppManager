@@ -24,7 +24,14 @@
       </el-form-item>
 
       <el-form-item label="构建命令" prop="buildCode">
-        <el-input v-model="form.buildCode" placeholder="请输入构建命令（输入npm run build:platform(tt/ks/wx..)-xx  的xx即可）" />
+        <el-input 
+          v-model="form.buildCode" 
+          placeholder="请输入构建命令（输入npm run build:platform(tt/ks/wx..)-xx  的xx即可）"
+          :disabled="buildCodeDisabled"
+        />
+        <div v-if="buildCodeDisabled" class="build-code-tip">
+          构建命令已自动获取，不可编辑
+        </div>
       </el-form-item>
 
       <!-- Conditionally show Douyin field -->
@@ -120,8 +127,9 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, toRaw } from 'vue';
+import { ref, watch, nextTick, toRaw, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
+import request from '../../utils/request';
 
 const props = defineProps({
   modelValue: {
@@ -131,6 +139,10 @@ const props = defineProps({
   platform: {
     type: String,
     required: true
+  },
+  appName: {
+    type: String,
+    required: true
   }
 });
 
@@ -138,6 +150,8 @@ const emit = defineEmits(['update:modelValue']);
 
 // 表单数据双向绑定
 const form = ref({ ...props.modelValue });
+// 控制buildCode是否可编辑
+const buildCodeDisabled = ref(false);
 
 // 监听 props 变化，更新本地表单数据
 watch(() => props.modelValue, (newVal) => {
@@ -251,6 +265,68 @@ watch(() => form.value.payCardStyle, (newVal) => {
   }
 }, { immediate: true });
 
+// 获取应用配置信息
+const fetchAppConfig = async () => {
+  try {
+    // 从props中获取appName
+    const appName = props.appName || '';
+    if (!appName) {
+      console.log('appName为空，不获取应用配置');
+      return;
+    }
+
+    console.log('开始获取应用配置，appName:', appName);
+    const res = await request.get('/api/novel-common/getAppCommonConfigByAppName', {
+      params: { appName }
+    });
+
+    if (res.code === 200 && res.data && res.data.length > 0) {
+      // 有数据，设置buildCode为第一个元素的buildCode，并设为不可编辑
+      form.value.buildCode = res.data[0].buildCode;
+      buildCodeDisabled.value = true;
+      console.log('获取应用配置成功，已设置buildCode:', form.value.buildCode);
+      ElMessage.success('已加载应用配置信息');
+    } else {
+      // 无数据，让用户自行输入
+      buildCodeDisabled.value = false;
+      console.log('没有找到应用配置，允许用户输入buildCode');
+    }
+  } catch (error) {
+    // console.error('获取应用配置失败:', error);
+    // ElMessage.error('获取应用配置失败: 网络异常');
+    buildCodeDisabled.value = false;
+  }
+};
+
+// 添加定时器变量
+let appConfigTimer = null;
+
+// 监听appName变化，确保可靠触发
+watch(
+  () => props.appName,
+  (newVal, oldVal) => {
+    console.log('appName变化监听触发:', { oldVal, newVal });
+    if (newVal && newVal !== oldVal) {
+      console.log('appName发生有效变化，延迟获取应用配置');
+      // 清除之前的定时器，避免重复请求
+      if (appConfigTimer) clearTimeout(appConfigTimer);
+      appConfigTimer = setTimeout(fetchAppConfig, 500);
+    }
+  },
+  { immediate: true, deep: true } // 立即执行且深度监听
+);
+
+// 组件挂载时主动检查appName
+onMounted(() => {
+  console.log('AutoCreateStep3组件已挂载');
+  // 组件挂载后立即检查一次appName
+  // const appName = props.appName || '';
+  // if (appName) {
+  //   console.log('挂载时发现appName已存在，延迟获取应用配置');
+  //   setTimeout(fetchAppConfig, 300);
+  // }
+});
+
 // 表单ref和校验暴露
 const formRef = ref(null);
 const validate = async () => {
@@ -298,8 +374,19 @@ defineExpose({ validate });
 }
 .iaa-dialog-style-card-inner.selected,
 .iaa-dialog-style-card-inner:hover {
-  border-color: #409eff;
-  box-shadow: 0 2px 8px 0 rgba(64,158,255,0.06); /* 只做轻微阴影，不要蓝色 */
+  border-color: #4096ff;
+  box-shadow: 0 0 10px rgba(64, 150, 255, 0.2);
+}
+
+.build-code-tip {
+  margin-top: 8px;
+  color: #606266;
+  font-size: 12px;
+  line-height: 1.5;
+  background-color: #f0f9eb;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border-left: 3px solid #67c23a;
 }
 .iaa-dialog-style-card-inner img {
   width: 160px;

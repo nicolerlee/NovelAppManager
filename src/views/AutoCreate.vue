@@ -37,6 +37,7 @@
             <AutoCreateStep3
               v-model="generalConfigForm"
               :platform="basicInfoForm.platform"
+              :appName="basicInfoForm.appName"
               ref="generalConfigFormRef"
             />
           </div>
