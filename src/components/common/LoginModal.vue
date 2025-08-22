@@ -309,10 +309,7 @@ const handleRegister = async () => {
     registerUsername.value = "";
     registerPassword.value = "";
     confirmPassword.value = "";
-    // 使用setTimeout确保tab切换完成后再显示消息
-    setTimeout(() => {
-      ElMessage.success("注册成功，请登录");
-    }, 100);
+
   } 
 };
 </script>

@@ -4,26 +4,74 @@
       <template #header>
         <div class="card-header">
           <span>用户管理</span>
-          <el-button type="primary" size="small" @click="handleAddUser">新增用户</el-button>
+          <div class="search-container">
+            <el-input
+              v-model="searchKey"
+              placeholder="输入用户ID或用户名搜索..."
+              prefix-icon="Search"
+              :style="{ width: '200px' }"
+            />
+            <el-button
+              type="primary"
+              size="small"
+              @click="handleSearch"
+              :style="{ marginLeft: '10px' }"
+            >
+              搜索
+            </el-button>
+          </div>
         </div>
       </template>
-      
-      <el-table :data="userList" style="width: 100%">
-        <el-table-column prop="id" label="用户ID" width="80" />
-        <el-table-column prop="userName" label="用户名" width="180" />
-        <el-table-column prop="email" label="邮箱" width="250" />
-        <el-table-column prop="phone" label="电话" width="150" />
-        <el-table-column prop="type" label="用户类型" width="120" :formatter="formatUserType" />
-        <el-table-column prop="status" label="状态" width="100" :formatter="formatStatus" />
-        <el-table-column prop="createTime" label="创建时间" width="180" />
-        <el-table-column label="操作" width="150" fixed="right">
-          <template #default="scope">
-            <el-button type="primary" size="small" @click="handleEditUser(scope.row)">编辑</el-button>
-            <el-button type="danger" size="small" @click="handleDeleteUser(scope.row.id)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      
+      <div class="user-management-content">
+        <el-table :data="userList" style="width: 100%">
+          <el-table-column prop="id" label="用户ID" width="200" />
+          <el-table-column prop="userName" label="用户名" width="200" />
+          <el-table-column prop="phone" label="电话" width="150" />
+          <el-table-column
+            prop="type"
+            label="用户类型"
+            width="120"
+            :formatter="formatUserType"
+          />
+          <el-table-column prop="status" label="状态" width="100">
+            <template #default="scope">
+              <span :class="getStatusClass(scope.row.status)">{{
+                formatStatus(scope.row)
+              }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="avatar" label="头像" width="120">
+            <template #default="scope">
+              <img
+                v-if="scope.row.avatar"
+                :src="scope.row.avatar"
+                alt="头像"
+                class="avatar"
+                width="36"
+                height="36"
+              />
+              <span v-else>无头像</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="300" fixed="right">
+            <template #default="scope">
+              <el-button
+                v-if="scope.row.status === 1"
+                type="primary"
+                size="small"
+                @click="handleApproveUser(scope.row.id)"
+                >通过审核</el-button
+              >
+              <el-button
+                type="danger"
+                size="small"
+                @click="handleDeleteUser(scope.row.id)"
+                >删除</el-button
+              >
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
       <div class="pagination-container">
         <el-pagination
           v-model:current-page="currentPage"
@@ -39,79 +87,159 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ref, onMounted } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import request from "../../utils/request";
 
-// 模拟用户数据
-const userList = ref([
-  { id: 1, userName: 'admin', email: 'admin@example.com', phone: '13800138000', type: 0, status: 1, createTime: '2023-01-01 10:00:00' },
-  { id: 2, userName: 'product', email: 'product@example.com', phone: '13900139000', type: 1, status: 1, createTime: '2023-01-02 10:00:00' },
-  { id: 3, userName: 'test', email: 'test@example.com', phone: '13700137000', type: 2, status: 1, createTime: '2023-01-03 10:00:00' },
-]);
-
-const total = ref(3);
+const userList = ref([]);
+const total = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(10);
+const searchKey = ref("");
 
 // 格式化用户类型
 const formatUserType = (row) => {
-  switch(row.type) {
-    case 0: return '研发';
-    case 1: return '产品';
-    case 2: return '测试';
-    default: return '未知';
+  switch (row.type) {
+    case 0:
+      return "研发";
+    case 1:
+      return "产品";
+    case 2:
+      return "测试";
+    default:
+      return "未知";
   }
 };
 
 // 格式化状态
 const formatStatus = (row) => {
-  return row.status === 1 ? '启用' : '禁用';
+  switch (row.status) {
+    case 0:
+      return "审核通过";
+    case 1:
+      return "待审核";
+    case 2:
+      return "审核失败";
+    default:
+      return "未知状态";
+  }
 };
 
-// 处理新增用户
-const handleAddUser = () => {
-  ElMessage.info('新增用户功能待实现');
+// 获取状态对应的样式类
+const getStatusClass = (status) => {
+  switch (status) {
+    case 0:
+      return "status-approved";
+    case 1:
+      return "status-pending";
+    case 2:
+      return "status-rejected";
+    default:
+      return "";
+  }
 };
 
-// 处理编辑用户
-const handleEditUser = (user) => {
-  ElMessage.info(`编辑用户: ${user.userName}`);
+// 处理审核通过
+const handleApproveUser = (id) => {
+  ElMessageBox.confirm("确定要通过该用户的审核吗？", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      try {
+        // 调用审核通过的API接口
+        const res = await request.get(`/api/novel-auth/users/approve/${id}`);
+        
+        if (res.code === 200) {
+          ElMessage.success("审核已通过");
+          // 刷新用户列表
+          fetchUserList();
+        } else {
+          ElMessage.error("审核失败: " + res.message);
+        }
+      } catch (error) {
+        console.error("审核用户失败:", error);
+        ElMessage.error("审核用户失败: 网络异常");
+      }
+    })
+    .catch(() => {
+      ElMessage.info("已取消审核");
+    });
 };
 
 // 处理删除用户
 const handleDeleteUser = (id) => {
-  ElMessageBox.confirm('确定要删除该用户吗？', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
+  ElMessageBox.confirm("确定要删除该用户吗？", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
   })
-    .then(() => {
-      // 模拟删除操作
-      const index = userList.value.findIndex(item => item.id === id);
-      if (index !== -1) {
-        userList.value.splice(index, 1);
-        total.value--;
-        ElMessage.success('删除成功');
+    .then(async () => {
+      try {
+        // 调用删除用户的API接口
+        const res = await request.get(`/api/novel-auth/users/delete/${id}`);
+        
+        if (res.code === 200) {
+          ElMessage.success("删除成功");
+          // 刷新用户列表
+          fetchUserList();
+        } else {
+          ElMessage.error("删除失败: " + res.message);
+        }
+      } catch (error) {
+        console.error("删除用户失败:", error);
+        ElMessage.error("删除用户失败: 网络异常");
       }
     })
     .catch(() => {
-      ElMessage.info('已取消删除');
+      ElMessage.info("已取消删除");
     });
+};
+
+// 搜索用户
+const handleSearch = () => {
+  currentPage.value = 1; // 重置为第一页
+  fetchUserList();
+};
+
+// 获取用户列表
+const fetchUserList = async () => {
+  try {
+    const res = await request.get("/api/novel-auth/users", {
+      params: {
+        page: currentPage.value,
+        size: pageSize.value,
+        ...(searchKey.value && { keyword: searchKey.value }),
+      },
+    });
+    console.log("fetchUserList:", res);
+    if (res.code === 200) {
+      userList.value = res.data.records;
+      total.value = res.data.total;
+    } else {
+      ElMessage.error("获取用户列表失败: " + res.message);
+    }
+  } catch (error) {
+    console.error("获取用户列表失败:", error);
+    ElMessage.error("获取用户列表失败: 网络异常");
+  }
 };
 
 // 分页处理
 const handleSizeChange = (size) => {
   pageSize.value = size;
+  fetchUserList();
 };
 
 const handleCurrentChange = (current) => {
   currentPage.value = current;
+  fetchUserList();
 };
 
 // 组件挂载时执行
 onMounted(() => {
-  // 模拟从API获取数据
-  console.log('用户管理组件已挂载');
+  fetchUserList();
 });
 </script>
 
@@ -119,16 +247,49 @@ onMounted(() => {
 .user-management-container {
   padding: 10px;
 }
-
+.user-management-content {
+  max-height: 500px;
+  overflow-y: auto;
+}
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .pagination-container {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 状态样式 */
+.status-approved {
+  color: #4caf50; /* 绿色 */
+  font-weight: bold;
+}
+
+.status-pending {
+  color: #ffc107; /* 黄色 */
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: #f44336; /* 红色 */
+  font-weight: bold;
 }
 </style>

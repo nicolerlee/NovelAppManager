@@ -96,10 +96,10 @@ export function useAuth() {
       // 调用注册API接口
       const res = await request.post('/api/novel-auth/register', userData);
       if (res.code === 200) {
-        ElMessage.success('注册成功');
+        ElMessage.success(res.message);
         return res;
       } else {
-        ElMessage.error('注册失败: ' + res.msg);
+        ElMessage.error('注册失败: ' + res.message);
         return null;
       }
     } catch (error) {
