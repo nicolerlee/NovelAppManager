@@ -27,12 +27,11 @@
           <el-table-column prop="id" label="用户ID" width="200" />
           <el-table-column prop="userName" label="用户名" width="200" />
           <el-table-column prop="phone" label="电话" width="150" />
-          <el-table-column
-            prop="type"
-            label="用户类型"
-            width="120"
-            :formatter="formatUserType"
-          />
+          <el-table-column prop="type" label="用户类型" width="120">
+            <template #default="scope">
+              <span :class="getUserTypeClass(scope.row.type)">{{ formatUserType(scope.row) }}</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="status" label="状态" width="100">
             <template #default="scope">
               <span :class="getStatusClass(scope.row.status)">{{
@@ -122,6 +121,20 @@ const formatStatus = (row) => {
       return "审核失败";
     default:
       return "未知状态";
+  }
+};
+
+// 获取用户类型对应的样式类
+const getUserTypeClass = (type) => {
+  switch (type) {
+    case 0:
+      return "type-developer";
+    case 1:
+      return "type-product";
+    case 2:
+      return "type-tester";
+    default:
+      return "type-unknown";
   }
 };
 
@@ -291,5 +304,35 @@ onMounted(() => {
 .status-rejected {
   color: #f44336; /* 红色 */
   font-weight: bold;
+}
+
+/* 用户类型样式 */
+.type-developer {
+  background-color: #4285f4; /* 蓝色 */
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+.type-product {
+  background-color: #0f9d58; /* 绿色 */
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+.type-tester {
+  background-color: #f4b400; /* 黄色 */
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+.type-unknown {
+  background-color: #9e9e9e; /* 灰色 */
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
 }
 </style>

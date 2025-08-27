@@ -18,9 +18,9 @@
         </div>
       </el-form-item>
       <el-form-item label="首页卡片样式" prop="homeCardStyle">
-        <el-select v-model="form.homeCardStyle" placeholder="请选择首页卡片样式" style="width: 100%;">
-          <el-option :value="1" label="样式1" />
-        </el-select>
+        <el-radio-group v-model="form.homeCardStyle">
+          <el-radio :value="1">样式1</el-radio>
+        </el-radio-group>
       </el-form-item>
 
       <el-form-item label="构建命令" prop="buildCode">
@@ -316,9 +316,16 @@ watch(
   { immediate: true, deep: true } // 立即执行且深度监听
 );
 
-// 组件挂载时主动检查appName
+// 组件挂载时主动检查appName和设置默认值
 onMounted(() => {
   console.log('AutoCreateStep3组件已挂载');
+  
+  // 设置首页卡片样式默认值为1
+  if (form.value.homeCardStyle === undefined || form.value.homeCardStyle === null) {
+    console.log('设置首页卡片样式默认值为1');
+    form.value.homeCardStyle = 1;
+  }
+  
   // 组件挂载后立即检查一次appName
   // const appName = props.appName || '';
   // if (appName) {
