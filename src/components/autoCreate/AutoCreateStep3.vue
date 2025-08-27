@@ -36,7 +36,7 @@
 
       <!-- Conditionally show Douyin field -->
       <template v-if="platform === 'douyin'">
-        <el-form-item label="抖音IM ID" prop="douyinImId">
+        <el-form-item label="抖音IM ID" prop="douyinImId" required>
           <el-input v-model="form.douyinImId" placeholder="请输入抖音IM ID" />
         </el-form-item>
         <el-form-item label="抖音AppToken" prop="douyinAppToken">

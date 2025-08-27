@@ -76,7 +76,7 @@
               <div
                 v-for="theme in predefinedThemes"
                 :key="theme.name"
-                :class="['theme-option', { 'disabled': themeConfigured }]"
+                :class="['theme-option', { 'disabled': themeConfigured, 'selected': selectedThemeName === theme.name }]"
                 @click="!themeConfigured && selectPredefinedTheme(theme)"
               >
                 <div class="theme-colors">
@@ -162,6 +162,7 @@ const predefinedThemes = ref([
 const selectedThemeImage = ref('');
 const themeConfigured = ref(false);
 const loadingThemes = ref(false);
+const selectedThemeName = ref('');
 
 // 请求主题色配置
 const fetchThemeConfig = async () => {
@@ -218,6 +219,7 @@ watch(
 
 // 选择预设主题色
 const selectPredefinedTheme = (theme) => {
+  selectedThemeName.value = theme.name;
   // 创建一个新的对象来更新表单数据
   const newForm = {
     ...form.value,
@@ -268,6 +270,12 @@ defineExpose({ validate });
 .theme-option.disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.theme-option.selected {
+  border: 2px solid #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+  border-radius: 4px;
 }
 
 .theme-configured-hint {
