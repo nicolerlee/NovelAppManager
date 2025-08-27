@@ -81,7 +81,7 @@ const goToCreate = () => {
     auth.showLogin()
     return
   }
-  router.push('/auto-create')
+  router.push('/create-mode-selection')
 }
 </script>
 

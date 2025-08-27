@@ -50,6 +50,12 @@ const routes = [
     meta: { title: '全平台自动发布中心' }
   },
   {
+    path: '/create-mode-selection',
+    name: 'CreateModeSelection',
+    component: () => import('../components/autoCreate/CreateModeSelection.vue'),
+    meta: { title: '选择创建方式' }
+  },
+  {
     path: '/auto-create',
     name: 'AutoCreate',
     component: () => import('../views/AutoCreate.vue'),
