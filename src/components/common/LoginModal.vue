@@ -70,6 +70,7 @@
                   :type="showLoginPassword ? 'text' : 'password'"
                   v-model="password"
                   placeholder="请输入密码"
+                  @keyup.enter="handleLogin"
                 />
                 <button
                   type="button"
@@ -134,6 +135,7 @@
                   :type="showConfirmPassword ? 'text' : 'password'"
                   v-model="confirmPassword"
                   placeholder="请再次输入密码"
+                  @keyup.enter="handleRegister"
                 />
                 <button
                   type="button"
