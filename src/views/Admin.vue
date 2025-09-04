@@ -14,6 +14,9 @@
         <el-tab-pane label="日志查看" name="logs">
           <LogViewer />
         </el-tab-pane>
+        <el-tab-pane label="重要操作数据归档" name="archive">
+          <OperationArchive />
+        </el-tab-pane>
       </el-tabs>
     </el-card>
   </div>
@@ -24,6 +27,7 @@ import { ref } from 'vue';
 // 导入子组件
 import UserManagement from '../components/admin/UserManagement.vue';
 import LogViewer from '../components/admin/LogViewer.vue';
+import OperationArchive from '../components/admin/OperationArchive.vue';
 
 // 当前激活的标签页
 const activeTab = ref('userManagement');

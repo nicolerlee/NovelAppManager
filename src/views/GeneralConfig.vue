@@ -78,7 +78,7 @@
         <div class="config-content">
           <template v-if="selectedApp">
             <div class="config-form" v-loading="loadingConfig">
-              <template v-if="!configForm.id">
+              <template v-if="!configForm.id && !tempShowConfig">
                 <el-empty 
                   description="暂无配置信息" 
                   :image-size="100"
@@ -94,9 +94,6 @@
               </template>
               <template v-else>
                 <el-form ref="formRef" :model="configForm" :rules="formRules" label-width="160px">
-                  <el-form-item label="配置ID">
-                    <span class="readonly-value">{{ configForm.id }}</span>
-                  </el-form-item>
                   <el-form-item label="AppID">
                     <span class="readonly-value">{{ configForm.appId }}</span>
                   </el-form-item>
@@ -162,9 +159,9 @@
                     </div>
                   </el-form-item>
                   <el-form-item label="首页卡片样式">
-                    <el-select v-model="configForm.homeCardStyle" placeholder="请选择首页卡片样式">
-                      <el-option :value="1" label="样式1" />
-                    </el-select>
+                    <el-radio-group v-model="configForm.homeCardStyle" class="home-card-style-radio-group">
+                      <el-radio :label="1">样式1</el-radio>
+                    </el-radio-group>
                   </el-form-item>
                   
                   <el-form-item label="构建命令" prop="buildCode">
@@ -219,10 +216,11 @@
                   </el-form-item>
             
                   <el-form-item>
-                    <el-button type="primary" @click="handleSaveConfig" :loading="saving">保存配置</el-button>
-                    <el-button type="danger" @click="handleDeleteConfirm" v-if="configForm.id">删除配置</el-button>
-                    <el-button @click="handleCopyGeneralConfig">复制配置</el-button>
-                    <el-button @click="handlePasteGeneralConfig">粘贴配置</el-button>
+                    <el-button v-if="tempShowConfig" type="primary" @click="handleCreateConfig">创建配置</el-button>
+                    <el-button v-if="!tempShowConfig" type="primary" @click="handleSaveConfig" :loading="saving">保存配置</el-button>
+                    <!-- <el-button v-if="!tempShowConfig && configForm.id" type="danger" @click="handleDeleteConfirm">删除配置</el-button> -->
+                    <el-button v-if="!tempShowConfig" @click="handleCopyGeneralConfig">复制配置</el-button>
+                    <el-button v-if="!tempShowConfig" @click="handlePasteGeneralConfig">粘贴配置</el-button>
                   </el-form-item>
                 </el-form>
               </template>
@@ -276,6 +274,7 @@ const saving = ref(false)
 const apps = ref([])
 const selectedApp = ref(null)
 const deleteDialogVisible = ref(false)
+const tempShowConfig=ref(false)
 const configForm = ref({
   id: null,
   appId: '',
@@ -284,7 +283,7 @@ const configForm = ref({
   kuaishouClientId: '',
   kuaishouClientSecret: '',
   payCardStyle: null,
-  homeCardStyle: null,
+  homeCardStyle: 1,
   buildCode: '',
   kuaishouAppToken: '',
   douyinAppToken: '',
@@ -569,10 +568,14 @@ const handleCreateConfig = async () => {
     ElMessage.warning('请先选择小程序')
     return
   }
-  const valid = await formRef.value?.validate().catch(() => false);
-  if (!valid) {
-    ElMessage.error('请检查表单填写是否正确');
-    return;
+  // const valid = await formRef.value?.validate().catch(() => false);
+  // if (!valid) {
+  //   ElMessage.error('请检查表单填写是否正确');
+  //   return;
+  // }
+  if(!tempShowConfig.value){
+    tempShowConfig.value = true
+    return
   }
   saving.value = true
   try {
@@ -620,6 +623,7 @@ const handleCreateConfig = async () => {
         iaaDialogStyle: res.data.iaaDialogStyle ?? null,
         hidePayEntry: res.data.hidePayEntry ?? false
       }
+      tempShowConfig.value = false
     } else {
       throw new Error(res.message || '创建失败')
     }
@@ -649,47 +653,31 @@ const handleDeleteConfig = async () => {
 
   loadingConfig.value = true
   try {
-    const res = await request.get('/api/novel-common/deleteAppCommonConfig', {
-      params: {
-        appId: selectedApp.value.appid
+    await ElMessageBox.confirm(
+      '确定要删除通用配置吗？此操作将对代码进行修改，请谨慎操作。',
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
       }
-    })
-    
+    );
+
+    const res = await request.delete(`/api/novel-common/deleteAppCommonConfig/${configForm.value.id}`);
+
     if (res.code === 200) {
-      ElMessage.success('配置删除成功')
-      // 清空配置表单并设置默认值
-      configForm.value = {
-        id: null,
-        appId: selectedApp.value.appid,
-        contact: '',
-        douyinImId: '',
-        kuaishouClientId: '',
-        kuaishouClientSecret: '',
-        payCardStyle: null,
-        homeCardStyle: null,
-        buildCode: '',
-        kuaishouAppToken: '',
-        douyinAppToken: '',
-        weixinAppToken: '',
-        mineLoginType: 'anonymousLogin',
-        readerLoginType: 'anonymousLogin',
-        iaaMode: false,
-        iaaDialogStyle: null,
-        hidePayEntry:false
-      }
-      // 关闭确认对话框
-      deleteDialogVisible.value = false
+      ElMessage.success('配置删除成功');
+      resetForm();
     } else {
-      throw new Error(res.message || '删除失败')
+      throw new Error(res.message || '删除失败');
     }
   } catch (error) {
-    console.error('删除配置失败:', error)
-    ElMessage.error(error.message || '删除配置失败')
+    if (error === 'cancel') return;
+    ElMessage.error(error.message || '删除配置失败');
   } finally {
     loadingConfig.value = false
   }
-}
-
+};
 const handleCopyGeneralConfig = () => {
   if (!auth.isLogin.value) {
     auth.showLogin()
@@ -908,6 +896,18 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 :deep(.pay-card-style-radio-group .el-radio) {
+  margin-right: 16px;
+  font-size: 15px;
+  padding: 6px 18px;
+}
+
+.home-card-style-radio-group{
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+:deep(.home-card-style-radio-group .el-radio) {
   margin-right: 16px;
   font-size: 15px;
   padding: 6px 18px;
