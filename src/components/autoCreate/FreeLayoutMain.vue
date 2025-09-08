@@ -30,28 +30,59 @@
       
         <div class="main-content">
           <div class="canvas-container" ref="canvasRef" @dragover.prevent @drop="handleDrop">
-            <div class="canvas-placeholder" v-if="currentLayout.length === 0">
-              <el-empty description="将左侧组件拖放到此处开始编排"></el-empty>
-            </div>
-            <div 
-                v-for="component in currentLayout" 
-                :key="component.id" 
-                :class="['component component-' + component.type, { 'component-selected': selectedComponent?.id == component.id }]"
-                :style="[
-                      { transform: `translate(${component.position.x}px, ${component.position.y}px) ${selectedComponent?.id == component.id ? 'scale(1.1)' : ''}` },
-                      getCanvasComponentStyle(component)
-                    ]"
-              :data-component-id="component.id"
-              @mousedown="startDrag(component, $event)"
-              @click="selectComponent(component)"
-              :data-id="component.id"
-            >
-              <div class="component-header">
-                <ElIcon class="delete-icon" @click.stop="removeComponent(component)">
-                  <Close />
-                </ElIcon>
+            <!-- 手机框架 -->
+            <div class="phone-frame">
+              <!-- 状态栏 -->
+              <div class="phone-status-bar">
+                <div class="status-bar-time">9:41</div>
+                <div class="status-bar-icons">
+                </div>
               </div>
-              <div class="component-label">{{ getComponentName(component.type) }}</div>
+              <!-- 应用区域 -->
+              <div class="phone-app-area">
+                <div class="canvas-placeholder" v-if="currentLayout.length === 0">
+                  <el-empty description="将左侧组件拖放到此处开始编排"></el-empty>
+                </div>
+                <div 
+                    v-for="component in currentLayout" 
+                    :key="component.id" 
+                    :class="['component component-' + component.type, { 'component-selected': selectedComponent?.id == component.id }]"
+                    :style="[
+                          { transform: `translate(${component.position.x}px, ${component.position.y}px) ${selectedComponent?.id == component.id ? 'scale(1.1)' : ''}` },
+                          getCanvasComponentStyle(component)
+                        ]"
+                  :data-component-id="component.id"
+                  @mousedown="startDrag(component, $event)"
+                  @click="selectComponent(component)"
+                  :data-id="component.id"
+                >
+                  <div class="component-header">
+                    <ElIcon class="delete-icon" @click.stop="removeComponent(component)">
+                      <Close />
+                    </ElIcon>
+                  </div>
+                  <div class="component-label">{{ getComponentName(component.type) }}</div>
+                </div>
+              </div>
+              <!-- 底部导航 -->
+              <div class="phone-tab-bar">
+                <div class="tab-bar-item">
+                  <img src="/images/icon/tab_shelf_nor.png" class="tab-bar-icon" alt="书架">
+                  <div class="tab-bar-label">书架</div>
+                </div>
+                <div class="tab-bar-item">
+                  <img src="/images/icon/tab_home_nor.png" class="tab-bar-icon" alt="书城">
+                  <div class="tab-bar-label">书城</div>
+                </div>
+                <div class="tab-bar-item">
+                  <img src="/images/icon/tab_category_nor.png" class="tab-bar-icon" alt="分类">
+                  <div class="tab-bar-label">分类</div>
+                </div>
+                <div class="tab-bar-item">
+                  <img src="/images/icon/tab_mine_nor.png" class="tab-bar-icon" alt="我的">
+                  <div class="tab-bar-label">我的</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -80,7 +111,6 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { ElMessage, ElEmpty, ElCard, ElForm, ElFormItem, ElInput, ElIcon } from 'element-plus'
-import { Close } from '@element-plus/icons-vue'
 import { inject } from 'vue'
 
 const auth = inject('auth')
@@ -440,10 +470,78 @@ const handleSaveLayout = () => {
 .canvas-container {
   width: 100%;
   height: 100%;
-  background-color: white;
+  background-color: #f5f5f5;
   border-radius: 8px;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-frame {
+  width: 320px;
+  height: 650px;
+  background-color: white;
+  border-radius: 40px;
+  border: 6px solid #333;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.phone-status-bar {
+  height: 44px;
+  background-color: #f8f8f8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.status-bar-icons {
+  display: flex;
+  gap: 4px;
+}
+
+.phone-app-area {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  bottom: 50px;
+  overflow: hidden;
+}
+
+.phone-tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background-color: white;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.tab-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #666;
+}
+
+.tab-bar-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 2px;
+  object-fit: contain;
 }
 
 .component {
