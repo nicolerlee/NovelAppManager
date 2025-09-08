@@ -26,13 +26,21 @@ const routes = [
     name: 'Payment',
     component: () => import('../views/Payment.vue')
   },
-  {
-    path: '/general-config',
+  { path: '/general-config',
     name: 'GeneralConfig',
     component: () => import('../views/GeneralConfig.vue')
   },
-  {
-    path: '/wenqu-auto',
+  { path: '/toolbox',
+    name: 'ToolBox',
+    component: () => import('../views/ToolBox.vue'),
+    meta: { title: '工具箱' }
+  },
+  { path: '/free-layout',
+    name: 'FreeLayout',
+    component: () => import('../components/autoCreate/FreeLayoutMain.vue'),
+    meta: { title: '自由编排工作台' }
+  },
+  { path: '/wenqu-auto',
     name: 'WenquAuto',
     component: () => import('../views/WenquAuto.vue'),
     meta: { title: '文曲自动化' }

@@ -23,7 +23,7 @@
           <div class="mode-title">自由编排</div>
           <div class="mode-desc">自定义页面布局和功能模块，灵活配置小程序</div>
           <div class="mode-action">
-            <el-button type="primary" size="small" disabled>即将上线</el-button>
+            <el-button type="primary" size="small">开始编排</el-button>
           </div>
         </el-card>
       </div>
@@ -43,9 +43,9 @@ const handleWizardCreate = () => {
   router.push('/auto-create');
 };
 
-// 自由编排 - 暂未实现
+// 自由编排 - 跳转到自由编排主界面
 const handleFreeLayout = () => {
-  ElMessage.info('自由编排功能正在开发中，敬请期待');
+  router.push('/free-layout');
 };
 </script>
 

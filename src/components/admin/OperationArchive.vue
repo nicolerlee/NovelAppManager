@@ -202,7 +202,7 @@ const handleSearch = async () => {
       pageSize: pageSize.value
     };
     
-    const result = await fetchArchiveData(params);
+    // const result = await fetchArchiveData(params);
     archiveData.value = result.data || [];
     totalCount.value = result.total || 0;
   } catch (error) {

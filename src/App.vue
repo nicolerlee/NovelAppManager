@@ -36,6 +36,7 @@
           <span>通用配置</span>
         </el-menu-item>
 
+
         <el-menu-item index="/wenqu-auto">
           <el-icon><Monitor /></el-icon>
           <span>文曲自动化</span>
@@ -51,6 +52,13 @@
           <el-icon><Key /></el-icon>
           <span>后台管理</span>
         </el-menu-item>
+
+        
+        <el-menu-item index="/toolbox">
+          <el-icon><Grid /></el-icon>
+          <span>工具箱</span>
+        </el-menu-item>
+
       </el-menu>
     </el-aside>
 
