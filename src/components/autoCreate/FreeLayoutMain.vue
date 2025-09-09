@@ -9,7 +9,7 @@
       </template>
       <div class="workspace-container">
         <div class="sidebar">
-          <h3>模块</h3>
+          <h3>模块待选区</h3>
           <div class="component-list">
             <div 
                   v-for="item in filteredComponents" 
@@ -18,7 +18,7 @@
               class="component-item" 
               draggable="true" 
               @dragstart.native="handleDragStart" 
-              :data-type="{ '支付': 'payment', '广告': 'advertisement', 'UI配置': 'ui-config', '微距': 'macro', '基础配置': 'basic-config', '通用配置': 'general-config' }[item.type?.trim()] || ''"
+              :data-type="item.type"
             >
               <div :style="getComponentStyle(item)"
                   class="component-card">
@@ -44,22 +44,22 @@
               <!-- 应用区域 -->
               <div class="phone-app-area">
                 <!-- 固定模块区域占位符 -->
-                <div class="module-placeholder" data-module-type="basic-config" style="top: 15px; left: 15px; width: calc(100% - 30px); height: 80px;">
+                <div class="module-placeholder" data-module-type="basic-config" style="top: 15px; left: 15px; width: calc(100% - 30px); height: 80px;" data-original-style="top: 15px; left: 15px; width: calc(100% - 30px); height: 80px;" @dragover.prevent="handleDragOver($event, 'basic-config')" @dragenter.prevent="handleDragEnter($event, 'basic-config')">
                   <div class="placeholder-label">基础配置区域</div>
                 </div>
-                <div class="module-placeholder" data-module-type="general-config" style="top: 110px; left: 15px; width: calc(100% - 30px); height: 80px;">
+                <div class="module-placeholder" data-module-type="general-config" style="top: 110px; left: 15px; width: calc(100% - 30px); height: 80px;" data-original-style="top: 110px; left: 15px; width: calc(100% - 30px); height: 80px;">
                   <div class="placeholder-label">通用配置区域</div>
                 </div>
-                <div class="module-placeholder" data-module-type="payment" style="top: 205px; left: 15px; width: calc(50% - 22.5px); height: 80px;">
+                <div class="module-placeholder" data-module-type="payment" style="top: 205px; left: 15px; width: calc(50% - 22.5px); height: 80px;" data-original-style="top: 205px; left: 15px; width: calc(50% - 22.5px); height: 80px;">
                   <div class="placeholder-label">支付区域</div>
                 </div>
-                <div class="module-placeholder" data-module-type="advertisement" style="top: 205px; left: calc(50% + 7.5px); width: calc(50% - 22.5px); height: 80px;">
+                <div class="module-placeholder" data-module-type="advertisement" style="top: 205px; left: calc(50% + 7.5px); width: calc(50% - 22.5px); height: 80px;" data-original-style="top: 205px; left: calc(50% + 7.5px); width: calc(50% - 22.5px); height: 80px;">
                   <div class="placeholder-label">广告区域</div>
                 </div>
-                <div class="module-placeholder" data-module-type="ui-config" style="top: 300px; left: 15px; width: calc(100% - 30px); height: 80px;">
+                <div class="module-placeholder" data-module-type="ui-config" style="top: 300px; left: 15px; width: calc(100% - 30px); height: 80px;" data-original-style="top: 300px; left: 15px; width: calc(100% - 30px); height: 80px;">
                   <div class="placeholder-label">UI配置区域</div>
                 </div>
-                <div class="module-placeholder" data-module-type="macro" style="top: 395px; left: 15px; width: calc(100% - 30px); height: 80px;">
+                <div class="module-placeholder" data-module-type="macro" style="top: 395px; left: 15px; width: calc(100% - 30px); height: 80px;" data-original-style="top: 395px; left: 15px; width: calc(100% - 30px); height: 80px;">
                   <div class="placeholder-label">微距区域</div>
                 </div>
                 
@@ -211,13 +211,37 @@ const filteredComponents = computed(() => {
 })
 
   
+  // 拖拽状态管理
+  const draggedComponentType = ref(null);
+
   // 拖拽功能实现
   const handleDragStart = (e) => {
     const componentType = e.currentTarget.dataset.type;
+    draggedComponentType.value = componentType;
+    e.dataTransfer.setData('text/plain', componentType);
+  
     e.dataTransfer.setData('text/plain', componentType);
     console.log('拖拽组件类型:', componentType);
   }
-const handleDrop = (e) => {
+// 拖拽悬停处理
+  const handleDragOver = (e, placeholderType) => {
+    if (draggedComponentType.value === placeholderType && !document.querySelector(`.module-placeholder[data-module-type="${placeholderType}"].occupied`)) {
+      e.currentTarget.classList.add('dragover');
+    }
+  };
+
+  const handleDragEnter = (e, placeholderType) => {
+    if (draggedComponentType.value === placeholderType && !document.querySelector(`.module-placeholder[data-module-type="${placeholderType}"].occupied`)) {
+      e.currentTarget.classList.add('dragover');
+    }
+  };
+
+  // 拖拽结束移除悬停样式
+  const handleDragLeave = (e) => {
+    e.currentTarget.classList.remove('dragover');
+  };
+
+  const handleDrop = (e) => {
     e.preventDefault()
     // 获取组件类型
       const componentType = e.dataTransfer.getData('text/plain');
@@ -240,34 +264,41 @@ const handleDrop = (e) => {
     const canvasWidth = appRect.width;
     const canvasHeight = appRect.height;
     // 使用实际渲染尺寸（与拖拽时保持一致）
+    // 初始化默认尺寸
     componentWidth = 200;
-    componentHeight = 100; // 匹配实际渲染高度
+    componentHeight = 100;
 
     // 根据组件类型获取对应模块区域位置
     // 根据组件类型获取对应模块区域位置
       // 精确匹配模块区域
         const modulePlaceholder = document.querySelector(`.module-placeholder[data-module-type="${componentType}"]`);
         console.log(`查找模块区域: ${componentType}`, modulePlaceholder);
-      if (modulePlaceholder) {
+    if (modulePlaceholder && !modulePlaceholder.classList.contains('occupied')) {
+        componentWidth = modulePlaceholder.offsetWidth - 20;
+        componentHeight = modulePlaceholder.offsetHeight - 20;
           const placeholderRect = modulePlaceholder.getBoundingClientRect();
           const appRect = appArea.getBoundingClientRect();
-          // 计算相对于应用区域的精确位置（包含内边距补偿）
-          // 直接从style属性获取位置
-          // 使用offsetLeft/offsetTop获取相对位置
-          // 使用offsetLeft/offsetTop获取相对位置
-          x = modulePlaceholder.offsetLeft + 10; // 10px内边距
-          y = modulePlaceholder.offsetTop + 10;
+          // 计算相对于应用区域的精确位置
+          x = placeholderRect.left - appRect.left + 5;
+          y = placeholderRect.top - appRect.top + 5;
+          componentWidth = modulePlaceholder.offsetWidth - 10;
+          componentHeight = modulePlaceholder.offsetHeight - 10;
+          // 标记占位区域为已占用
+          modulePlaceholder.classList.add('occupied');
+          modulePlaceholder.style.borderStyle = 'solid';
+          modulePlaceholder.style.opacity = '0.3';
+          modulePlaceholder.classList.remove('dragover');
           console.log(`组件${componentType}定位到区域:`, x, y);
         } else {
           console.error(`未找到${componentType}对应的模块区域`);
-          // 根据组件类型设置备用位置
+          // 根据组件类型设置备用位置（匹配占位符位置）
           const positions = {
-            'basic-config': {x: 15, y: 15},
-            'general-config': {x: 15, y: 110},
-            'payment': {x: 15, y: 205},
-            'advertisement': {x: 175, y: 205},
-            'ui-config': {x: 15, y: 300},
-            'macro': {x: 15, y: 395}
+            'basic-config': {x: 15, y: 59},
+            'general-config': {x: 15, y: 154},
+            'payment': {x: 15, y: 249},
+            'advertisement': {x: 175, y: 249},
+            'ui-config': {x: 15, y: 344},
+            'macro': {x: 15, y: 439}
           };
           const pos = positions[componentType] || {x: 15, y: 15};
           x = pos.x;
@@ -286,8 +317,8 @@ const handleDrop = (e) => {
       id: nextComponentId.value++,
       type: componentType,
       position: { x: x, y: y },
-      width: finalWidth,
-        height: finalHeight,
+      width: componentWidth,
+        height: componentHeight,
       props: {},
       isEditingComplete: false
     }
@@ -332,9 +363,13 @@ const handleDrop = (e) => {
     };
     // 根据编辑状态设置背景
     if (!component.isEditingComplete) {
-      style.background = 'linear-gradient(135deg, #909399 0%, #c9cdd4 100%)';
+      style.background = 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)';
+      style.borderColor = '#ddd';
+      style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
     } else {
-      style.background = 'linear-gradient(135deg, #b7eb8f 0%, #87e8de 100%)';
+      style.background = 'linear-gradient(135deg, #81c784 0%, #4caf50 100%)';
+      style.borderColor = '#4caf50';
+      style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.2)';
     }
     return style;
   }
@@ -418,6 +453,36 @@ const handleDrop = (e) => {
     if (selectedComponent.value?.id === component.id) {
       selectedComponent.value = null
     }
+    // 重置对应占位区域状态
+    const modulePlaceholder = document.querySelector(`.module-placeholder[data-module-type="${component.type}"]`);
+    if (modulePlaceholder) {
+      modulePlaceholder.classList.remove('occupied', 'dragover');
+      // 先清除所有内联样式，再恢复原始样式
+        modulePlaceholder.removeAttribute('style');
+        const originalStyle = modulePlaceholder.getAttribute('data-original-style');
+        if (originalStyle) {
+            modulePlaceholder.style.cssText = originalStyle;
+            // 显式清除可能残留的内联样式
+            modulePlaceholder.style.border = '';
+            modulePlaceholder.style.borderStyle = '';
+            modulePlaceholder.style.borderWidth = '';
+            modulePlaceholder.style.borderColor = '';
+            modulePlaceholder.style.backgroundColor = '';
+            modulePlaceholder.style.opacity = '';
+            // 触发重排确保样式立即应用
+            modulePlaceholder.offsetHeight;
+          }
+      // 清除所有内联样式，恢复CSS类定义的默认样式
+      // 使用border简写属性清除所有边框样式
+      // 仅清除组件添加时设置的内联样式，保留原始定位样式
+        // 显式重置为默认样式，确保视觉一致性
+        // 完全重置边框样式为默认值
+        // 清除内联样式，完全依赖CSS类定义
+          modulePlaceholder.style.borderStyle = '';
+          modulePlaceholder.style.borderWidth = '';
+          modulePlaceholder.style.borderColor = '';
+          modulePlaceholder.style.opacity = '';
+    }
     ElMessage.success(`已移除${getComponentName(component.type)}组件`)
   }
 
@@ -464,7 +529,7 @@ const handleSaveLayout = () => {
 
 <style scoped>
 .free-layout-module {
-  padding: 20px;
+  padding: 10px;
 }
 .header-content {
   display: flex;
@@ -516,6 +581,10 @@ const handleSaveLayout = () => {
 
 .component-card {
   transition: all 0.3s ease;
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  }
   transform: translateY(0);
 }
 
@@ -604,11 +673,10 @@ const handleSaveLayout = () => {
 
 .app-title-bar {
   height: 40px;
-  background-color: #fff;
+  background-color: #f8f8f8;
   display: flex;
   align-items: center;
   justify-content: center;
-  
 }
 
 .app-title {
@@ -622,6 +690,21 @@ const handleSaveLayout = () => {
   position: absolute;
   background: rgba(64, 158, 255, 0.05);
   display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.module-placeholder.occupied {
+  border-color: #409EFF;
+  background: rgba(64, 158, 255, 0.05);
+}
+
+.module-placeholder.dragover {
+  border-color: #409EFF;
+  background: rgba(64, 158, 255, 0.2);
+  border-width: 2px;
+   display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -645,6 +728,7 @@ const handleSaveLayout = () => {
   left: 15px;
   width: calc(50% - 22.5px);
   height: 80px;
+  float: left;
 }
 
 .module-placeholder[data-module-type="advertisement"] {
@@ -652,6 +736,7 @@ const handleSaveLayout = () => {
   left: calc(50% + 7.5px);
   width: calc(50% - 22.5px);
   height: 80px;
+  float: right;
 }
 
 .module-placeholder[data-module-type="ui-config"] {
@@ -676,6 +761,10 @@ const handleSaveLayout = () => {
   margin: 0;
   text-align: center;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .phone-tab-bar {
@@ -708,23 +797,25 @@ const handleSaveLayout = () => {
 }
 
 .component {
-  position: absolute;
-  width: 200px;
-  height: 80px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: move;
-  transition: all 0.3s ease;
-  overflow: hidden;
-  will-change: transform;
-  z-index: 9999; /* 确保在最上层 */
-  /* 调试可见性 */
-  border: 2px solid red !important;
-  background: rgba(255,0,0,0.5) !important;
-}
+    position: absolute;
+    width: 200px;
+    height: 80px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: move;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    will-change: transform;
+    z-index: 9999; /* 确保在最上层 */
+    border: none;
+    &:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+  }
 
 .component-header {
   position: absolute;
@@ -769,9 +860,9 @@ const handleSaveLayout = () => {
 
 .component-label {
   font-size: 14px;
-  color: white;
+  color: #333;
   font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+
 }
 .properties-panel {
   background-color: #f5f7fa;
