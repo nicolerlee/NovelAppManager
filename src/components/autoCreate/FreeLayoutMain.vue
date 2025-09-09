@@ -12,13 +12,13 @@
           <h3>模块</h3>
           <div class="component-list">
             <div 
-              v-for="item in filteredComponents" 
-                    :key="item.type"
+                  v-for="item in filteredComponents" 
+                        :key="item.type"
 
               class="component-item" 
               draggable="true" 
               @dragstart.native="handleDragStart" 
-              :data-type="item?.type"
+              :data-type="{ '支付': 'payment', '广告': 'advertisement', 'UI配置': 'ui-config', '微距': 'macro', '基础配置': 'basic-config', '通用配置': 'general-config' }[item.type?.trim()] || ''"
             >
               <div :style="getComponentStyle(item)"
                   class="component-card">
@@ -35,24 +35,44 @@
               <!-- 状态栏 -->
               <div class="phone-status-bar">
                 <div class="status-bar-time">9:41</div>
-                <div class="status-bar-icons">
-                </div>
+                <div class="status-bar-icons"></div>
+              </div>
+              <!-- 标题区域 -->
+              <div class="app-title-bar">
+                <div class="app-title">{{ appName }}</div>
               </div>
               <!-- 应用区域 -->
               <div class="phone-app-area">
-                <div class="canvas-placeholder" v-if="currentLayout.length === 0">
-                  <el-empty description="将左侧组件拖放到此处开始编排"></el-empty>
+                <!-- 固定模块区域占位符 -->
+                <div class="module-placeholder" data-module-type="basic-config" style="top: 15px; left: 15px; width: calc(100% - 30px); height: 80px;">
+                  <div class="placeholder-label">基础配置区域</div>
                 </div>
+                <div class="module-placeholder" data-module-type="general-config" style="top: 110px; left: 15px; width: calc(100% - 30px); height: 80px;">
+                  <div class="placeholder-label">通用配置区域</div>
+                </div>
+                <div class="module-placeholder" data-module-type="payment" style="top: 205px; left: 15px; width: calc(50% - 22.5px); height: 80px;">
+                  <div class="placeholder-label">支付区域</div>
+                </div>
+                <div class="module-placeholder" data-module-type="advertisement" style="top: 205px; left: calc(50% + 7.5px); width: calc(50% - 22.5px); height: 80px;">
+                  <div class="placeholder-label">广告区域</div>
+                </div>
+                <div class="module-placeholder" data-module-type="ui-config" style="top: 300px; left: 15px; width: calc(100% - 30px); height: 80px;">
+                  <div class="placeholder-label">UI配置区域</div>
+                </div>
+                <div class="module-placeholder" data-module-type="macro" style="top: 395px; left: 15px; width: calc(100% - 30px); height: 80px;">
+                  <div class="placeholder-label">微距区域</div>
+                </div>
+                
+                <!-- 组件渲染区域 -->
                 <div 
                     v-for="component in currentLayout" 
                     :key="component.id" 
                     :class="['component component-' + component.type, { 'component-selected': selectedComponent?.id == component.id }]"
                     :style="[
-                          { transform: `translate(${component.position.x}px, ${component.position.y}px) ${selectedComponent?.id == component.id ? 'scale(1.1)' : ''}` },
-                          getCanvasComponentStyle(component)
-                        ]"
+                      { transform: `translate(${component.position.x}px, ${component.position.y}px) ${selectedComponent?.id == component.id ? 'scale(1.1)' : ''}` },
+                      getCanvasComponentStyle(component)
+                    ]"
                   :data-component-id="component.id"
-                  @mousedown="startDrag(component, $event)"
                   @click="selectComponent(component)"
                   :data-id="component.id"
                 >
@@ -83,9 +103,11 @@
                   <div class="tab-bar-label">我的</div>
                 </div>
               </div>
+              </div>
             </div>
-          </div>
+          
         </div>
+        <!-- 属性面板 -->
         <div class="properties-panel">
             <h3>属性面板</h3>
             <div v-if="selectedComponent" class="component-properties">
@@ -94,7 +116,6 @@
                 <el-form-item label="组件类型">
                   <el-input v-model="selectedComponent.type" disabled></el-input>
                 </el-form-item>
-
               </el-form>
             </div>
             <div v-else class="no-selection">
@@ -102,6 +123,7 @@
             </div>
         </div>
       </div>
+      
     </el-card>
   </div>
 </template>
@@ -122,6 +144,7 @@ const isDragging = ref(false)
   const usedComponentTypes = ref(new Set())
   const selectedComponent = ref(null)
 const canvasRef = ref(null)
+const appName = ref('小程序名称')
 const canvasBounds = ref({})
 let draggedElement = null;
 let dragStartPos = null;
@@ -190,51 +213,95 @@ const filteredComponents = computed(() => {
   
   // 拖拽功能实现
   const handleDragStart = (e) => {
-    e.dataTransfer.effectAllowed = 'copy'
-    // 直接从事件绑定元素获取组件类型
-      // 直接从事件绑定元素获取组件类型
-      const componentType = e.currentTarget.dataset.type;
-      if (!componentType) {
-        console.error('Component type not found on element:', e.currentTarget);
-        return;
-      }
-      e.dataTransfer.setData('text/plain', componentType);
+    const componentType = e.currentTarget.dataset.type;
+    e.dataTransfer.setData('text/plain', componentType);
+    console.log('拖拽组件类型:', componentType);
   }
 const handleDrop = (e) => {
     e.preventDefault()
-    const componentType = e.dataTransfer.getData('text/plain')
+    // 获取组件类型
+      const componentType = e.dataTransfer.getData('text/plain');
+      console.log('组件类型:', componentType);
     if (!componentType) return
 
-    // 获取画布容器位置
+    // 获取画布容器
     const canvas = document.querySelector('.canvas-container')
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect()
-    const canvasWidth = rect.width
-    const canvasHeight = rect.height
+    // 声明x, y, componentWidth和componentHeight变量
+    let x, y, componentWidth, componentHeight;
+
+    // 获取手机框架位置
+    const phoneFrame = document.querySelector('.phone-frame')
+    const appArea = document.querySelector('.phone-app-area')
+    if (!phoneFrame || !appArea) return;
+    const frameRect = phoneFrame.getBoundingClientRect();
+    const appRect = appArea.getBoundingClientRect();
+    const canvasWidth = appRect.width;
+    const canvasHeight = appRect.height;
     // 使用实际渲染尺寸（与拖拽时保持一致）
-    const componentWidth = 200;
-    const componentHeight = 100; // 匹配实际渲染高度
+    componentWidth = 200;
+    componentHeight = 100; // 匹配实际渲染高度
 
-    // 计算初始位置（鼠标位置直接映射，无额外偏移）
-    let x = e.clientX - rect.left;
-    let y = e.clientY - rect.top;
+    // 根据组件类型获取对应模块区域位置
+    // 根据组件类型获取对应模块区域位置
+      // 精确匹配模块区域
+        const modulePlaceholder = document.querySelector(`.module-placeholder[data-module-type="${componentType}"]`);
+        console.log(`查找模块区域: ${componentType}`, modulePlaceholder);
+      if (modulePlaceholder) {
+          const placeholderRect = modulePlaceholder.getBoundingClientRect();
+          const appRect = appArea.getBoundingClientRect();
+          // 计算相对于应用区域的精确位置（包含内边距补偿）
+          // 直接从style属性获取位置
+          // 使用offsetLeft/offsetTop获取相对位置
+          // 使用offsetLeft/offsetTop获取相对位置
+          x = modulePlaceholder.offsetLeft + 10; // 10px内边距
+          y = modulePlaceholder.offsetTop + 10;
+          console.log(`组件${componentType}定位到区域:`, x, y);
+        } else {
+          console.error(`未找到${componentType}对应的模块区域`);
+          // 根据组件类型设置备用位置
+          const positions = {
+            'basic-config': {x: 15, y: 15},
+            'general-config': {x: 15, y: 110},
+            'payment': {x: 15, y: 205},
+            'advertisement': {x: 175, y: 205},
+            'ui-config': {x: 15, y: 300},
+            'macro': {x: 15, y: 395}
+          };
+          const pos = positions[componentType] || {x: 15, y: 15};
+          x = pos.x;
+          y = pos.y;
+          console.log(`使用备用位置:`, x, y);
+        componentWidth = Math.max(200, modulePlaceholder.offsetWidth - 20);
+        componentHeight = Math.max(80, modulePlaceholder.offsetHeight - 20);
+      }
 
-    // 边界限制（应用画布内边距）
-    const canvasPadding = 15;
-    x = Math.max(canvasPadding, Math.min(x, canvasWidth - componentWidth - canvasPadding));
-    y = Math.max(canvasPadding, Math.min(y, canvasHeight - componentHeight - canvasPadding));
-
+    // 调试组件尺寸和位置
+    // 调试应用区域尺寸
+    console.log('应用区域尺寸:', appRect.width, appRect.height);
+    console.log('创建组件:', componentType, '位置:', x, y, '尺寸:', componentWidth, componentHeight);
     // 创建带正确初始位置的组件
     const newComponent = {
       id: nextComponentId.value++,
       type: componentType,
       position: { x: x, y: y },
+      width: finalWidth,
+        height: finalHeight,
       props: {},
       isEditingComplete: false
     }
 
-    // 添加到布局中
-    currentLayout.value.push(newComponent)
+    // 确保组件属性有效
+    if (typeof x === 'number' && typeof y === 'number' && componentWidth > 0 && componentHeight > 0) {
+      // 添加到布局中
+      currentLayout.value.push(newComponent);
+      console.log('组件已添加到布局:', newComponent);
+    } else {
+      console.error('无效的组件属性:', {x, y, componentWidth, componentHeight});
+      ElMessage.error('组件创建失败: 无效的位置或尺寸');
+    }
+    console.log('组件已添加到布局，当前数量:', currentLayout.value.length);
     // 标记组件类型为已使用
     usedComponentTypes.value.add(componentType)
     // 触发响应式更新
@@ -250,23 +317,10 @@ const handleDrop = (e) => {
 
   // 获取画布组件样式
   const getCanvasComponentStyle = (component) => {
-    // 未完成编辑状态使用灰色背景
-    if (!component.isEditingComplete) {
-      return {
-        background: 'linear-gradient(135deg, #909399 0%, #c9cdd4 100%)',
-        borderRadius: '8px',
-        padding: '20px',
-        'box-shadow': '0 4px 12px rgba(0, 0, 0, 0.1)',
-        'box-sizing': 'border-box',
-        display: 'flex',
-        'align-items': 'center',
-        'justify-content': 'center',
-        transition: 'all 0.3s ease'
-      };
-    }
-    // 已完成编辑状态使用渐变绿色背景
-    return {
-      background: 'linear-gradient(135deg, #b7eb8f 0%, #87e8de 100%)',
+    // 使用动态宽高
+    const style = {
+      width: `${component.width}px`,
+      height: `${component.height}px`,
       borderRadius: '8px',
       padding: '20px',
       'box-shadow': '0 4px 12px rgba(0, 0, 0, 0.1)',
@@ -276,6 +330,13 @@ const handleDrop = (e) => {
       'justify-content': 'center',
       transition: 'all 0.3s ease'
     };
+    // 根据编辑状态设置背景
+    if (!component.isEditingComplete) {
+      style.background = 'linear-gradient(135deg, #909399 0%, #c9cdd4 100%)';
+    } else {
+      style.background = 'linear-gradient(135deg, #b7eb8f 0%, #87e8de 100%)';
+    }
+    return style;
   }
 
 
@@ -417,6 +478,11 @@ const handleSaveLayout = () => {
   margin-top: 20px;
   height: calc(100vh - 220px);
 }
+
+/* 确保属性面板正确显示 */
+.properties-panel {
+  display: block !important;
+}
 .sidebar {
   background-color: #f5f7fa;
   border-radius: 8px;
@@ -490,29 +556,126 @@ const handleSaveLayout = () => {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
+.phone-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(180deg, var(--theme-color, #409EFF), #e4edfb00);
+  z-index: 0;
+}
+
 .phone-status-bar {
   height: 44px;
-  background-color: #f8f8f8;
+  background-color: transparent;
   display: flex;
+  position: relative;
+  z-index: 10;
   justify-content: space-between;
   align-items: center;
   padding: 0 16px;
   font-size: 12px;
-  border-bottom: 1px solid #eee;
+}
+.status-bar-time{
+  color: #fff;  
 }
 
 .status-bar-icons {
   display: flex;
   gap: 4px;
-}
-
-.phone-app-area {
-  position: absolute;
+  position: relative;
   top: 44px;
   left: 0;
   right: 0;
   bottom: 50px;
   overflow: hidden;
+}
+.phone-app-area {
+  position: absolute;
+  top: 84px;
+  left: 0;
+  right: 0;
+  bottom: 50px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.app-title-bar {
+  height: 40px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+.app-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+.module-placeholder {
+  border: 1px dashed #409EFF;
+  border-radius: 8px;
+  position: absolute;
+  background: rgba(64, 158, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.module-placeholder[data-module-type="basic-config"] {
+  top: 59px;
+  left: 15px;
+  width: calc(100% - 30px);
+  height: 80px;
+}
+
+.module-placeholder[data-module-type="general-config"] {
+  top: 154px;
+  left: 15px;
+  width: calc(100% - 30px);
+  height: 80px;
+}
+
+.module-placeholder[data-module-type="payment"] {
+  top: 249px;
+  left: 15px;
+  width: calc(50% - 22.5px);
+  height: 80px;
+}
+
+.module-placeholder[data-module-type="advertisement"] {
+  top: 249px;
+  left: calc(50% + 7.5px);
+  width: calc(50% - 22.5px);
+  height: 80px;
+}
+
+.module-placeholder[data-module-type="ui-config"] {
+  top: 344px;
+  left: 15px;
+  width: calc(100% - 30px);
+  height: 80px;
+}
+
+.module-placeholder[data-module-type="macro"] {
+  top: 439px;
+  left: 15px;
+  width: calc(100% - 30px);
+  height: 80px;
+}
+
+
+
+.placeholder-label {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+  text-align: center;
+  width: 100%;
 }
 
 .phone-tab-bar {
@@ -557,7 +720,10 @@ const handleSaveLayout = () => {
   transition: all 0.3s ease;
   overflow: hidden;
   will-change: transform;
-  z-index: 1;
+  z-index: 9999; /* 确保在最上层 */
+  /* 调试可见性 */
+  border: 2px solid red !important;
+  background: rgba(255,0,0,0.5) !important;
 }
 
 .component-header {
