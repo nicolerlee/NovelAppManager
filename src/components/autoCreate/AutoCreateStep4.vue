@@ -82,6 +82,7 @@ const formattedConfigData = computed(() => {
       iaaMode: props.generalConfigForm.iaaMode,
       iaaDialogStyle: props.generalConfigForm.iaaDialogStyle,
       hidePayEntry: props.generalConfigForm.hidePayEntry,
+      hideScoreExchange: props.generalConfigForm.hideScoreExchange,
       payCardStyle: props.generalConfigForm.payCardStyle,
       readerLoginType: props.generalConfigForm.readerLoginType,
       weixinAppToken: props.generalConfigForm.weixinAppToken,

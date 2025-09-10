@@ -100,9 +100,12 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="屏蔽支付入口">
-        <el-switch v-model="form.hidePayEntry" />
-        <span class="form-tip">除微信IOS的非投流渠道，默认不屏蔽。审核失败时候可尝试屏蔽处理</span>
-      </el-form-item>
+            <el-switch v-model="form.hidePayEntry" />
+            <span class="form-tip">除微信IOS的非投流渠道，默认不屏蔽。审核失败时候可尝试屏蔽处理</span>
+          </el-form-item>
+          <el-form-item label="屏蔽积分入口">
+            <el-switch v-model="form.hideScoreExchange" />
+          </el-form-item>
       <el-form-item label="我的页登录类型" class="login-type-item">
         <el-radio-group v-model="form.mineLoginType">
           <el-radio value="anonymousLogin">静默登录</el-radio>
@@ -149,7 +152,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 // 表单数据双向绑定
-const form = ref({ ...props.modelValue });
+const form = ref({ ...props.modelValue});
 // 控制buildCode是否可编辑
 const buildCodeDisabled = ref(false);
 
@@ -163,7 +166,7 @@ watch(() => props.modelValue, (newVal) => {
 // 监听本地表单数据变化，触发更新事件
 watch(form, (newVal) => {
   if (JSON.stringify(toRaw(newVal)) !== JSON.stringify(toRaw(props.modelValue))) {
-    emit('update:modelValue', { ...newVal });
+emit('update:modelValue', { ...newVal});
   }
 }, { deep: true });
 

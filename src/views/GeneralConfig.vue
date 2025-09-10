@@ -192,6 +192,9 @@
                     <el-switch v-model="configForm.hidePayEntry" />
                     <span class="form-tip">除微信IOS的非投流渠道，默认不屏蔽。审核失败时候可尝试屏蔽处理</span>
                   </el-form-item>
+                  <el-form-item label="屏蔽移动积分兑换入口">
+                    <el-switch v-model="configForm.hideScoreExchange" />
+                  </el-form-item>
                  
                   <!-- 我的页登录类型 -->
                   <el-form-item label="我的页登录类型" class="login-type-item">
@@ -292,7 +295,8 @@ const configForm = ref({
   readerLoginType: 'anonymousLogin',
   iaaMode: false,
   iaaDialogStyle: null,
-  hidePayEntry:false
+  hidePayEntry:false,
+  hideScoreExchange: true,
 })
 const formRef = ref(null)
 
@@ -411,6 +415,7 @@ const fetchConfig = async (appId) => {
         iaaMode: res.data.iaaMode ?? false,
         iaaDialogStyle: res.data.iaaDialogStyle ?? null,
         hidePayEntry:res.data.hidePayEntry ?? false,
+        hideScoreExchange:res.data.hideScoreExchange ?? false,
       }
     } else {
       ElMessage.warning(res.message || '获取配置失败，可能该小程序未创建通用配置');
@@ -432,6 +437,7 @@ const fetchConfig = async (appId) => {
         iaaMode: false,
         iaaDialogStyle: null,
         hidePayEntry:false,
+        hideScoreExchange:true
       }
     }
   } catch (error) {
@@ -453,7 +459,8 @@ const fetchConfig = async (appId) => {
       readerLoginType: 'anonymousLogin',
       iaaMode: false,
       iaaDialogStyle: null,
-      hidePayEntry:false
+      hidePayEntry:false,
+      hideScoreExchange:true
     }
   } finally {
     loadingConfig.value = false
@@ -545,6 +552,7 @@ const handleSaveConfig = async () => {
       iaaMode: configForm.value.iaaMode,
       iaaDialogStyle: configForm.value.iaaMode ? configForm.value.iaaDialogStyle : null,
       hidePayEntry: configForm.value.hidePayEntry,
+      hideScoreExchange: configForm.value.hideScoreExchange,
     }
 
     const res = await request.post('/api/novel-common/updateAppCommonConfig', requestData)
@@ -597,6 +605,7 @@ const handleCreateConfig = async () => {
       iaaMode: configForm.value.iaaMode,
       iaaDialogStyle: configForm.value.iaaMode ? configForm.value.iaaDialogStyle : null,
       hidePayEntry: configForm.value.hidePayEntry,
+      hideScoreExchange: configForm.value.hideScoreExchange,
     }
 
     const res = await request.post('/api/novel-common/createAppCommonConfig', requestData)
@@ -621,7 +630,9 @@ const handleCreateConfig = async () => {
         readerLoginType: res.data.readerLoginType || 'anonymousLogin',
         iaaMode: res.data.iaaMode ?? false,
         iaaDialogStyle: res.data.iaaDialogStyle ?? null,
-        hidePayEntry: res.data.hidePayEntry ?? false
+        hidePayEntry: res.data.hidePayEntry ?? false,
+        hideScoreExchange: res.data.hideScoreExchange ?? true,
+
       }
       tempShowConfig.value = false
     } else {
@@ -692,6 +703,7 @@ const handleCopyGeneralConfig = () => {
       iaaMode: configForm.value.iaaMode,
       iaaDialogStyle: configForm.value.iaaDialogStyle,
       hidePayEntry: configForm.value.hidePayEntry,
+      hideScoreExchange: configForm.value.hideScoreExchange,
     }
     localStorage.setItem('generalConfigCopy', JSON.stringify(dataToCopy))
     ElMessage.success('通用配置已复制')
@@ -718,7 +730,8 @@ const handlePasteGeneralConfig = () => {
         readerLoginType: parsedData.readerLoginType ?? 'anonymousLogin',
         iaaMode: parsedData.iaaMode ?? false,
         iaaDialogStyle: parsedData.iaaDialogStyle ?? null,
-        hidePayEntry: parsedData.hidePayEntry ?? false
+        hidePayEntry: parsedData.hidePayEntry ?? false,
+        hideScoreExchange: parsedData.hideScoreExchange ?? true,
       }
       ElMessage.success('通用配置已粘贴')
     } else {

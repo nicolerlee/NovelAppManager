@@ -174,7 +174,8 @@ const generalConfigForm = ref({
   kuaishouAppToken: '',
   iaaMode: false,
   iaaDialogStyle: null,
-  hidePayEntry:false
+  hidePayEntry:true,
+  hideScoreExchange: true,
 })
 
 const resetWizard = () => {
@@ -331,7 +332,7 @@ const startGeneration = async () => {
 </script>
 
 <style scoped>
-.auto-create-module {
+. {
   padding: 20px;
 }
 
@@ -347,11 +348,11 @@ const startGeneration = async () => {
 }
 
 .workflow-content {
-  padding: 20px;
+  padding: 10px;
 }
 
 .step-panel {
-  padding: 20px 0;
+  padding: 10px 0;
   min-height: 250px;
 }
 
