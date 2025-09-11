@@ -89,7 +89,7 @@
                     </ElIcon>
                   </div>
                   <div class="component-label">{{ getComponentName(component.type) }}</div>
-<span v-if="component.isCompleted" class="completion-tag">已编辑</span>
+                  <span v-if="component.isCompleted" class="completion-tag">已编辑</span>
                 </div>
               </div>
               <!-- 底部导航 -->
@@ -120,7 +120,7 @@
           <h3>属性面板</h3>
           <div v-if="selectedComponent" class="component-properties">
             <h4>{{ getComponentName(selectedComponent.type) }} 属性</h4>
-            <el-form size="small" label-width="100px" class="basic-config-form">
+            <el-form ref="formRef" size="small" label-width="100px" class="basic-config-form" :model="generalConfig" :rules="generalConfigRules">
               <el-form-item label="组件类型">
                 <el-input v-model="selectedComponent.type" disabled></el-input>
               </el-form-item>
@@ -205,6 +205,111 @@
                   </el-radio-group>
                 </el-form-item>
               </template>
+              <template v-else-if="selectedComponent.type === 'general-config'">
+                <el-form-item label="客服URL" prop="contact">
+                  <el-input 
+                    v-model="generalConfig.contact" 
+                    placeholder="请输入客服URL" 
+                    @input="handleInputChange('contact')"
+                  />
+                </el-form-item>
+                <el-form-item label="构建命令" prop="buildCode">
+                  <el-input 
+                    v-model="generalConfig.buildCode" 
+                    placeholder="请输入构建命令（输入npm run build:platform(tt/ks/wx..)-xx 的xx即可）"
+                    @input="handleInputChange('buildCode')"
+                  />
+                </el-form-item>
+                
+                <!-- 平台特定配置 -->
+                <template v-if="getCurrentPlatform() === 'douyin'">
+                  <el-form-item label="抖音IM ID" prop="douyinImId">
+                    <el-input v-model="generalConfig.douyinImId" placeholder="请输入抖音IM ID" />
+                  </el-form-item>
+                  <el-form-item label="抖音AppToken" prop="douyinAppToken">
+                    <el-input
+                      v-model="generalConfig.douyinAppToken"
+                      type="textarea"
+                      :rows="6"
+                      placeholder="请输入抖音AppToken（私钥内容）"
+                    />
+                  </el-form-item>
+                </template>
+                
+                <template v-if="getCurrentPlatform() === 'weixin'">
+                  <el-form-item label="微信AppToken" prop="weixinAppToken">
+                    <el-input
+                      v-model="generalConfig.weixinAppToken"
+                      type="textarea"
+                      :rows="6"
+                      placeholder="请输入微信AppToken（私钥内容）"
+                    />
+                  </el-form-item>
+                </template>
+                
+                <template v-if="getCurrentPlatform() === 'kuaishou'">
+                  <el-form-item label="快手Client ID" prop="kuaishouClientId">
+                    <el-input v-model="generalConfig.kuaishouClientId" placeholder="请输入快手Client ID" />
+                  </el-form-item>
+                  <el-form-item label="快手Client Secret" prop="kuaishouClientSecret">
+                    <el-input v-model="generalConfig.kuaishouClientSecret" placeholder="请输入快手Client Secret" show-password />
+                  </el-form-item>
+                  <el-form-item label="快手AppToken" prop="kuaishouAppToken">
+                    <el-input
+                      v-model="generalConfig.kuaishouAppToken"
+                      type="textarea"
+                      :rows="6"
+                      placeholder="请输入快手AppToken（私钥内容）"
+                    />
+                  </el-form-item>
+                </template>
+                
+                <el-form-item label="IAA模式">
+                  <el-switch v-model="generalConfig.iaaMode" />
+                  <span class="form-tip">是否开启IAA(In-App-Advertising)模式</span>
+                </el-form-item>
+                
+                <el-form-item v-if="generalConfig.iaaMode" label="IAA弹窗样式" prop="iaaDialogStyle">
+                  <el-radio-group v-model="generalConfig.iaaDialogStyle" class="iaa-dialog-style-card-group">
+                    <el-radio-button
+                      v-for="item in iaaDialogStyleOptions"
+                      :key="item.value"
+                      :value="item.value"
+                      class="iaa-dialog-style-card"
+                    >
+                      <div class="iaa-dialog-style-card-inner" :class="{ selected: generalConfig.iaaDialogStyle === item.value }">
+                        <img :src="item.img" :alt="item.label" />
+                        <div class="iaa-dialog-style-label">{{ item.label }}</div>
+                      </div>
+                    </el-radio-button>
+                  </el-radio-group>
+                </el-form-item>
+                
+                <el-form-item label="屏蔽支付入口">
+                  <el-switch v-model="generalConfig.hidePayEntry" />
+                  <span class="form-tip">除微信IOS的非投流渠道，默认不屏蔽。审核失败时候可尝试屏蔽处理</span>
+                </el-form-item>
+                
+                <el-form-item label="屏蔽积分入口">
+                  <el-switch v-model="generalConfig.hideScoreExchange" />
+                </el-form-item>
+                
+                <el-form-item label="我的页登录类型" class="login-type-item" prop="mineLoginType">
+                  <el-radio-group v-model="generalConfig.mineLoginType" class="platform-radio-group">
+                    <el-radio-button value="anonymousLogin">静默登录</el-radio-button>
+                    <el-radio-button value="phoneLogin">手机号授权登录</el-radio-button>
+                  </el-radio-group>
+                  <span class="form-tip">无手机号权限的小程序默认使用静默登录</span>
+                </el-form-item>
+                
+                <el-form-item label="阅读页登录类型" class="login-type-item" prop="readerLoginType">
+                  <el-radio-group v-model="generalConfig.readerLoginType" class="platform-radio-group">
+                    <el-radio-button value="anonymousLogin">静默登录</el-radio-button>
+                    <el-radio-button value="phoneLogin">手机号授权登录</el-radio-button>
+                  </el-radio-group>
+                  <span class="form-tip">无手机号权限的小程序默认使用静默登录</span>
+                </el-form-item>
+              </template>
             </el-form>
           </div>
           <div v-else class="no-selection">
@@ -222,8 +327,42 @@ import { ref, computed, onMounted,watch ,nextTick} from 'vue'
 import { useRouter } from 'vue-router'
 import { Platform, Share, ChatDotRound, Connection, InfoFilled } from '@element-plus/icons-vue';
 
-import { ElMessage, ElEmpty, ElCard, ElForm, ElFormItem, ElInput, ElIcon  } from 'element-plus'
+import { ElMessage, ElEmpty, ElCard, ElForm, ElFormItem, ElInput, ElIcon, ElSwitch, ElRadioGroup, ElRadio, ElRadioButton } from 'element-plus'
 import { inject } from 'vue'
+
+// 表单校验规则
+const generalConfigRules = ref({
+  buildCode: [
+    { required: true, message: '请输入构建命令', trigger: 'blur' },
+    {
+      validator: (rule, value, callback) => {
+        if (/^\d+$/.test(value)) {
+          callback(new Error('构建命令不能为纯数字'));
+        } else if (/^\d/.test(value)) {
+          callback(new Error('构建命令不能以数字开头'));
+        } else {
+          callback();
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
+  contact: [{ required: true, message: '请输入客服URL', trigger: 'blur' }],
+  iaaDialogStyle: [
+    {
+      validator: (rule, value, callback) => {
+        if (generalConfig.value.iaaMode && !value) {
+          callback(new Error('请选择IAA弹窗样式'));
+        } else {
+          callback();
+        }
+      },
+      trigger: 'change'
+    }
+  ],
+  mineLoginType: [{ required: true, message: '请选择我的页登录类型', trigger: 'change' }],
+  readerLoginType: [{ required: true, message: '请选择阅读页登录类型', trigger: 'change' }]
+});
 
 const auth = inject('auth')
 const router = useRouter()
@@ -235,6 +374,21 @@ const isDragging = ref(false)
   const selectedComponent = ref(null)
 const basicConfig = ref({})
 const uiConfig = ref({})
+const generalConfig = ref({})
+// 表单引用
+const formRef = ref(null);
+
+// 输入变化时触发字段验证
+const handleInputChange = (field) => {
+  if (formRef.value && selectedComponent.value && selectedComponent.value.type === 'general-config') {
+    // 延迟验证，避免频繁触发
+    setTimeout(() => {
+      formRef.value.validateField(field);
+      // 同步更新组件完成状态
+      checkGeneralConfigCompleted(selectedComponent.value);
+    }, 100);
+  }
+};
 
 // 预设主题色
 const predefinedThemes = ref([
@@ -243,6 +397,14 @@ const predefinedThemes = ref([
   { name: '风行推广主题', mainTheme: '#F86003FF', secondTheme: '#FFEFE7FF' },
   { name: '漫影主题', mainTheme: '#FF4363FF', secondTheme: '#FFE5EBFF' }
 ])
+
+// IAA弹窗样式选项
+const iaaDialogStyleOptions = ref([
+  { value: 1, label: '样式1', img: '/images/iaaDialogStyle/iaa_dialog_style1.jpg' },
+  { value: 2, label: '样式2', img: '/images/iaaDialogStyle/iaa_dialog_style2.jpg' }
+])
+
+
 
 // 选择预设主题
 const selectPredefinedTheme = (theme) => {
@@ -262,6 +424,27 @@ const initBasicConfig = (component) => {
     appid: component.config?.appid || '',
     tokenId: component.config?.tokenId || '',
     cl: component.config?.cl || ''
+  }
+}
+
+// 初始化通用配置数据
+const initGeneralConfig = (component) => {
+  generalConfig.value = {
+    contact: component.config?.contact || '',
+    buildCode: component.config?.buildCode || '',
+    iaaMode: component.config?.iaaMode || false,
+    iaaDialogStyle: component.config?.iaaDialogStyle || null,
+    hidePayEntry: component.config?.hidePayEntry || false,
+    hideScoreExchange: component.config?.hideScoreExchange || false,
+    mineLoginType: component.config?.mineLoginType || 'anonymousLogin',
+    readerLoginType: component.config?.readerLoginType || 'anonymousLogin',
+    // 平台特定配置
+    douyinImId: component.config?.douyinImId || '',
+    douyinAppToken: component.config?.douyinAppToken || '',
+    weixinAppToken: component.config?.weixinAppToken || '',
+    kuaishouClientId: component.config?.kuaishouClientId || '',
+    kuaishouClientSecret: component.config?.kuaishouClientSecret || '',
+    kuaishouAppToken: component.config?.kuaishouAppToken || ''
   }
 }
 
@@ -324,12 +507,51 @@ watch(() => uiConfig.value, (newVal) => {
     checkUIConfigCompleted(selectedComponent.value);
   }
 }, { deep: true })
+
+// 监听通用配置变化，更新完成状态并触发表单校验
+watch(() => generalConfig.value, (newVal) => {
+  if (selectedComponent.value && selectedComponent.value.type === 'general-config') {
+    // 更新组件配置
+    selectedComponent.value.config = { ...newVal };
+    // 检查完成状态
+    checkGeneralConfigCompleted(selectedComponent.value);
+    
+    // 在表单有效时触发表单校验（主要针对buildCode字段）
+    if (formRef.value && newVal.buildCode) {
+      formRef.value.validateField('buildCode');
+    }
+  }
+}, { deep: true })
+
+// IAA模式切换时，自动选中样式1
+watch(() => generalConfig.value.iaaMode, (val) => {
+  if (val && (generalConfig.value.iaaDialogStyle === null || generalConfig.value.iaaDialogStyle === undefined)) {
+    nextTick(() => {
+      generalConfig.value.iaaDialogStyle = 1;
+    });
+  }
+  if (!val) {
+    generalConfig.value.iaaDialogStyle = null;
+  }
+})
+
 const canvasBounds = ref({})
 let draggedElement = null;
 let dragStartPos = null;
 
   // 选择组件
   const selectComponent = (component) => {
+  // 当选择通用配置时，先检查基础配置是否已设置平台
+  if (component.type === 'general-config') {
+    // 查找基础配置组件
+    const basicConfigComponent = currentLayout.value.find(item => item.type === 'basic-config');
+    // 检查是否存在基础配置且平台已设置
+    if (!basicConfigComponent || !basicConfigComponent.config || !basicConfigComponent.config.platform) {
+      ElMessage.warning('请先在基础配置中设置平台信息');
+      return; // 不进行后续操作
+    }
+  }
+  
   selectedComponent.value = component;
   if (component.type === 'basic-config') {
     initBasicConfig(component);
@@ -337,6 +559,9 @@ let dragStartPos = null;
   } else if (component.type === 'ui-config') {
     initUIConfig(component);
     checkUIConfigCompleted(component);
+  } else if (component.type === 'general-config') {
+    initGeneralConfig(component);
+    checkGeneralConfigCompleted(component);
   }
 }
 
@@ -358,6 +583,49 @@ const checkUIConfigCompleted = (component) => {
   const allCompleted = !!config.mainTheme && !!config.secondTheme && config.payCardStyle !== undefined && config.homeCardStyle !== undefined;
   component.isCompleted = allCompleted;
   return allCompleted;
+}
+
+// 检查通用配置是否完成
+const checkGeneralConfigCompleted = (component) => {
+  if (!component || component.type !== 'general-config') {
+    return false;
+  }
+  
+  // 直接使用generalConfig作为验证来源，确保与表单输入同步
+  const config = generalConfig.value;
+  // 基本字段验证
+  const requiredFields = ['contact', 'buildCode', 'mineLoginType', 'readerLoginType'];
+  const allRequiredCompleted = requiredFields.every(field => {
+    const value = config[field];
+    return value !== undefined && value !== null && value !== '';
+  });
+  
+  // buildCode 特殊校验（格式校验通过表单验证规则实现，这里只做基本逻辑判断）
+  let buildCodeValid = true;
+  if (config.buildCode) {
+    const isPureNumber = /^\d+$/.test(config.buildCode);
+    const startsWithNumber = /^\d/.test(config.buildCode);
+    
+    if (isPureNumber || startsWithNumber) {
+      buildCodeValid = false;
+    }
+  }
+  
+  // 平台特定字段验证
+  let platformSpecificCompleted = true;
+  const currentPlatform = getCurrentPlatform();
+  
+  if (currentPlatform === 'douyin') {
+    platformSpecificCompleted = !!config.douyinImId;
+  } else if (currentPlatform === 'kuaishou') {
+    platformSpecificCompleted = !!config.kuaishouClientId && !!config.kuaishouClientSecret;
+  }
+  
+  // IAA模式验证
+  const iaaCompleted = !config.iaaMode || (config.iaaMode && config.iaaDialogStyle !== null && config.iaaDialogStyle !== undefined);
+  
+  component.isCompleted = allRequiredCompleted && platformSpecificCompleted && iaaCompleted && buildCodeValid;
+  return component.isCompleted;
 }
 
   // 获取组件样式
@@ -551,33 +819,40 @@ const filteredComponents = computed(() => {
     return component ? component.gradient : 'linear-gradient(135deg, #409eff 0%, #69b1ff 100%)';
   }
 
-  // 获取画布组件样式
-  const getCanvasComponentStyle = (component) => {
-    // 使用动态宽高
-    const style = {
-      width: `${component.width}px`,
-      height: `${component.height}px`,
-      borderRadius: '8px',
-      padding: '20px',
-      'box-shadow': '0 4px 12px rgba(0, 0, 0, 0.1)',
-      'box-sizing': 'border-box',
-      display: 'flex',
-      'align-items': 'center',
-      'justify-content': 'center',
-      transition: 'all 0.3s ease'
-    };
-    // 根据编辑状态设置背景
-    if (!component.isEditingComplete) {
-      style.background = 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)';
-      style.borderColor = '#ddd';
-      style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
-    } else {
-      style.background = 'linear-gradient(135deg, #81c784 0%, #4caf50 100%)';
-      style.borderColor = '#4caf50';
-      style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.2)';
-    }
-    return style;
+  // 获取当前平台
+const getCurrentPlatform = () => {
+  // 查找基础配置组件
+  const basicConfigComponent = currentLayout.value.find(item => item.type === 'basic-config');
+  return basicConfigComponent?.config?.platform || 'douyin';
+}
+
+// 获取画布组件样式
+const getCanvasComponentStyle = (component) => {
+  // 使用动态宽高
+  const style = {
+    width: `${component.width}px`,
+    height: `${component.height}px`,
+    borderRadius: '8px',
+    padding: '20px',
+    'box-shadow': '0 4px 12px rgba(0, 0, 0, 0.1)',
+    'box-sizing': 'border-box',
+    display: 'flex',
+    'align-items': 'center',
+    'justify-content': 'center',
+    transition: 'all 0.3s ease'
+  };
+  // 根据编辑状态设置背景
+  if (!component.isCompleted) {
+    style.background = 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)';
+    style.borderColor = '#ddd';
+    style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)';
+  } else {
+    style.background = 'linear-gradient(135deg, #81c784 0%, #4caf50 100%)';
+    style.borderColor = '#4caf50';
+    style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.2)';
   }
+  return style;
+}
 
 
   // 获取组件名称
@@ -727,15 +1002,46 @@ const handleSaveLayout = () => {
     ElMessage.warning('请先创建布局')
     return
   }
-  // 保存基础配置数据
-  currentLayout.value.forEach(component => {
-    if (component.type === 'basic-config') {
-      component.config = { ...basicConfig.value };
-    }
-  });
-  // 这里可以将currentLayout.value转换为所需JSON格式
-  console.log('保存布局数据:', JSON.stringify(currentLayout.value))
-  ElMessage.success('布局保存成功')
+  
+  // 验证当前选中的通用配置表单
+  if (selectedComponent.value && selectedComponent.value.type === 'general-config' && formRef.value) {
+    formRef.value.validate((valid) => {
+      if (!valid) {
+        ElMessage.error('请检查通用配置中的错误项')
+        return
+      }
+      
+      // 保存所有配置数据
+      currentLayout.value.forEach(component => {
+        if (component.type === 'basic-config') {
+          component.config = { ...basicConfig.value };
+        } else if (component.type === 'ui-config') {
+          component.config = { ...uiConfig.value };
+        } else if (component.type === 'general-config') {
+          component.config = { ...generalConfig.value };
+        }
+      });
+      
+      // 这里可以将currentLayout.value转换为所需JSON格式
+      console.log('保存布局数据:', JSON.stringify(currentLayout.value))
+      ElMessage.success('布局保存成功')
+    })
+  } else {
+    // 保存所有配置数据（当没有选中通用配置或表单引用不存在时）
+    currentLayout.value.forEach(component => {
+      if (component.type === 'basic-config') {
+        component.config = { ...basicConfig.value };
+      } else if (component.type === 'ui-config') {
+        component.config = { ...uiConfig.value };
+      } else if (component.type === 'general-config') {
+        component.config = { ...generalConfig.value };
+      }
+    });
+    
+    // 这里可以将currentLayout.value转换为所需JSON格式
+    console.log('保存布局数据:', JSON.stringify(currentLayout.value))
+    ElMessage.success('布局保存成功')
+  }
 }
 </script>
 
@@ -802,6 +1108,70 @@ const handleSaveLayout = () => {
   border-radius: 8px;
   border: 1px solid #e0e0e0;
   transition: all 0.2s;
+}
+
+/* IAA弹窗样式卡片布局 */
+.iaa-dialog-style-card-group {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0 32px 0;
+}
+
+.iaa-dialog-style-card {
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+}
+
+.iaa-dialog-style-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #dcdfe6;
+  border-radius: 6px;
+  background: #fff;
+  padding: 2px 8px 2px 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  min-width: 140px;
+  min-height: 180px;
+}
+
+.iaa-dialog-style-card-inner.selected,
+.iaa-dialog-style-card-inner:hover {
+  border-color: #4096ff;
+  box-shadow: 0 0 10px rgba(64, 150, 255, 0.2);
+}
+
+.iaa-dialog-style-card-inner img {
+  width: 160px;
+  height: 240px;
+  object-fit: contain;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  background: #f8fafc;
+  border: 1px solid #ebeef5;
+}
+
+.iaa-dialog-style-label {
+  font-size: 15px;
+  color: #333;
+  margin-top: 2px;
+  font-weight: 500;
+  text-align: center;
+}
+
+
+
+.login-type-item {
+  margin-bottom: 20px;
+}
+
+.form-tip {
+  font-size: 12px;
+  color: #909399;
+  margin-left: 8px;
 }
 
 .theme-option:hover {
