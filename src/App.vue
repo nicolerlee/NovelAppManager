@@ -174,9 +174,9 @@ const agentOption = ref({
   auth: {
     type: "token",
     token:
-      "pat_l7UKvMflGJIG5iL9YgRWcYW3NF19v1xiiGu15wSxMtwLRDJaNsUZ0xZWeiLYuT6y",
+      "pat_ogyAtCdul52maU0rzqGWhwHnkHTDzMlIoP46jzLvTOKXAKjdv6PJ4TYq9hS7Ps3L",
     onRefreshToken: function () {
-      return "pat_l7UKvMflGJIG5iL9YgRWcYW3NF19v1xiiGu15wSxMtwLRDJaNsUZ0xZWeiLYuT6y";
+      return "pat_ogyAtCdul52maU0rzqGWhwHnkHTDzMlIoP46jzLvTOKXAKjdv6PJ4TYq9hS7Ps3L";
     },
   },
   //整体UI效果配置

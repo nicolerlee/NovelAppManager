@@ -32,15 +32,22 @@
           <div class="canvas-container" ref="canvasRef" @dragover.prevent @drop="handleDrop">
             <!-- 手机框架 -->
             <div class="phone-frame">
-              <!-- 状态栏 -->
-              <div class="phone-status-bar">
-                <div class="status-bar-time">9:41</div>
-                <div class="status-bar-icons"></div>
-              </div>
-              <!-- 标题区域 -->
-              <div class="app-title-bar">
-                <div class="app-title">{{ appName }}</div>
-              </div>
+              <!-- 顶部渐变容器 -->
+          <div class="top-gradient-container" 
+          :style="{ 
+            width: '100%',
+            height: '120px', 
+            background: `linear-gradient(180deg, ${uiConfig.secondTheme}, #f8f8f8)`
+          }" 
+          :key="themeUpdateKey">
+            <!-- 状态栏 -->
+            <div class="phone-status-bar">
+              <div class="status-bar-time" :style="{ color: '#ffffff' }">&nbsp;9:41</div>
+              <div class="status-bar-icons"></div>
+            </div>
+            <!-- 标题区域 -->
+            <div class="app-title-bar"><div class="app-title">{{ appName }}</div></div>
+          </div>
               <!-- 应用区域 -->
               <div class="phone-app-area">
                 <!-- 固定模块区域占位符 -->
@@ -67,7 +74,7 @@
                 <div 
                     v-for="component in currentLayout" 
                     :key="component.id" 
-                    :class="['component component-' + component.type, { 'component-selected': selectedComponent?.id == component.id }]"
+                    :class="['component component-' + component.type, { 'component-selected': selectedComponent?.id == component.id, 'component-completed': component.isCompleted }]"
                     :style="[
                       { transform: `translate(${component.position.x}px, ${component.position.y}px) ${selectedComponent?.id == component.id ? 'scale(1.1)' : ''}` },
                       getCanvasComponentStyle(component)
@@ -82,6 +89,7 @@
                     </ElIcon>
                   </div>
                   <div class="component-label">{{ getComponentName(component.type) }}</div>
+<span v-if="component.isCompleted" class="completion-tag">已编辑</span>
                 </div>
               </div>
               <!-- 底部导航 -->
@@ -109,18 +117,99 @@
         </div>
         <!-- 属性面板 -->
         <div class="properties-panel">
-            <h3>属性面板</h3>
-            <div v-if="selectedComponent" class="component-properties">
-              <h4>{{ getComponentName(selectedComponent.type) }} 属性</h4>
-              <el-form size="small">
-                <el-form-item label="组件类型">
-                  <el-input v-model="selectedComponent.type" disabled></el-input>
+          <h3>属性面板</h3>
+          <div v-if="selectedComponent" class="component-properties">
+            <h4>{{ getComponentName(selectedComponent.type) }} 属性</h4>
+            <el-form size="small" label-width="100px" class="basic-config-form">
+              <el-form-item label="组件类型">
+                <el-input v-model="selectedComponent.type" disabled></el-input>
+              </el-form-item>
+              <template v-if="selectedComponent.type === 'basic-config'"><!-- 基础配置原有内容 -->
+                <el-form-item label="appName">
+                  <el-input v-model="basicConfig.appName" placeholder="请输入应用名称"></el-input>
                 </el-form-item>
-              </el-form>
-            </div>
-            <div v-else class="no-selection">
-              <el-empty description="选择组件以编辑属性"></el-empty>
-            </div>
+                <el-form-item label="platform">
+                  <el-radio-group v-model="basicConfig.platform" class="platform-radio-group">
+                    <el-radio-button label="douyin">
+                      <el-icon style="vertical-align: middle; color: #2c2c2c; margin-right: 6px;"><Platform /></el-icon>
+                      抖音小程序
+                    </el-radio-button>
+                    <el-radio-button label="kuaishou">
+                      <el-icon style="vertical-align: middle; color: #ff4e33; margin-right: 6px;"><Share /></el-icon>
+                      快手小程序
+                    </el-radio-button>
+                    <el-radio-button label="wechat">
+                      <el-icon style="vertical-align: middle; color: #07c160; margin-right: 6px;"><ChatDotRound /></el-icon>
+                      微信小程序
+                    </el-radio-button>
+                    <el-radio-button label="baidu">
+                      <el-icon style="vertical-align: middle; color: #4e6ef2; margin-right: 6px;"><Connection /></el-icon>
+                      百度小程序
+                    </el-radio-button>
+                  </el-radio-group>
+                </el-form-item>
+                <el-form-item label="version">
+                  <el-input v-model="basicConfig.version" placeholder="请输入版本号"></el-input>
+                </el-form-item>
+                <el-form-item label="appCode">
+                  <el-input v-model="basicConfig.appCode" placeholder="例：tt_miniapp_yunyounovel"></el-input>
+                </el-form-item>
+                <el-form-item label="product">
+                  <el-input v-model="basicConfig.product" placeholder="例：yunyounovel"></el-input>
+                </el-form-item>
+                <el-form-item label="customer">
+                  <el-input v-model="basicConfig.customer" placeholder="例：yunyounovel"></el-input>
+                </el-form-item>
+                <el-form-item label="appid">
+                  <el-input v-model="basicConfig.appid" placeholder="请输入appId"></el-input>
+                </el-form-item>
+                <el-form-item label="tokenId">
+                  <el-input-number v-model="basicConfig.tokenId" :min="0" controls-position="right" placeholder="请输入tokenId"></el-input-number>
+                </el-form-item>
+                <el-form-item label="cl">
+                  <el-input v-model="basicConfig.cl" placeholder="例：yunyounovel"></el-input>
+                </el-form-item>
+              </template>
+              <template v-else-if="selectedComponent.type === 'ui-config'">
+                <el-form-item label="主题色">
+                  <el-color-picker v-model="uiConfig.mainTheme" show-alpha color-format="hex"></el-color-picker>
+                </el-form-item>
+                <el-form-item label="次主题色">
+                  <el-color-picker v-model="uiConfig.secondTheme" show-alpha color-format="hex"></el-color-picker>
+                </el-form-item>
+                <el-form-item label="预设主题">
+                  <div class="predefined-themes-container">
+                    <div v-for="theme in predefinedThemes" :key="theme.name" class="theme-option" @click="selectPredefinedTheme(theme)">
+                      <div class="theme-colors">
+                        <div class="main-color" :style="{ backgroundColor: theme.mainTheme }"></div>
+                        <div class="second-color" :style="{ backgroundColor: theme.secondTheme }"></div>
+                      </div>
+                      <span class="theme-name">{{ theme.name }}</span>
+                    </div>
+                  </div>
+                </el-form-item>
+                <el-form-item label="支付卡片样式" prop="payCardStyle" class="platform-radio-group">
+                <el-radio-group v-model="uiConfig.payCardStyle" @change="handlePayCardStyleChange" class="platform-radio-group">
+                  <el-radio-button :value="1">样式1</el-radio-button>
+                  <el-radio-button :value="2">样式2</el-radio-button>
+                  <el-radio-button :value="3">样式3</el-radio-button>
+                  <el-radio-button :value="4">样式4</el-radio-button>
+                </el-radio-group>
+                <div v-if="uiConfig.selectedPayCardImage" class="pay-card-image-preview">
+                  <img :src="uiConfig.selectedPayCardImage" alt="支付卡片样式预览" />
+                </div>
+              </el-form-item>
+                <el-form-item label="首页卡片样式" prop="homeCardStyle" class="platform-radio-group">
+                  <el-radio-group v-model="uiConfig.homeCardStyle" class="platform-radio-group">
+                    <el-radio-button :value="1">样式1</el-radio-button>
+                  </el-radio-group>
+                </el-form-item>
+              </template>
+            </el-form>
+          </div>
+          <div v-else class="no-selection">
+            <el-empty description="选择组件以编辑属性"></el-empty>
+          </div>
         </div>
       </div>
       
@@ -129,10 +218,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted,watch ,nextTick} from 'vue'
 import { useRouter } from 'vue-router'
+import { Platform, Share, ChatDotRound, Connection, InfoFilled } from '@element-plus/icons-vue';
 
-import { ElMessage, ElEmpty, ElCard, ElForm, ElFormItem, ElInput, ElIcon } from 'element-plus'
+import { ElMessage, ElEmpty, ElCard, ElForm, ElFormItem, ElInput, ElIcon  } from 'element-plus'
 import { inject } from 'vue'
 
 const auth = inject('auth')
@@ -143,17 +233,132 @@ const draggedComponent = ref(null)
 const isDragging = ref(false)
   const usedComponentTypes = ref(new Set())
   const selectedComponent = ref(null)
+const basicConfig = ref({})
+const uiConfig = ref({})
+
+// 预设主题色
+const predefinedThemes = ref([
+  { name: '阅界视窗主题', mainTheme: '#2552F5FF', secondTheme: '#DCE7FFFF' },
+  { name: '悦动故事主题', mainTheme: '#EF5350FF', secondTheme: '#FFEBEEFF' },
+  { name: '风行推广主题', mainTheme: '#F86003FF', secondTheme: '#FFEFE7FF' },
+  { name: '漫影主题', mainTheme: '#FF4363FF', secondTheme: '#FFE5EBFF' }
+])
+
+// 选择预设主题
+const selectPredefinedTheme = (theme) => {
+  uiConfig.value.mainTheme = theme.mainTheme;
+  uiConfig.value.secondTheme = theme.secondTheme;
+}
+
+// 初始化基础配置数据
+const initBasicConfig = (component) => {
+  basicConfig.value = {
+    appName: component.config?.appName || '',
+    appCode: component.config?.appCode || '',
+    platform: component.config?.platform || 'douyin',
+    version: component.config?.version || '',
+    product: component.config?.product || '',
+    customer: component.config?.customer || '',
+    appid: component.config?.appid || '',
+    tokenId: component.config?.tokenId || '',
+    cl: component.config?.cl || ''
+  }
+}
+
+// 初始化UI配置数据
+const initUIConfig = (component) => {
+  uiConfig.value = {
+    mainTheme: component.config?.mainTheme || '#2552F5FF',
+    secondTheme: component.config?.secondTheme || '#DCE7FFFF',
+    payCardStyle: component.config?.payCardStyle || 1,
+    homeCardStyle: component.config?.homeCardStyle || 1,
+    selectedPayCardImage: `/images/payStyle/pay_style${component.config?.payCardStyle || 1}.png`
+  }
+  // 确保UI更新后触发预览图加载
+nextTick(() => {
+  handlePayCardStyleChange(uiConfig.value.payCardStyle);
+});
+}
+
+// 处理支付卡片样式变化
+const handlePayCardStyleChange = (value) => {
+  uiConfig.value.selectedPayCardImage = `/images/payStyle/pay_style${value}.png`;
+}
+
+
 const canvasRef = ref(null)
 const appName = ref('小程序名称')
+
+// 主题更新追踪键
+const themeUpdateKey = ref(0);
+
+// 监听主题色变化以更新渐变
+watch(() => uiConfig.value.secondTheme, () => {
+  // 触发重渲染
+  themeUpdateKey.value++;
+})
+
+// 监听小程序名称变化，同步到手机模拟区
+watch(() => basicConfig.value.appName, (newVal) => {
+  if (newVal) {
+    appName.value = newVal;
+  }
+})
+
+// 监听基础配置变化，更新完成状态
+watch(() => basicConfig.value, (newVal) => {
+  if (selectedComponent.value && selectedComponent.value.type === 'basic-config') {
+    // 更新组件配置
+    selectedComponent.value.config = { ...newVal };
+    // 检查完成状态
+    checkConfigCompleted(selectedComponent.value);
+  }
+}, { deep: true })
+
+// 监听UI配置变化，更新完成状态
+watch(() => uiConfig.value, (newVal) => {
+  if (selectedComponent.value && selectedComponent.value.type === 'ui-config') {
+    // 更新组件配置
+    selectedComponent.value.config = { ...newVal };
+    // 检查完成状态
+    checkUIConfigCompleted(selectedComponent.value);
+  }
+}, { deep: true })
 const canvasBounds = ref({})
 let draggedElement = null;
 let dragStartPos = null;
 
   // 选择组件
   const selectComponent = (component) => {
-    selectedComponent.value = component;
+  selectedComponent.value = component;
+  if (component.type === 'basic-config') {
+    initBasicConfig(component);
+    checkConfigCompleted(component);
+  } else if (component.type === 'ui-config') {
+    initUIConfig(component);
+    checkUIConfigCompleted(component);
   }
+}
 
+// 检查基础配置是否完成
+const checkConfigCompleted = (component) => {
+  const config = component.config || {};
+  const requiredFields = ['appName', 'platform', 'version', 'appCode', 'product', 'customer', 'appid', 'tokenId', 'cl'];
+  const allCompleted = requiredFields.every(field => {
+    const value = config[field];
+    return value !== undefined && value !== null && value !== '';
+  });
+  component.isCompleted = allCompleted;
+  return allCompleted;
+}
+
+// 检查UI配置是否完成
+const checkUIConfigCompleted = (component) => {
+  const config = component.config || {};
+  const allCompleted = !!config.mainTheme && !!config.secondTheme && config.payCardStyle !== undefined && config.homeCardStyle !== undefined;
+  component.isCompleted = allCompleted;
+  return allCompleted;
+}
 
   // 获取组件样式
   const getComponentStyle = (item) => {
@@ -174,9 +379,9 @@ let dragStartPos = null;
 
   // 初始化画布边界
   onMounted(() => {
-    updateCanvasBounds();
-    window.addEventListener('resize', updateCanvasBounds);
-  })
+  updateCanvasBounds();
+  window.addEventListener('resize', updateCanvasBounds);
+})
 
   // 更新画布边界
   const updateCanvasBounds = () => {
@@ -522,7 +727,14 @@ const handleSaveLayout = () => {
     ElMessage.warning('请先创建布局')
     return
   }
-  // 这里将实现保存逻辑
+  // 保存基础配置数据
+  currentLayout.value.forEach(component => {
+    if (component.type === 'basic-config') {
+      component.config = { ...basicConfig.value };
+    }
+  });
+  // 这里可以将currentLayout.value转换为所需JSON格式
+  console.log('保存布局数据:', JSON.stringify(currentLayout.value))
   ElMessage.success('布局保存成功')
 }
 </script>
@@ -538,7 +750,7 @@ const handleSaveLayout = () => {
 }
 .workspace-container {
   display: grid;
-  grid-template-columns: 280px 1fr 300px;
+  grid-template-columns: 280px 1fr 400px;
   gap: 20px;
   margin-top: 20px;
   height: calc(100vh - 220px);
@@ -547,6 +759,19 @@ const handleSaveLayout = () => {
 /* 确保属性面板正确显示 */
 .properties-panel {
   display: block !important;
+}
+
+.basic-config-form .el-form-item {
+  margin-bottom: 15px;
+}
+
+.basic-config-form .el-input, .basic-config-form .el-select {
+  width: 100%;
+  max-width: 280px;
+}
+
+.basic-config-form .el-form-item__label {
+  padding-right: 10px;
 }
 .sidebar {
   background-color: #f5f7fa;
@@ -558,6 +783,62 @@ const handleSaveLayout = () => {
   ::-webkit-scrollbar {width: 0;}
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* 主题选择样式 */
+.predefined-themes-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.theme-option {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s;
+}
+
+.theme-option:hover {
+  border-color: #c0c0c0;
+  background-color: #f9f9f9;
+}
+
+.theme-colors {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.main-color, .second-color {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+}
+
+.main-color {
+  margin-right: 5px;
+}
+
+.theme-name {
+  font-size: 12px;
+  color: #666;
+}
+
+.pay-card-image-preview {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.pay-card-image-preview img {
+  width: 120px;
+  height: 140px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .component-list {
   display: flex;
@@ -593,6 +874,25 @@ const handleSaveLayout = () => {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
+/* 配置完成状态样式 */
+.component-completed {
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%) !important;
+  border: 1px solid #b7eb8f;
+  position: relative;
+}
+
+.completion-tag {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background-color: #52c41a;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
 :deep(.component-item *) {
   pointer-events: none;
 }
@@ -612,16 +912,16 @@ const handleSaveLayout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
 .phone-frame {
   width: 320px;
   height: 650px;
-  background-color: white;
+  background: transparent;
   border-radius: 40px;
   border: 6px solid #333;
+  padding: 0;
   position: relative;
   overflow: hidden;
+}
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -632,8 +932,49 @@ const handleSaveLayout = () => {
   left: 0;
   right: 0;
   height: 100px;
-  background: linear-gradient(180deg, var(--theme-color, #409EFF), #e4edfb00);
+  /* background: linear-gradient(180deg, var(--theme-color, ), #e4edfb00); */
   z-index: 0;
+}
+
+.top-gradient-container {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.phone-status-bar {
+  height: 44px;
+  padding: 0 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.app-title-bar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+}
+
+.phone-status-bar, .app-title-bar {
+  box-sizing: border-box;
+}
+
+.app-title-bar {
+  margin-top: 0;
+}
+
+.phone-status-bar {
+  height: 44px;
+  padding-top: 0;
+}
+
+.app-title-bar {
+  height: 56px;
 }
 
 .phone-status-bar {
@@ -673,7 +1014,7 @@ const handleSaveLayout = () => {
 
 .app-title-bar {
   height: 40px;
-  background-color: #f8f8f8;
+  -color: #f8f8f8;
   display: flex;
   align-items: center;
   justify-content: center;
