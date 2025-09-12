@@ -12,6 +12,8 @@
         v-model="generalConfig.buildCode" 
         placeholder="请输入构建命令（输入npm run build:platform(tt/ks/wx..)-xx 的xx即可）"
         @input="handleInputChange('buildCode')"
+        :disabled="buildCodeDisabled"
+        :loading="generalConfigLoading"
       />
     </el-form-item>
     
@@ -121,7 +123,15 @@ const props = defineProps({
   },
   formRef: {
     type: Object,
-    required: true
+    required: false
+  },
+  buildCodeDisabled: {
+    type: Boolean,
+    default: false
+  },
+  generalConfigLoading: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -222,8 +232,8 @@ watch(() => props.generalConfig.iaaMode, (val) => {
   padding: 2px 8px 2px 8px;
   transition: border-color 0.2s, box-shadow 0.2s;
   cursor: pointer;
-  min-width: 140px;
-  min-height: 180px;
+  min-width: 100px;
+  min-height: 140px;
 }
 
 .iaa-dialog-style-card-inner:hover {

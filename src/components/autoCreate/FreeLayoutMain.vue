@@ -22,7 +22,7 @@
             >
               <div :style="getComponentStyle(item)"
                   class="component-card">
-                  <span style="color: white; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">{{ item.name }}</span>
+                  <span style="color: white; font-weight: 500; font-size: 14px; text-shadow: 0 2px 4px rgba(0,0,0,0.5), 0 3px 8px rgba(0,0,0,0.3);">{{ item.name }}</span>
                 </div>
             </div>
           </div>
@@ -89,7 +89,8 @@
                     </ElIcon>
                   </div>
                   <div class="component-label">{{ getComponentName(component.type) }}</div>
-                  <span v-if="component.isCompleted" class="completion-tag">已编辑</span>
+                  <span v-if="component.isCompleted" class="completion-tag">配置完成</span>
+                  <span v-else class="uncompletion-tag">未配置</span>
                 </div>
               </div>
               <!-- 底部导航 -->
@@ -139,6 +140,13 @@
                   v-model:generalConfig="generalConfig"
                   :basicConfig="basicConfig"
                   :formRef="formRef"
+                  :buildCodeDisabled="buildCodeDisabled"
+                  :generalConfigLoading="generalConfigLoading"
+                />
+              </template>
+              <template v-else-if="selectedComponent.type === 'macro'">
+                <FreeWeijuConfigPanel 
+                  v-model:macroConfig="macroConfig"
                 />
               </template>
             </el-form>
@@ -165,6 +173,7 @@ import { inject } from 'vue'
 import FreeBasicConfigPanel from './FreeBasicConfigPanel.vue'
 import FreeUiConfigPanel from './FreeUiConfigPanel.vue'
 import FreeGeneralConfigPanel from './FreeGeneralConfigPanel.vue'
+import FreeWeijuConfigPanel from './FreeWeijuConfigPanel.vue'
 import request from '../../utils/request';
 
 // 表单校验规则
@@ -212,9 +221,13 @@ const isDragging = ref(false)
 const basicConfig = ref({})
 const uiConfig = ref({})
 const generalConfig = ref({})
+const macroConfig = ref({})
 // UI配置相关状态
 const uiConfigThemeConfigured = ref(false)
 const uiConfigLoading = ref(false)
+// 通用配置相关状态
+const buildCodeDisabled = ref(false)
+const generalConfigLoading = ref(false)
 // 上次查询的appName缓存
 const lastQueriedAppName = ref('')
 // 表单引用
@@ -266,6 +279,50 @@ const fetchUiThemeConfig = async () => {
 };
 
 
+// 请求查询应用通用配置
+const fetchAppCommonConfigByAppName = async () => {
+  // 查找基础配置组件
+  const basicConfigComponent = currentLayout.value.find(item => item.type === 'basic-config');
+  if (!basicConfigComponent || !basicConfigComponent.config || !basicConfigComponent.config.appName) {
+    return;
+  }
+
+  const currentAppName = basicConfigComponent.config.appName;
+  // 如果appName没有变化，且已经有查询结果，不重复请求
+  if (currentAppName === lastQueriedAppName.value && (buildCodeDisabled.value || lastQueriedAppName.value !== '')) {
+    console.log('appName未变化，跳过通用配置查询');
+    return;
+  }
+
+  generalConfigLoading.value = true;
+  try {
+    const response = await request.get('/api/novel-common/getAppCommonConfigByAppName', {
+      params: { appName: currentAppName }
+    });
+    
+    // 更新上次查询的appName
+    lastQueriedAppName.value = currentAppName;
+    
+    if (response.code === 200 && response.data && response.data.length > 0) {
+      // 有配置，使用第一条数据
+      const appConfig = response.data[0];
+      if (appConfig.buildCode) {
+        generalConfig.value.buildCode = appConfig.buildCode;
+        buildCodeDisabled.value = true;
+        ElMessage.success('已加载历史构建命令，构建命令不可修改');
+      }
+    } else {
+      // 无配置，允许用户设置
+      buildCodeDisabled.value = false;
+    }
+  } catch (error) {
+    console.error('获取通用配置失败:', error);
+    buildCodeDisabled.value = false;
+  } finally {
+    generalConfigLoading.value = false;
+  }
+};
+
 // 初始化基础配置数据
 const initBasicConfig = (component) => {
   basicConfig.value = {
@@ -315,6 +372,14 @@ const initUIConfig = (component) => {
 nextTick(() => {
   handlePayCardStyleChange(uiConfig.value.payCardStyle);
 });
+}
+
+// 初始化微距配置数据
+const initMacroConfig = (component) => {
+  macroConfig.value = {
+    deliverId: component.config?.deliverId || '',
+    bannerId: component.config?.bannerId || ''
+  }
 }
 
 
@@ -374,6 +439,16 @@ watch(() => generalConfig.value, (newVal) => {
   }
 }, { deep: true })
 
+// 监听微距配置变化，更新完成状态
+watch(() => macroConfig.value, (newVal) => {
+  if (selectedComponent.value && selectedComponent.value.type === 'macro') {
+    // 更新组件配置
+    selectedComponent.value.config = { ...newVal };
+    // 检查完成状态
+    checkMacroConfigCompleted(selectedComponent.value);
+  }
+}, { deep: true })
+
 // IAA模式切换时，自动选中样式1
 watch(() => generalConfig.value.iaaMode, (val) => {
   if (val && (generalConfig.value.iaaDialogStyle === null || generalConfig.value.iaaDialogStyle === undefined)) {
@@ -400,7 +475,11 @@ let dragStartPos = null;
     // 检查是否存在基础配置且平台已设置
     if (!basicConfigComponent || !basicConfigComponent.config || !basicConfigComponent.config.platform) {
       ElMessage.error('请先在基础配置中设置平台类型');
-      return; // 不进行后续操作
+      return; 
+    }
+    if (!basicConfigComponent || !basicConfigComponent.config || !basicConfigComponent.config.appName) {
+      ElMessage.error('请先在基础配置中设置程序名称');
+      return; 
     }
   }
   
@@ -425,6 +504,11 @@ let dragStartPos = null;
   } else if (component.type === 'general-config') {
     initGeneralConfig(component);
     checkGeneralConfigCompleted(component);
+    // 查询同名小程序通用配置
+    fetchAppCommonConfigByAppName();
+  } else if (component.type === 'macro') {
+    initMacroConfig(component);
+    checkMacroConfigCompleted(component);
   }
 }
 
@@ -491,6 +575,24 @@ const checkGeneralConfigCompleted = (component) => {
   return component.isCompleted;
 }
 
+// 检查微距配置是否完成
+const checkMacroConfigCompleted = (component) => {
+  if (!component || component.type !== 'macro') {
+    return false;
+  }
+  
+  // 直接使用macroConfig作为验证来源，确保与表单输入同步
+  const config = macroConfig.value;
+  // 基本字段验证
+  const requiredFields = ['deliverId', 'bannerId'];
+  const allRequiredCompleted = requiredFields.every(field => {
+    const value = config[field];
+    return value !== undefined && value !== null && value !== '';
+  });
+  
+  component.isCompleted = allRequiredCompleted;
+  return component.isCompleted;
+}
   // 获取组件样式
   const getComponentStyle = (item) => {
     return {
@@ -530,12 +632,12 @@ const checkGeneralConfigCompleted = (component) => {
 
   // 可用组件列表
   const availableComponents = ref([
-      { type: 'basic-config', name: '基础配置', color: '#409eff', gradient: 'linear-gradient(135deg, #409eff 0%, #69b1ff 100%)' },
-      { type: 'general-config', name: '通用配置', color: '#67c23a', gradient: 'linear-gradient(135deg, #67c23a 0%, #85ce61 100%)' },
-      { type: 'payment', name: '支付', color: '#e6a23c', gradient: 'linear-gradient(135deg, #e6a23c 0%, #f3d19e 100%)' },
-      { type: 'advertisement', name: '广告', color: '#f56c6c', gradient: 'linear-gradient(135deg, #f56c6c 0%, #f89898 100%)' },
-      { type: 'ui-config', name: 'UI配置', color: '#13c2c2', gradient: 'linear-gradient(135deg, #13c2c2 0%, #1890ff 100%)' },
-      { type: 'macro', name: '微距', color: '#722ed1', gradient: 'linear-gradient(135deg, #722ed1 0%, #a06ee1 100%)' }
+      { type: 'basic-config', name: '基础配置', color: '#409eff', gradient: 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)' },
+      { type: 'general-config', name: '通用配置', color: '#67c23a', gradient: 'linear-gradient(135deg, #66bb6a 0%, #2e7d32 100%)' },
+      { type: 'payment', name: '支付', color: '#e6a23c', gradient: 'linear-gradient(135deg, #ffb74d 0%, #f57c00 100%)' },
+      { type: 'advertisement', name: '广告', color: '#f56c6c', gradient: 'linear-gradient(135deg, #ff7675 0%, #d63031 100%)' },
+      { type: 'ui-config', name: 'UI配置', color: '#13c2c2', gradient: 'linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)' },
+      { type: 'macro', name: '微距', color: '#722ed1', gradient: 'linear-gradient(135deg, #9c27b0 0%, #6a0080 100%)' }
     ])
 console.log('可用组件初始数据:', availableComponents.value);
   
@@ -809,6 +911,9 @@ const getCanvasComponentStyle = (component) => {
       
       // 强制清空属性面板的选中状态，防止显示无效数据
       selectedComponent.value = null;
+      
+      // 将appName重置为默认值，同步更新手机模拟器区域的title
+      appName.value = '小程序名称';
       
       // 找到并更新UI配置和通用配置组件的完成状态
       currentLayout.value.forEach(comp => {
@@ -1151,6 +1256,18 @@ const handleSaveLayout = () => {
   top: 5px;
   left: 5px;
   background-color: #52c41a;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.uncompletion-tag {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background-color: #bcc0ba;
   color: white;
   font-size: 12px;
   padding: 2px 6px;
