@@ -124,191 +124,22 @@
               <el-form-item label="组件类型">
                 <el-input v-model="selectedComponent.type" disabled></el-input>
               </el-form-item>
-              <template v-if="selectedComponent.type === 'basic-config'"><!-- 基础配置原有内容 -->
-                <el-form-item label="appName">
-                  <el-input v-model="basicConfig.appName" placeholder="请输入应用名称"></el-input>
-                </el-form-item>
-                <el-form-item label="platform">
-                  <el-radio-group v-model="basicConfig.platform" class="platform-radio-group">
-                    <el-radio-button label="douyin">
-                      <el-icon style="vertical-align: middle; color: #2c2c2c; margin-right: 6px;"><Platform /></el-icon>
-                      抖音小程序
-                    </el-radio-button>
-                    <el-radio-button label="kuaishou">
-                      <el-icon style="vertical-align: middle; color: #ff4e33; margin-right: 6px;"><Share /></el-icon>
-                      快手小程序
-                    </el-radio-button>
-                    <el-radio-button label="wechat">
-                      <el-icon style="vertical-align: middle; color: #07c160; margin-right: 6px;"><ChatDotRound /></el-icon>
-                      微信小程序
-                    </el-radio-button>
-                    <el-radio-button label="baidu">
-                      <el-icon style="vertical-align: middle; color: #4e6ef2; margin-right: 6px;"><Connection /></el-icon>
-                      百度小程序
-                    </el-radio-button>
-                  </el-radio-group>
-                </el-form-item>
-                <el-form-item label="version">
-                  <el-input v-model="basicConfig.version" placeholder="请输入版本号"></el-input>
-                </el-form-item>
-                <el-form-item label="appCode">
-                  <el-input v-model="basicConfig.appCode" placeholder="例：tt_miniapp_yunyounovel"></el-input>
-                </el-form-item>
-                <el-form-item label="product">
-                  <el-input v-model="basicConfig.product" placeholder="例：yunyounovel"></el-input>
-                </el-form-item>
-                <el-form-item label="customer">
-                  <el-input v-model="basicConfig.customer" placeholder="例：yunyounovel"></el-input>
-                </el-form-item>
-                <el-form-item label="appid">
-                  <el-input v-model="basicConfig.appid" placeholder="请输入appId"></el-input>
-                </el-form-item>
-                <el-form-item label="tokenId">
-                  <el-input-number v-model="basicConfig.tokenId" :min="0" controls-position="right" placeholder="请输入tokenId"></el-input-number>
-                </el-form-item>
-                <el-form-item label="cl">
-                  <el-input v-model="basicConfig.cl" placeholder="例：yunyounovel"></el-input>
-                </el-form-item>
+              <template v-if="selectedComponent.type === 'basic-config'">
+                <FreeBasicConfigPanel v-model:basicConfig="basicConfig" />
               </template>
               <template v-else-if="selectedComponent.type === 'ui-config'">
-                <el-form-item label="主题色">
-                  <el-color-picker v-model="uiConfig.mainTheme" show-alpha color-format="hex"></el-color-picker>
-                </el-form-item>
-                <el-form-item label="次主题色">
-                  <el-color-picker v-model="uiConfig.secondTheme" show-alpha color-format="hex"></el-color-picker>
-                </el-form-item>
-                <el-form-item label="预设主题">
-                  <div class="predefined-themes-container">
-                    <div v-for="theme in predefinedThemes" :key="theme.name" class="theme-option" @click="selectPredefinedTheme(theme)">
-                      <div class="theme-colors">
-                        <div class="main-color" :style="{ backgroundColor: theme.mainTheme }"></div>
-                        <div class="second-color" :style="{ backgroundColor: theme.secondTheme }"></div>
-                      </div>
-                      <span class="theme-name">{{ theme.name }}</span>
-                    </div>
-                  </div>
-                </el-form-item>
-                <el-form-item label="支付卡片样式" prop="payCardStyle" class="platform-radio-group">
-                <el-radio-group v-model="uiConfig.payCardStyle" @change="handlePayCardStyleChange" class="platform-radio-group">
-                  <el-radio-button :value="1">样式1</el-radio-button>
-                  <el-radio-button :value="2">样式2</el-radio-button>
-                  <el-radio-button :value="3">样式3</el-radio-button>
-                  <el-radio-button :value="4">样式4</el-radio-button>
-                </el-radio-group>
-                <div v-if="uiConfig.selectedPayCardImage" class="pay-card-image-preview">
-                  <img :src="uiConfig.selectedPayCardImage" alt="支付卡片样式预览" />
-                </div>
-              </el-form-item>
-                <el-form-item label="首页卡片样式" prop="homeCardStyle" class="platform-radio-group">
-                  <el-radio-group v-model="uiConfig.homeCardStyle" class="platform-radio-group">
-                    <el-radio-button :value="1">样式1</el-radio-button>
-                  </el-radio-group>
-                </el-form-item>
+                <FreeUiConfigPanel 
+                  v-model:uiConfig="uiConfig" 
+                  :uiConfigThemeConfigured="uiConfigThemeConfigured" 
+                  :uiConfigLoading="uiConfigLoading" 
+                />
               </template>
               <template v-else-if="selectedComponent.type === 'general-config'">
-                <el-form-item label="客服URL" prop="contact">
-                  <el-input 
-                    v-model="generalConfig.contact" 
-                    placeholder="请输入客服URL" 
-                    @input="handleInputChange('contact')"
-                  />
-                </el-form-item>
-                <el-form-item label="构建命令" prop="buildCode">
-                  <el-input 
-                    v-model="generalConfig.buildCode" 
-                    placeholder="请输入构建命令（输入npm run build:platform(tt/ks/wx..)-xx 的xx即可）"
-                    @input="handleInputChange('buildCode')"
-                  />
-                </el-form-item>
-                
-                <!-- 平台特定配置 -->
-                <template v-if="getCurrentPlatform() === 'douyin'">
-                  <el-form-item label="抖音IM ID" prop="douyinImId">
-                    <el-input v-model="generalConfig.douyinImId" placeholder="请输入抖音IM ID" />
-                  </el-form-item>
-                  <el-form-item label="抖音AppToken" prop="douyinAppToken">
-                    <el-input
-                      v-model="generalConfig.douyinAppToken"
-                      type="textarea"
-                      :rows="6"
-                      placeholder="请输入抖音AppToken（私钥内容）"
-                    />
-                  </el-form-item>
-                </template>
-                
-                <template v-if="getCurrentPlatform() === 'weixin'">
-                  <el-form-item label="微信AppToken" prop="weixinAppToken">
-                    <el-input
-                      v-model="generalConfig.weixinAppToken"
-                      type="textarea"
-                      :rows="6"
-                      placeholder="请输入微信AppToken（私钥内容）"
-                    />
-                  </el-form-item>
-                </template>
-                
-                <template v-if="getCurrentPlatform() === 'kuaishou'">
-                  <el-form-item label="快手Client ID" prop="kuaishouClientId">
-                    <el-input v-model="generalConfig.kuaishouClientId" placeholder="请输入快手Client ID" />
-                  </el-form-item>
-                  <el-form-item label="快手Client Secret" prop="kuaishouClientSecret">
-                    <el-input v-model="generalConfig.kuaishouClientSecret" placeholder="请输入快手Client Secret" show-password />
-                  </el-form-item>
-                  <el-form-item label="快手AppToken" prop="kuaishouAppToken">
-                    <el-input
-                      v-model="generalConfig.kuaishouAppToken"
-                      type="textarea"
-                      :rows="6"
-                      placeholder="请输入快手AppToken（私钥内容）"
-                    />
-                  </el-form-item>
-                </template>
-                
-                <el-form-item label="IAA模式">
-                  <el-switch v-model="generalConfig.iaaMode" />
-                  <span class="form-tip">是否开启IAA(In-App-Advertising)模式</span>
-                </el-form-item>
-                
-                <el-form-item v-if="generalConfig.iaaMode" label="IAA弹窗样式" prop="iaaDialogStyle">
-                  <el-radio-group v-model="generalConfig.iaaDialogStyle" class="iaa-dialog-style-card-group">
-                    <el-radio-button
-                      v-for="item in iaaDialogStyleOptions"
-                      :key="item.value"
-                      :value="item.value"
-                      class="iaa-dialog-style-card"
-                    >
-                      <div class="iaa-dialog-style-card-inner" :class="{ selected: generalConfig.iaaDialogStyle === item.value }">
-                        <img :src="item.img" :alt="item.label" />
-                        <div class="iaa-dialog-style-label">{{ item.label }}</div>
-                      </div>
-                    </el-radio-button>
-                  </el-radio-group>
-                </el-form-item>
-                
-                <el-form-item label="屏蔽支付入口">
-                  <el-switch v-model="generalConfig.hidePayEntry" />
-                  <span class="form-tip">除微信IOS的非投流渠道，默认不屏蔽。审核失败时候可尝试屏蔽处理</span>
-                </el-form-item>
-                
-                <el-form-item label="屏蔽积分入口">
-                  <el-switch v-model="generalConfig.hideScoreExchange" />
-                </el-form-item>
-                
-                <el-form-item label="我的页登录类型" class="login-type-item" prop="mineLoginType">
-                  <el-radio-group v-model="generalConfig.mineLoginType" class="platform-radio-group">
-                    <el-radio-button value="anonymousLogin">静默登录</el-radio-button>
-                    <el-radio-button value="phoneLogin">手机号授权登录</el-radio-button>
-                  </el-radio-group>
-                  <span class="form-tip">无手机号权限的小程序默认使用静默登录</span>
-                </el-form-item>
-                
-                <el-form-item label="阅读页登录类型" class="login-type-item" prop="readerLoginType">
-                  <el-radio-group v-model="generalConfig.readerLoginType" class="platform-radio-group">
-                    <el-radio-button value="anonymousLogin">静默登录</el-radio-button>
-                    <el-radio-button value="phoneLogin">手机号授权登录</el-radio-button>
-                  </el-radio-group>
-                  <span class="form-tip">无手机号权限的小程序默认使用静默登录</span>
-                </el-form-item>
+                <FreeGeneralConfigPanel 
+                  v-model:generalConfig="generalConfig"
+                  :basicConfig="basicConfig"
+                  :formRef="formRef"
+                />
               </template>
             </el-form>
           </div>
@@ -325,10 +156,16 @@
 <script setup>
 import { ref, computed, onMounted,watch ,nextTick} from 'vue'
 import { useRouter } from 'vue-router'
-import { Platform, Share, ChatDotRound, Connection, InfoFilled } from '@element-plus/icons-vue';
+import { Platform, Share, ChatDotRound, Connection, InfoFilled, Close } from '@element-plus/icons-vue';
 
-import { ElMessage, ElEmpty, ElCard, ElForm, ElFormItem, ElInput, ElIcon, ElSwitch, ElRadioGroup, ElRadio, ElRadioButton } from 'element-plus'
+import { ElMessage, ElEmpty, ElCard, ElForm, ElFormItem, ElInput, ElIcon, ElSwitch, ElRadioGroup, ElRadio, ElRadioButton, ElInputNumber } from 'element-plus'
 import { inject } from 'vue'
+
+// 导入配置面板组件
+import FreeBasicConfigPanel from './FreeBasicConfigPanel.vue'
+import FreeUiConfigPanel from './FreeUiConfigPanel.vue'
+import FreeGeneralConfigPanel from './FreeGeneralConfigPanel.vue'
+import request from '../../utils/request';
 
 // 表单校验规则
 const generalConfigRules = ref({
@@ -375,42 +212,59 @@ const isDragging = ref(false)
 const basicConfig = ref({})
 const uiConfig = ref({})
 const generalConfig = ref({})
+// UI配置相关状态
+const uiConfigThemeConfigured = ref(false)
+const uiConfigLoading = ref(false)
+// 上次查询的appName缓存
+const lastQueriedAppName = ref('')
 // 表单引用
 const formRef = ref(null);
 
-// 输入变化时触发字段验证
-const handleInputChange = (field) => {
-  if (formRef.value && selectedComponent.value && selectedComponent.value.type === 'general-config') {
-    // 延迟验证，避免频繁触发
-    setTimeout(() => {
-      formRef.value.validateField(field);
-      // 同步更新组件完成状态
-      checkGeneralConfigCompleted(selectedComponent.value);
-    }, 100);
+// 请求查询同名小程序主体配置
+const fetchUiThemeConfig = async () => {
+  // 查找基础配置组件
+  const basicConfigComponent = currentLayout.value.find(item => item.type === 'basic-config');
+  if (!basicConfigComponent || !basicConfigComponent.config || !basicConfigComponent.config.appName) {
+    return;
+  }
+
+  const currentAppName = basicConfigComponent.config.appName;
+  // 如果appName没有变化，且已经有查询结果，不重复请求
+  if (currentAppName === lastQueriedAppName.value && (uiConfigThemeConfigured.value || lastQueriedAppName.value !== '')) {
+    console.log('appName未变化，跳过主题色配置查询');
+    return;
+  }
+
+  uiConfigLoading.value = true;
+  try {
+    const response = await request.get('/api/novel-apps/getByAppName', {
+      params: { appName: currentAppName }
+    });
+    
+    // 更新上次查询的appName
+    lastQueriedAppName.value = currentAppName;
+    
+    if (response.data && response.data.length > 0) {
+      // 有配置，使用第一条数据
+      const firstTheme = response.data[0];
+      if (firstTheme.mainTheme && firstTheme.secondTheme) {
+        uiConfig.value.mainTheme = firstTheme.mainTheme;
+        uiConfig.value.secondTheme = firstTheme.secondTheme;
+        uiConfigThemeConfigured.value = true;
+        ElMessage.success('已加载历史主题色配置，主题色不可修改');
+      }
+    } else {
+      // 无配置，允许用户设置
+      uiConfigThemeConfigured.value = false;
+    }
+  } catch (error) {
+    console.error('获取主题色配置失败:', error);
+    ElMessage.error('获取主题色配置失败，将使用默认配置');
+  } finally {
+    uiConfigLoading.value = false;
   }
 };
 
-// 预设主题色
-const predefinedThemes = ref([
-  { name: '阅界视窗主题', mainTheme: '#2552F5FF', secondTheme: '#DCE7FFFF' },
-  { name: '悦动故事主题', mainTheme: '#EF5350FF', secondTheme: '#FFEBEEFF' },
-  { name: '风行推广主题', mainTheme: '#F86003FF', secondTheme: '#FFEFE7FF' },
-  { name: '漫影主题', mainTheme: '#FF4363FF', secondTheme: '#FFE5EBFF' }
-])
-
-// IAA弹窗样式选项
-const iaaDialogStyleOptions = ref([
-  { value: 1, label: '样式1', img: '/images/iaaDialogStyle/iaa_dialog_style1.jpg' },
-  { value: 2, label: '样式2', img: '/images/iaaDialogStyle/iaa_dialog_style2.jpg' }
-])
-
-
-
-// 选择预设主题
-const selectPredefinedTheme = (theme) => {
-  uiConfig.value.mainTheme = theme.mainTheme;
-  uiConfig.value.secondTheme = theme.secondTheme;
-}
 
 // 初始化基础配置数据
 const initBasicConfig = (component) => {
@@ -463,10 +317,7 @@ nextTick(() => {
 });
 }
 
-// 处理支付卡片样式变化
-const handlePayCardStyleChange = (value) => {
-  uiConfig.value.selectedPayCardImage = `/images/payStyle/pay_style${value}.png`;
-}
+
 
 
 const canvasRef = ref(null)
@@ -541,13 +392,23 @@ let dragStartPos = null;
 
   // 选择组件
   const selectComponent = (component) => {
+  // 查找基础配置组件
+  const basicConfigComponent = currentLayout.value.find(item => item.type === 'basic-config');
+  
   // 当选择通用配置时，先检查基础配置是否已设置平台
   if (component.type === 'general-config') {
-    // 查找基础配置组件
-    const basicConfigComponent = currentLayout.value.find(item => item.type === 'basic-config');
     // 检查是否存在基础配置且平台已设置
     if (!basicConfigComponent || !basicConfigComponent.config || !basicConfigComponent.config.platform) {
-      ElMessage.warning('请先在基础配置中设置平台信息');
+      ElMessage.error('请先在基础配置中设置平台类型');
+      return; // 不进行后续操作
+    }
+  }
+  
+  // 当选择UI配置时，先检查基础配置是否已设置程序名称
+  if (component.type === 'ui-config') {
+    // 检查是否存在基础配置且程序名称已设置
+    if (!basicConfigComponent || !basicConfigComponent.config || !basicConfigComponent.config.appName) {
+      ElMessage.error('请先在基础配置中设置程序名称');
       return; // 不进行后续操作
     }
   }
@@ -559,6 +420,8 @@ let dragStartPos = null;
   } else if (component.type === 'ui-config') {
     initUIConfig(component);
     checkUIConfigCompleted(component);
+    // 查询同名小程序主体配置
+    fetchUiThemeConfig();
   } else if (component.type === 'general-config') {
     initGeneralConfig(component);
     checkGeneralConfigCompleted(component);
@@ -933,6 +796,28 @@ const getCanvasComponentStyle = (component) => {
     if (selectedComponent.value?.id === component.id) {
       selectedComponent.value = null
     }
+    
+    // 当基础配置被移除时，清空依赖的UI配置和通用配置数据
+    if (component.type === 'basic-config') {
+      // 清空UI配置数据
+      uiConfig.value = {};
+      uiConfigThemeConfigured.value = false;
+      lastQueriedAppName.value = '';
+      
+      // 清空通用配置数据
+      generalConfig.value = {};
+      
+      // 强制清空属性面板的选中状态，防止显示无效数据
+      selectedComponent.value = null;
+      
+      // 找到并更新UI配置和通用配置组件的完成状态
+      currentLayout.value.forEach(comp => {
+        if (comp.type === 'ui-config' || comp.type === 'general-config') {
+          // 直接设置为未完成状态
+          comp.isCompleted = false;
+        }
+      });
+    }
     // 重置对应占位区域状态
     const modulePlaceholder = document.querySelector(`.module-placeholder[data-module-type="${component.type}"]`);
     if (modulePlaceholder) {
@@ -1091,125 +976,135 @@ const handleSaveLayout = () => {
   scrollbar-width: none;
 }
 
-/* 主题选择样式 */
-.predefined-themes-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 10px;
-}
+/* 属性面板样式 */
+  .properties-panel {
+    width: 100%;
+    padding: 20px;
+    background-color: #f5f7fa;
+    height: 100%;
+    overflow-y: auto;
+  }
 
-.theme-option {
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  transition: all 0.2s;
-}
+  /* 基础配置表单样式 */
+  .platform-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 
-/* IAA弹窗样式卡片布局 */
-.iaa-dialog-style-card-group {
-  display: flex;
-  gap: 12px;
-  margin: 12px 0 32px 0;
-}
+  .platform-radio-group .el-radio-button__inner {
+    padding: 8px 16px;
+  }
 
-.iaa-dialog-style-card {
-  padding: 0;
-  border: none;
-  background: none;
-  box-shadow: none;
-}
+  /* 主题选择样式 */
+  .predefined-themes-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+  }
 
-.iaa-dialog-style-card-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: 1px solid #dcdfe6;
-  border-radius: 6px;
-  background: #fff;
-  padding: 2px 8px 2px 8px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-  min-width: 140px;
-  min-height: 180px;
-}
+  .theme-option {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border-radius: 4px;
+    transition: all 0.3s;
+    background-color: white;
+    border: 1px solid #e4e7ed;
+    width: 120px;
+  }
 
-.iaa-dialog-style-card-inner.selected,
-.iaa-dialog-style-card-inner:hover {
-  border-color: #4096ff;
-  box-shadow: 0 0 10px rgba(64, 150, 255, 0.2);
-}
+  .theme-option:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: #2552F5;
+  }
 
-.iaa-dialog-style-card-inner img {
-  width: 160px;
-  height: 240px;
-  object-fit: contain;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  background: #f8fafc;
-  border: 1px solid #ebeef5;
-}
+  .theme-colors {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
 
-.iaa-dialog-style-label {
-  font-size: 15px;
-  color: #333;
-  margin-top: 2px;
-  font-weight: 500;
-  text-align: center;
-}
+  .main-color,
+  .second-color {
+    width: 30px;
+    height: 20px;
+    border-radius: 2px;
+    border: 1px solid #e4e7ed;
+  }
 
+  .theme-name {
+    font-size: 12px;
+    color: #606266;
+  }
 
+  /* IAA弹窗样式卡片布局 */
+  .iaa-dialog-style-card-group {
+    display: flex;
+    gap: 15px;
+  }
 
-.login-type-item {
-  margin-bottom: 20px;
-}
+  .iaa-dialog-style-card {
+    display: inline-block;
+    width: 150px;
+  }
 
-.form-tip {
-  font-size: 12px;
-  color: #909399;
-  margin-left: 8px;
-}
+  .iaa-dialog-style-card-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 2px solid #e4e7ed;
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
 
-.theme-option:hover {
-  border-color: #c0c0c0;
-  background-color: #f9f9f9;
-}
+  .iaa-dialog-style-card-inner:hover,
+  .iaa-dialog-style-card-inner.selected {
+    border-color: #2552F5;
+    box-shadow: 0 2px 8px rgba(37, 82, 245, 0.2);
+  }
 
-.theme-colors {
-  display: flex;
-  margin-bottom: 8px;
-}
+  .iaa-dialog-style-card-inner img {
+    width: 120px;
+    height: 80px;
+    object-fit: cover;
+    margin-bottom: 8px;
+  }
 
-.main-color, .second-color {
-  width: 30px;
-  height: 30px;
-  border-radius: 4px;
-}
+  .iaa-dialog-style-label {
+    font-size: 12px;
+    color: #606266;
+  }
 
-.main-color {
-  margin-right: 5px;
-}
+  /* 支付卡片预览样式 */
+  .pay-card-image-preview {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+  }
 
-.theme-name {
-  font-size: 12px;
-  color: #666;
-}
+  .pay-card-image-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    border: 1px solid #e4e7ed;
+    border-radius: 4px;
+  }
 
-.pay-card-image-preview {
-  margin-top: 15px;
-  text-align: center;
-}
+  /* 表单提示文本 */
+  .form-tip {
+    margin-left: 10px;
+    font-size: 12px;
+    color: #909399;
+  }
 
-.pay-card-image-preview img {
-  width: 120px;
-  height: 140px;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
+  /* 登录类型选择样式 */
+  .login-type-item {
+    margin-bottom: 20px;
+  }
 .component-list {
   display: flex;
   flex-direction: column;
