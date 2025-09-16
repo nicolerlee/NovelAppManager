@@ -1,65 +1,8 @@
 <template>
   <div class="ad-management">
     <div class="layout-container">
-      <!-- 左侧小程序列表 -->
-      <el-card class="app-list-card">
-        <template #header>
-          <div class="header">
-            <h3>小程序列表</h3>
-            <div>
-              <el-input
-                v-model="searchQuery"
-                placeholder="搜索小程序"
-                style="width: 200px; margin-right: 15px"
-              >
-                <template #prefix>
-                  <el-icon><Search /></el-icon>
-                </template>
-              </el-input>
-              <el-button type="primary" @click="handleRefresh">刷新数据</el-button>
-            </div>
-          </div>
-        </template>
-
-        <div v-loading="loadingApps">
-          <template v-if="filteredApps.length === 0">
-            <el-empty 
-              :image-size="200"
-              description="暂无小程序数据"
-            >
-              <template #description>
-                <div class="empty-description">
-                  <p>还没有找到任何小程序</p>
-                  <p class="sub-text">点击刷新按钮获取最新数据</p>
-                </div>
-              </template>
-              <el-button type="primary" @click="handleRefresh">
-                <el-icon><Refresh /></el-icon>
-                立即刷新
-              </el-button>
-            </el-empty>
-          </template>
-          
-          <el-table 
-            v-else
-            :data="filteredApps" 
-            style="width: 100%"
-            @row-click="handleAppSelect"
-            row-key="id"
-            :highlight-current-row="true"
-          >
-            <el-table-column prop="platform" label="平台" width="80">
-              <template #default="scope">
-                <el-tag :type="getPlatformType(scope.row.platform)" effect="light" size="small">
-                  {{ scope.row.platform }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="appName" label="小程序名称" width="180" />
-            <el-table-column prop="appid" label="AppID" width="220" />
-          </el-table>
-        </div>
-      </el-card>
+      <!-- 左侧小程序列表 - 使用公共组件 -->
+      <AppListSelector @app-selected="handleAppSelect" title="小程序列表" />
 
       <!-- 右侧广告配置 -->
       <el-card class="ad-config-card">
@@ -413,20 +356,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, inject } from 'vue'
+import { ref, inject } from 'vue'
 const auth = inject('auth')
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Refresh, Edit, Delete, Plus } from '@element-plus/icons-vue'
+import { Edit, Delete, Plus } from '@element-plus/icons-vue'
 import request from '../utils/request'
-import { pinyin } from 'pinyin-pro'
-
-// 小程序列表相关
-const apps = ref([])
-const loadingApps = ref(false)
-const searchQuery = ref('')
-const selectedApp = ref(null)
+import AppListSelector from '../components/common/AppListSelector.vue'
 
 // 广告配置相关
+const selectedApp = ref(null)
 const adConfig = ref(null)
 const loadingAdConfig = ref(false)
 const adFormRef = ref(null)
@@ -444,74 +382,6 @@ const deleteAdType = ref('')
 
 // 新增 isEditMode 变量
 const isEditMode = ref(false)
-
-// 过滤后的小程序列表
-const filteredApps = computed(() => {
-  if (!searchQuery.value) return apps.value
-  const query = searchQuery.value.toLowerCase()
-  const isSingleCharQuery = query.length === 1;
-  return apps.value.filter(app => {
-    const name = app.appName || ''
-    // 获取全拼和首字母
-    const namePinyinFirst = pinyin(name, {
-      pattern: 'first', 
-      type: 'array',
-      toneType: 'none',
-      nonZh: 'consecutive'
-    }).join('').toLowerCase()
-    const namePinyinFull = pinyin(name, {
-      pattern: 'pinyin', 
-      type: 'array',
-      toneType: 'none',
-      nonZh: 'consecutive'
-    }).join('').toLowerCase()
-    
-    // 检查原始名称
-    if (name.toLowerCase().includes(query)) return true
-    
-    // 检查拼音首字母
-    if (isSingleCharQuery) {
-      // 对于单字符查询，严格匹配首字母
-      if (namePinyinFirst.length > 0 && namePinyinFirst[0] === query) return true;
-    } else {
-      // 对于多字符查询，检查是否以首字母开头
-      if (namePinyinFirst.startsWith(query)) return true
-    }
-    
-    // 检查全拼
-    if (namePinyinFull.includes(query)) return true
-    
-    // 检查其他字段
-    return (app.appid && app.appid.toLowerCase().includes(query))
-  })
-})
-
-// 获取小程序列表
-const fetchApps = async () => {
-  loadingApps.value = true
-  try {
-    const res = await request.get('/api/novel-apps/appLists')
-    
-    let allApps = []
-    Object.entries(res.data).forEach(([platform, platformApps]) => {
-      const convertedApps = platformApps.map(app => ({
-        id: app.id,
-        platform: getPlatformName(app.platform),
-        appName: app.appName,
-        appid: app.appid
-      }))
-      
-      allApps = [...allApps, ...convertedApps]
-    })
-    
-    apps.value = allApps
-  } catch (error) {
-    console.error('获取小程序列表失败:', error)
-    ElMessage.error('获取小程序列表失败')
-  } finally {
-    loadingApps.value = false
-  }
-}
 
 // 获取广告配置
 const fetchAdConfig = async (appId) => {
@@ -535,7 +405,7 @@ const fetchAdConfig = async (appId) => {
   }
 }
 
-// 平台类型和名称转换
+// 平台类型转换 - 保留用于右侧配置面板的平台标签显示
 const getPlatformType = (platform) => {
   const types = {
     '抖音': 'info',
@@ -546,26 +416,11 @@ const getPlatformType = (platform) => {
   return types[platform] || 'info'
 }
 
-const getPlatformName = (platformCode) => {
-  const platforms = {
-    'douyin': '抖音',
-    'kuaishou': '快手',
-    'weixin': '微信',
-    'baidu': '百度'
-  }
-  return platforms[platformCode] || platformCode
-}
-
 // 选择小程序
 const handleAppSelect = (app) => {
   selectedApp.value = app
   // 加载选中小程序的广告配置
   fetchAdConfig(app.appid)
-}
-
-// 刷新小程序列表
-const handleRefresh = () => {
-  fetchApps()
 }
 
 // 修改编辑广告配置的方法
@@ -854,9 +709,7 @@ const handleConfirmDelete = async () => {
   }
 }
 
-onMounted(() => {
-  fetchApps()
-})
+
 </script>
 
 <style scoped>
@@ -867,36 +720,6 @@ onMounted(() => {
 .layout-container {
   display: flex;
   gap: 20px;
-}
-
-.app-list-card {
-  flex: 0 0 500px; /* 固定宽度 */
-  max-height: calc(100vh - 80px); /* 设置最大高度，减去上下padding的值 */
-  display: flex;
-  flex-direction: column;
-}
-
-.app-list-card :deep(.el-card__body) {
-  flex: 1;
-  overflow-y: auto; /* 添加垂直滚动 */
-  padding: 0; /* 移除默认内边距 */
-}
-
-.app-list-card .el-table {
-  height: 100%;
-}
-
-.app-list-card :deep(.el-card__body)::-webkit-scrollbar {
-  width: 6px;
-}
-
-.app-list-card :deep(.el-card__body)::-webkit-scrollbar-thumb {
-  background: #dcdfe6;
-  border-radius: 3px;
-}
-
-.app-list-card :deep(.el-card__body)::-webkit-scrollbar-track {
-  background: #f5f7fa;
 }
 
 .header {
