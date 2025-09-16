@@ -31,6 +31,11 @@
           <span>支付</span>
         </el-menu-item>
 
+        <el-menu-item index="/ui-config">
+          <el-icon><PictureRounded /></el-icon>
+          <span>UI配置</span>
+        </el-menu-item>
+
         <el-menu-item index="/general-config">
           <el-icon><Tools /></el-icon>
           <span>通用配置</span>
@@ -106,6 +111,7 @@
 import { onMounted, onUnmounted, provide, ref, watchEffect } from "vue";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
+import { Platform, Setting, Picture, Money, PictureRounded, Tools, Monitor, ChatDotRound, Key, Grid } from '@element-plus/icons-vue';
 // 导入登录相关的组合式函数
 import { provideAuth } from "./composables/useAuth";
 // 导入设置认证token的函数

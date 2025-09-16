@@ -118,13 +118,12 @@
         </div>
         <!-- 属性面板 -->
         <div class="properties-panel">
-          <h3>属性面板</h3>
           <div v-if="selectedComponent" class="component-properties">
-            <h4>{{ getComponentName(selectedComponent.type) }} 属性</h4>
+            <h4>{{ getComponentName(selectedComponent.type) }} 配置编辑</h4>
             <el-form ref="formRef" size="small" label-width="100px" class="basic-config-form" :model="generalConfig" :rules="generalConfigRules">
-              <el-form-item label="组件类型">
+              <!-- <el-form-item label="组件类型">
                 <el-input v-model="selectedComponent.type" disabled></el-input>
-              </el-form-item>
+              </el-form-item> -->
               <template v-if="selectedComponent.type === 'basic-config'">
                 <FreeBasicConfigPanel v-model:basicConfig="basicConfig" />
               </template>
@@ -147,6 +146,17 @@
               <template v-else-if="selectedComponent.type === 'macro'">
                 <FreeWeijuConfigPanel 
                   v-model:macroConfig="macroConfig"
+                />
+              </template>
+              <template v-else-if="selectedComponent.type === 'payment'">
+                <FreePayConfigPanel 
+                  v-model:modelValue="paymentConfig"
+                  :platform="getCurrentPlatform()"
+                />
+              </template>
+              <template v-else-if="selectedComponent.type === 'advertisement'">
+                <FreeAdConfigPanel 
+                  v-model:modelValue="adConfig"
                 />
               </template>
             </el-form>
@@ -174,6 +184,8 @@ import FreeBasicConfigPanel from './FreeBasicConfigPanel.vue'
 import FreeUiConfigPanel from './FreeUiConfigPanel.vue'
 import FreeGeneralConfigPanel from './FreeGeneralConfigPanel.vue'
 import FreeWeijuConfigPanel from './FreeWeijuConfigPanel.vue'
+import FreePayConfigPanel from './FreePayConfigPanel.vue'
+import FreeAdConfigPanel from './FreeAdConfigPanel.vue'
 import request from '../../utils/request';
 
 // 表单校验规则
@@ -222,6 +234,8 @@ const basicConfig = ref({})
 const uiConfig = ref({})
 const generalConfig = ref({})
 const macroConfig = ref({})
+const paymentConfig = ref({})
+const adConfig = ref({})
 // UI配置相关状态
 const uiConfigThemeConfigured = ref(false)
 const uiConfigLoading = ref(false)
@@ -382,6 +396,118 @@ const initMacroConfig = (component) => {
   }
 }
 
+// 初始化支付配置数据
+const initPaymentConfig = (component) => {
+  paymentConfig.value = {
+    normalPay: {
+      enabled: component.config?.normalPay?.enabled || false,
+      gatewayAndroid: component.config?.normalPay?.gatewayAndroid || '',
+      gatewayIos: component.config?.normalPay?.gatewayIos || ''
+    },
+    orderPay: {
+      enabled: component.config?.orderPay?.enabled || false,
+      gatewayAndroid: component.config?.orderPay?.gatewayAndroid || '',
+      gatewayIos: component.config?.orderPay?.gatewayIos || ''
+    },
+    renewPay: {
+      enabled: component.config?.renewPay?.enabled || false,
+      gatewayAndroid: component.config?.renewPay?.gatewayAndroid || '',
+      gatewayIos: component.config?.renewPay?.gatewayIos || ''
+    },
+    douzuanPay: {
+      enabled: component.config?.douzuanPay?.enabled || false,
+      gatewayAndroid: component.config?.douzuanPay?.gatewayAndroid || '',
+      gatewayIos: component.config?.douzuanPay?.gatewayIos || ''
+    },
+    wxVirtualPay: {
+      enabled: component.config?.wxVirtualPay?.enabled || false,
+      gatewayAndroid: component.config?.wxVirtualPay?.gatewayAndroid || '',
+      gatewayIos: component.config?.wxVirtualPay?.gatewayIos || ''
+    }
+  }
+}
+
+// 检查支付配置是否完成
+const checkPaymentConfigCompleted = (component) => {
+  const config = component.config || {};
+  
+  // 检查是否至少有一个支付方式已启用并配置了网关
+  const hasCompletedPayment = Object.values(config).some(payment => {
+    if (!payment || typeof payment !== 'object') return false;
+    
+    // 检查该支付方式是否启用
+    if (!payment.enabled) return false;
+    
+    // 检查网关是否配置
+    const hasGateway = payment.gatewayAndroid && payment.gatewayIos;
+    
+    // 获取当前平台
+    const currentPlatform = getCurrentPlatform();
+    
+    // 特殊处理：抖音平台的抖钻支付只需启用即可
+    if (currentPlatform === 'douyin' && config.douzuanPay && payment === config.douzuanPay) {
+      return true;
+    }
+    
+    // 特殊处理：微信平台的微信虚拟支付只需启用即可
+    if (currentPlatform === 'weixin' && config.wxVirtualPay && payment === config.wxVirtualPay) {
+      return true;
+    }
+    
+    return hasGateway;
+  });
+  
+  component.isCompleted = hasCompletedPayment;
+  return hasCompletedPayment;
+}
+
+// 初始化广告配置数据
+const initAdConfig = (component) => {
+  adConfig.value = {
+    rewardAd: {
+      enabled: component.config?.rewardAd?.enabled || false,
+      rewardAdId: component.config?.rewardAd?.rewardAdId || '',
+      rewardCount: component.config?.rewardAd?.rewardCount || 1
+    },
+    interstitialAd: {
+      enabled: component.config?.interstitialAd?.enabled || false,
+      interstitialAdId: component.config?.interstitialAd?.interstitialAdId || '',
+      interstitialCount: component.config?.interstitialAd?.interstitialCount || 1
+    },
+    nativeAd: {
+      enabled: component.config?.nativeAd?.enabled || false,
+      nativeAdId: component.config?.nativeAd?.nativeAdId || ''
+    }
+  }
+}
+
+// 检查广告配置是否完成
+const checkAdConfigCompleted = (component) => {
+  const config = component.config || {};
+  
+  // 检查是否至少有一种广告类型已启用并配置了必要信息
+  const hasCompletedAd = Object.values(config).some(ad => {
+    if (!ad || typeof ad !== 'object') return false;
+    
+    // 检查该广告类型是否启用
+    if (!ad.enabled) return false;
+    
+    // 针对不同广告类型检查必要字段
+    if (ad.rewardAdId && (!ad.rewardCount || ad.rewardCount <= 0)) {
+      return false;
+    } else if (ad.interstitialAdId && (!ad.interstitialCount || ad.interstitialCount <= 0)) {
+      return false;
+    } else if (ad.nativeAdId) {
+      return true; // 信息流广告只需要ID
+    }
+    
+    return !!ad.rewardAdId || !!ad.interstitialAdId || !!ad.nativeAdId;
+  });
+  
+  component.isCompleted = hasCompletedAd;
+  return hasCompletedAd;
+}
+
 
 
 
@@ -449,6 +575,26 @@ watch(() => macroConfig.value, (newVal) => {
   }
 }, { deep: true })
 
+// 监听支付配置变化，更新完成状态
+watch(() => paymentConfig.value, (newVal) => {
+  if (selectedComponent.value && selectedComponent.value.type === 'payment') {
+    // 更新组件配置
+    selectedComponent.value.config = { ...newVal };
+    // 检查完成状态
+    checkPaymentConfigCompleted(selectedComponent.value);
+  }
+}, { deep: true })
+
+// 监听广告配置变化，更新完成状态
+watch(() => adConfig.value, (newVal) => {
+  if (selectedComponent.value && selectedComponent.value.type === 'advertisement') {
+    // 更新组件配置
+    selectedComponent.value.config = { ...newVal };
+    // 检查完成状态
+    checkAdConfigCompleted(selectedComponent.value);
+  }
+}, { deep: true })
+
 // IAA模式切换时，自动选中样式1
 watch(() => generalConfig.value.iaaMode, (val) => {
   if (val && (generalConfig.value.iaaDialogStyle === null || generalConfig.value.iaaDialogStyle === undefined)) {
@@ -509,6 +655,12 @@ let dragStartPos = null;
   } else if (component.type === 'macro') {
     initMacroConfig(component);
     checkMacroConfigCompleted(component);
+  } else if (component.type === 'payment') {
+    initPaymentConfig(component);
+    checkPaymentConfigCompleted(component);
+  } else if (component.type === 'advertisement') {
+    initAdConfig(component);
+    checkAdConfigCompleted(component);
   }
 }
 
@@ -1009,6 +1161,12 @@ const handleSaveLayout = () => {
           component.config = { ...uiConfig.value };
         } else if (component.type === 'general-config') {
           component.config = { ...generalConfig.value };
+        } else if (component.type === 'macro') {
+          component.config = { ...macroConfig.value };
+        } else if (component.type === 'payment') {
+          component.config = { ...paymentConfig.value };
+        } else if (component.type === 'advertisement') {
+          component.config = { ...adConfig.value };
         }
       });
       
@@ -1025,6 +1183,12 @@ const handleSaveLayout = () => {
         component.config = { ...uiConfig.value };
       } else if (component.type === 'general-config') {
         component.config = { ...generalConfig.value };
+      } else if (component.type === 'macro') {
+        component.config = { ...macroConfig.value };
+      } else if (component.type === 'payment') {
+        component.config = { ...paymentConfig.value };
+      } else if (component.type === 'advertisement') {
+        component.config = { ...adConfig.value };
       }
     });
     

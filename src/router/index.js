@@ -26,6 +26,10 @@ const routes = [
     name: 'Payment',
     component: () => import('../views/Payment.vue')
   },
+  { path: '/ui-config',
+    name: 'UIConfig',
+    component: () => import('../views/UIConfig.vue')
+  },
   { path: '/general-config',
     name: 'GeneralConfig',
     component: () => import('../views/GeneralConfig.vue')
