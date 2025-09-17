@@ -627,11 +627,6 @@ const tableColumns = [
     width: '120'
   },
   {
-    prop: 'createTime',
-    label: '创建时间',
-    width: '120'
-  },
-  {
     prop: 'status',
     label: '状态',
     width: '100',

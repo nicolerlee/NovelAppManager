@@ -28,17 +28,13 @@
                 >
                   <template #description>
                     <p>当前小程序尚未配置UI信息</p>
-                    <p class="sub-text">点击下方按钮创建配置</p>
                   </template>
-                  <el-button type="primary" @click="handleCreateConfig">
-                    创建配置
-                  </el-button>
                 </el-empty>
               </template>
               <template v-else>
                 <el-form ref="formRef" :model="configForm" :rules="formRules" label-width="160px">
                   <el-form-item label="AppID">
-                    <span class="readonly-value">{{ configForm.appid }}</span>
+                    <span class="readonly-value">{{ configForm.appId }}</span>
                   </el-form-item>
                     
                   <!-- 主题色配置 -->
@@ -146,7 +142,7 @@ const tempShowConfig = ref(false)
 // 确保configForm始终是一个完整的对象，避免undefined错误
 const configForm = ref({
   id: null,
-  appid: '',
+  appId: '',
   mainTheme: '#2552F5FF',
   secondTheme: '#DCE7FFFF',
   payCardStyle: 1,
@@ -226,7 +222,7 @@ const loadConfig = async (appId) => {
     if (response.code === 200) {
       configForm.value = {
         id: response.data?.id || null,
-        appid: response.data?.appid || '',
+        appId: response.data?.appId || '',
         mainTheme: response.data?.mainTheme || '#2552F5FF',
         secondTheme: response.data?.secondTheme || '#DCE7FFFF',
         payCardStyle: response.data?.payCardStyle || 1,
@@ -250,7 +246,7 @@ const loadConfig = async (appId) => {
       // 如果没有配置，设置默认值
       configForm.value = {
         id: null,
-        appid: appId,
+        appId: appId,
         mainTheme: '#2552F5FF',
         secondTheme: '#DCE7FFFF',
         payCardStyle: 1,
@@ -265,7 +261,7 @@ const loadConfig = async (appId) => {
     // 设置默认值
     configForm.value = {
       id: null,
-      appid: appId,
+      appId: appId,
       mainTheme: '#2552F5FF',
       secondTheme: '#DCE7FFFF',
       payCardStyle: 1,
@@ -290,7 +286,7 @@ const selectPredefinedTheme = (theme) => {
 
 // 创建配置
 const handleCreateConfig = async () => {
-  if (!selectedApp.value?.appid) {
+  if (!selectedApp.value?.appId) {
     ElMessage.warning('请先选择小程序')
     return
   }
@@ -304,7 +300,7 @@ const handleCreateConfig = async () => {
   try {
     // 准备请求数据
     const requestData = {
-      appId: selectedApp.value.appid,
+      appId: selectedApp.value.appId,
       mainTheme: configForm.value.mainTheme,
       secondTheme: configForm.value.secondTheme,
       payCardStyle: configForm.value.payCardStyle,
@@ -318,7 +314,7 @@ const handleCreateConfig = async () => {
       // 更新配置表单，使用返回的数据
       configForm.value = {
         id: res.data.id,
-        appid: res.data.appid,
+        appId: res.data.appId,
         mainTheme: res.data.mainTheme || '#2552F5FF',
         secondTheme: res.data.secondTheme || '#DCE7FFFF',
         payCardStyle: res.data.payCardStyle || 1,
@@ -359,7 +355,7 @@ const handleSaveConfig = async () => {
     // 准备请求数据
     const requestData = {
       id: configForm.value.id,
-      appid: selectedApp.value?.appid || configForm.value.appid,
+      appId: selectedApp.value?.appId || configForm.value.appId,
       mainTheme: configForm.value.mainTheme,
       secondTheme: configForm.value.secondTheme,
       payCardStyle: configForm.value.payCardStyle,
@@ -373,7 +369,7 @@ const handleSaveConfig = async () => {
       // 更新配置表单，使用返回的数据
       configForm.value = {
         id: res.data.id,
-        appid: res.data.appid,
+        appId: res.data.appId,
         mainTheme: res.data.mainTheme,
         secondTheme: res.data.secondTheme,
         payCardStyle: res.data.payCardStyle,
@@ -425,7 +421,7 @@ const handleDeleteConfig = async () => {
       ElMessage.success('配置删除成功');
       configForm.value = {
         id: null,
-        appid: selectedApp.value.appid,
+        appId: selectedApp.value.appId,
         mainTheme: '#2552F5FF',
         secondTheme: '#DCE7FFFF',
         payCardStyle: 1,
@@ -443,8 +439,8 @@ const handleDeleteConfig = async () => {
 
 // 页面挂载时，如果有选中的小程序，则加载配置
 onMounted(() => {
-if (selectedApp.value?.appid) {
-    loadConfig(selectedApp.value.appid);
+if (selectedApp.value?.appId) {
+    loadConfig(selectedApp.value.appId);
 }
 });
 

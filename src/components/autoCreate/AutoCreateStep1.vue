@@ -170,11 +170,11 @@ const fetchThemeConfig = async () => {
 
   loadingThemes.value = true;
   try {
-    const response = await request.get('/api/novel-apps/getByAppName', {
+    const response = await request.get('/api/novel-ui/getUiConfigByAppName', {
       params: { appName: form.value.appName }
     });
     
-    if (response.data && response.data.length > 0) {
+    if (response.code === 200 &&response.data && response.data.length > 0) {
       // 有配置，使用第一条数据
       const firstTheme = response.data[0];
       form.value.mainTheme = firstTheme.mainTheme;

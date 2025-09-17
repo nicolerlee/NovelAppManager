@@ -89,24 +89,7 @@
                   <el-form-item label="客服URL">
                     <el-input v-model="configForm.contact" placeholder="请输入客服URL" />
                   </el-form-item>
-                  
-                  <el-form-item label="支付卡片样式">
-                    <el-radio-group v-model="configForm.payCardStyle" class="pay-card-style-radio-group">
-                      <el-radio :label="1">样式1</el-radio>
-                      <el-radio :label="2">样式2</el-radio>
-                      <el-radio :label="3">样式3</el-radio>
-                      <el-radio :label="4">样式4</el-radio>
-                    </el-radio-group>
-                    <div v-if="payCardStyleImage" class="pay-card-image-preview">
-                      <img :src="payCardStyleImage" alt="支付卡片样式预览" />
-                    </div>
-                  </el-form-item>
-                  <el-form-item label="首页卡片样式">
-                    <el-radio-group v-model="configForm.homeCardStyle" class="home-card-style-radio-group">
-                      <el-radio :label="1">样式1</el-radio>
-                    </el-radio-group>
-                  </el-form-item>
-                  
+            
                   <el-form-item label="构建命令" prop="buildCode">
                     <el-input v-model="configForm.buildCode" placeholder="请输入构建命令（如 npm run build:xxx）" />
                   </el-form-item>
@@ -225,8 +208,6 @@ const configForm = ref({
   douyinImId: '',
   kuaishouClientId: '',
   kuaishouClientSecret: '',
-  payCardStyle: null,
-  homeCardStyle: 1,
   buildCode: '',
   kuaishouAppToken: '',
   douyinAppToken: '',
@@ -276,8 +257,6 @@ const fetchConfig = async (appId) => {
         douyinImId: res.data.douyinImId || '',
         kuaishouClientId: res.data.kuaishouClientId || '',
         kuaishouClientSecret: res.data.kuaishouClientSecret || '',
-        payCardStyle: res.data.payCardStyle ?? null,
-        homeCardStyle: res.data.homeCardStyle ?? null,
         buildCode: res.data.buildCode || '',
         kuaishouAppToken: res.data.kuaishouAppToken || '',
         douyinAppToken: res.data.douyinAppToken || '',
@@ -298,8 +277,6 @@ const fetchConfig = async (appId) => {
         douyinImId: '',
         kuaishouClientId: '',
         kuaishouClientSecret: '',
-        payCardStyle: null,
-        homeCardStyle: null,
         buildCode: '',
         kuaishouAppToken: '',
         douyinAppToken: '',
@@ -321,8 +298,6 @@ const fetchConfig = async (appId) => {
       douyinImId: '',
       kuaishouClientId: '',
       kuaishouClientSecret: '',
-      payCardStyle: null,
-      homeCardStyle: null,
       buildCode: '',
       kuaishouAppToken: '',
       douyinAppToken: '',
@@ -398,8 +373,6 @@ const handleSaveConfig = async () => {
       douyinImId: configForm.value.douyinImId,
       kuaishouClientId: configForm.value.kuaishouClientId,
       kuaishouClientSecret: configForm.value.kuaishouClientSecret,
-      payCardStyle: configForm.value.payCardStyle,
-      homeCardStyle: configForm.value.homeCardStyle,
       buildCode: configForm.value.buildCode,
       kuaishouAppToken: configForm.value.kuaishouAppToken,
       douyinAppToken: configForm.value.douyinAppToken,
@@ -451,8 +424,6 @@ const handleCreateConfig = async () => {
       douyinImId: configForm.value.douyinImId,
       kuaishouClientId: configForm.value.kuaishouClientId,
       kuaishouClientSecret: configForm.value.kuaishouClientSecret,
-      payCardStyle: configForm.value.payCardStyle,
-      homeCardStyle: configForm.value.homeCardStyle,
       buildCode: configForm.value.buildCode,
       kuaishouAppToken: configForm.value.kuaishouAppToken,
       douyinAppToken: configForm.value.douyinAppToken,
@@ -477,8 +448,6 @@ const handleCreateConfig = async () => {
         douyinImId: res.data.douyinImId || '',
         kuaishouClientId: res.data.kuaishouClientId || '',
         kuaishouClientSecret: res.data.kuaishouClientSecret || '',
-        payCardStyle: res.data.payCardStyle ?? null,
-        homeCardStyle: res.data.homeCardStyle ?? null,
         buildCode: res.data.buildCode || '',
         kuaishouAppToken: res.data.kuaishouAppToken || '',
         douyinAppToken: res.data.douyinAppToken || '',
@@ -599,11 +568,6 @@ const handlePasteGeneralConfig = () => {
     ElMessage.error('粘贴失败')
   }
 }
-
-const payCardStyleImage = computed(() => {
-  if (!configForm.value.payCardStyle) return '';
-  return `/images/payStyle/pay_style${configForm.value.payCardStyle}.png`;
-});
 
 // IAA弹窗样式选项
 const iaaDialogStyleOptions = [
@@ -728,42 +692,6 @@ watch(() => configForm.value.iaaMode, (val) => {
   align-items: center;
 }
 
-.pay-card-style-radio-group {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 8px;
-}
-:deep(.pay-card-style-radio-group .el-radio) {
-  margin-right: 16px;
-  font-size: 15px;
-  padding: 6px 18px;
-}
-
-.home-card-style-radio-group{
-  display: flex;
-  gap: 16px;
-  margin-bottom: 8px;
-}
-
-:deep(.home-card-style-radio-group .el-radio) {
-  margin-right: 16px;
-  font-size: 15px;
-  padding: 6px 18px;
-}
-
-.pay-card-image-preview {
-  margin-top: 10px;
-  width: 100%;
-  max-width: 300px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  overflow: hidden;
-}
-.pay-card-image-preview img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
 /* 新增IAA弹窗样式卡片布局 */
 .iaa-dialog-style-card-group {
   display: flex;

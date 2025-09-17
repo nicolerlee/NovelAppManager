@@ -264,19 +264,29 @@ const fetchUiThemeConfig = async () => {
 
   uiConfigLoading.value = true;
   try {
-    const response = await request.get('/api/novel-apps/getByAppName', {
+    const response = await request.get('/api/novel-ui/getUiConfigByAppName', {
       params: { appName: currentAppName }
     });
     
     // 更新上次查询的appName
     lastQueriedAppName.value = currentAppName;
     
-    if (response.data && response.data.length > 0) {
+    // 检查接口返回是否成功
+    if (response.code === 200 && response.data && response.data.length > 0) {
       // 有配置，使用第一条数据
       const firstTheme = response.data[0];
       if (firstTheme.mainTheme && firstTheme.secondTheme) {
         uiConfig.value.mainTheme = firstTheme.mainTheme;
         uiConfig.value.secondTheme = firstTheme.secondTheme;
+        
+        // 如果有支付卡片样式和首页卡片样式，也一并设置
+        if (firstTheme.payCardStyle !== undefined) {
+          uiConfig.value.payCardStyle = firstTheme.payCardStyle;
+        }
+        if (firstTheme.homeCardStyle !== undefined) {
+          uiConfig.value.homeCardStyle = firstTheme.homeCardStyle;
+        }
+        
         uiConfigThemeConfigured.value = true;
         ElMessage.success('已加载历史主题色配置，主题色不可修改');
       }
