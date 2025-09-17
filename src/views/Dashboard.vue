@@ -144,11 +144,7 @@
               </el-tag>
             </template>
 
-            <!-- 主题色列 -->
-            <template v-if="col.prop === 'mainTheme' || col.prop === 'secondTheme'">
-              <div class="color-block" :style="{ backgroundColor: scope.row[col.prop] || '#ffffff00' }"></div>
-              <span>{{ scope.row[col.prop] || '-' }}</span>
-            </template>
+           
           </template>
         </el-table-column>
 
@@ -232,22 +228,6 @@
         
         <el-form-item label="bannerId">
           <el-input v-model="appForm.bannerId" placeholder="例：banner_6789" />
-        </el-form-item>
-        
-        <el-form-item label="mainTheme">
-          <el-color-picker 
-            v-model="appForm.mainTheme" 
-            show-alpha 
-            color-format="hex" 
-          />
-        </el-form-item>
-        
-        <el-form-item label="secondTheme">
-          <el-color-picker 
-            v-model="appForm.secondTheme" 
-            show-alpha 
-            color-format="hex" 
-          />
         </el-form-item>
       </el-form>
       
@@ -465,8 +445,6 @@ const handleEdit = (app) => {
     cl: app.cl,
     deliverId: app.deliverId,
     bannerId: app.bannerId,
-    mainTheme: app.mainTheme,
-    secondTheme: app.secondTheme,
     version: app.version
   }
   dialogVisible.value = true
@@ -647,18 +625,6 @@ const tableColumns = [
     prop: 'bannerId',
     label: 'bannerId',
     width: '120'
-  },
-  {
-    prop: 'mainTheme',
-    label: '主题色',
-    width: '100',
-    slot: true
-  },
-  {
-    prop: 'secondTheme',
-    label: '次要主题色',
-    width: '100',
-    slot: true
   },
   {
     prop: 'createTime',

@@ -80,12 +80,12 @@
                         <span class="theme-name">{{ theme.name }}</span>
                       </div>
                     </div>
-                    <!-- 主题预览图 -->
-                    <div v-if="selectedThemeImage" class="theme-image-preview">
-                      <img :src="selectedThemeImage" alt="Theme Preview" class="preview-image" />
-                    </div>
-                  </el-form-item>
                    
+                  </el-form-item>
+                <!-- 主题预览图 -->
+                <div v-if="selectedThemeImage" class="theme-image-preview">
+                    <img :src="selectedThemeImage" alt="Theme Preview" class="preview-image" />
+                </div>
                   <!-- 支付卡片样式 -->
                   <el-form-item label="支付卡片样式" class="platform-radio-group">
                     <el-radio-group v-model="configForm.payCardStyle" @change="handlePayCardStyleChange" class="platform-radio-group">
@@ -94,12 +94,12 @@
                       <el-radio-button :value="3">样式3</el-radio-button>
                       <el-radio-button :value="4">样式4</el-radio-button>
                     </el-radio-group>
-                    <!-- 支付卡片样式预览图 -->
+                  
+                  </el-form-item>
+                      <!-- 支付卡片样式预览图 -->
                     <div class="pay-card-preview">
                       <img :src="payCardStyleImage" alt="支付卡片样式预览" class="preview-image" />
                     </div>
-                  </el-form-item>
-                    
                   <el-form-item label="首页卡片样式" class="platform-radio-group">
                     <el-radio-group v-model="configForm.homeCardStyle" class="platform-radio-group">
                       <el-radio-button :value="1">样式1</el-radio-button>
@@ -131,7 +131,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject, nextTick, onMounted } from 'vue'
+import { ref, inject, nextTick, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '../utils/request'
 import AppListSelector from '../components/common/AppListSelector.vue'
@@ -170,6 +170,25 @@ const formRef = ref(null)
 const formRules = {
   // 后续添加验证规则
 }
+
+// 监听主题色变化，检查是否匹配预设主题
+watch(
+  () => [configForm.value.mainTheme, configForm.value.secondTheme],
+  ([newMainTheme, newSecondTheme]) => {
+    // 检查是否匹配预设主题
+    const matchedTheme = predefinedThemes.value.find(theme => 
+      theme.mainTheme === newMainTheme && 
+      theme.secondTheme === newSecondTheme
+    );
+    if (matchedTheme) {
+      selectedThemeImage.value = `/images/theme/${matchedTheme.image}`;
+    } else {
+      // 如果不匹配任何预设主题，不显示预览图
+      selectedThemeImage.value = '';
+    }
+  },
+  { deep: true }
+);
 
 // 获取平台对应的标签类型 - 保留用于右侧配置面板的平台标签显示
 const getPlatformType = (platform) => {
@@ -222,6 +241,9 @@ const loadConfig = async (appId) => {
       );
       if (matchedTheme) {
         selectedThemeImage.value = `/images/theme/${matchedTheme.image}`;
+      } else {
+        // 如果不匹配任何预设主题，不显示预览图
+        selectedThemeImage.value = '';
       }
       tempShowConfig.value = false;
     } else {
@@ -293,7 +315,7 @@ const handleCreateConfig = async () => {
     
     if (res.code === 200) {
       ElMessage.success('配置创建成功')
-      // 直接使用返回的数据更新表单
+      // 更新配置表单，使用返回的数据
       configForm.value = {
         id: res.data.id,
         appid: res.data.appid,
@@ -301,6 +323,17 @@ const handleCreateConfig = async () => {
         secondTheme: res.data.secondTheme || '#DCE7FFFF',
         payCardStyle: res.data.payCardStyle || 1,
         homeCardStyle: res.data.homeCardStyle || 1
+      }
+      // 检查是否匹配预设主题
+      const matchedTheme = predefinedThemes.value.find(theme => 
+        theme.mainTheme === configForm.value.mainTheme && 
+        theme.secondTheme === configForm.value.secondTheme
+      );
+      if (matchedTheme) {
+        selectedThemeImage.value = `/images/theme/${matchedTheme.image}`;
+      } else {
+        // 如果不匹配任何预设主题，不显示预览图
+        selectedThemeImage.value = '';
       }
       tempShowConfig.value = false
     } else {
@@ -345,6 +378,17 @@ const handleSaveConfig = async () => {
         secondTheme: res.data.secondTheme,
         payCardStyle: res.data.payCardStyle,
         homeCardStyle: res.data.homeCardStyle
+      }
+      // 检查是否匹配预设主题
+      const matchedTheme = predefinedThemes.value.find(theme => 
+        theme.mainTheme === configForm.value.mainTheme && 
+        theme.secondTheme === configForm.value.secondTheme
+      );
+      if (matchedTheme) {
+        selectedThemeImage.value = `/images/theme/${matchedTheme.image}`;
+      } else {
+        // 如果不匹配任何预设主题，不显示预览图
+        selectedThemeImage.value = '';
       }
     } else {
       throw new Error(res.message || '保存失败')
