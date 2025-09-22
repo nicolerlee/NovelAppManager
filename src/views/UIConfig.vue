@@ -298,6 +298,23 @@ const handleCreateConfig = async () => {
   
   saving.value = true
   try {
+    // 保存前增加二次确认弹窗
+    try {
+      await ElMessageBox.confirm(
+        '保存将会同步修改代码，且所有平台的主题色都会被修改，请谨慎操作',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      )
+    } catch (e) {
+      // 用户取消
+      saving.value = false
+      return
+    }
+    
     // 准备请求数据
     const requestData = {
       appId: selectedApp.value.appId,
@@ -352,6 +369,23 @@ const handleSaveConfig = async () => {
   
   saving.value = true
   try {
+    // 保存前增加二次确认弹窗
+    try {
+      await ElMessageBox.confirm(
+        '保存将会同步修改代码，且所有平台的主题色都会被修改，请谨慎操作',
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+      )
+    } catch (e) {
+      // 用户取消
+      saving.value = false
+      return
+    }
+    
     // 准备请求数据
     const requestData = {
       id: configForm.value.id,

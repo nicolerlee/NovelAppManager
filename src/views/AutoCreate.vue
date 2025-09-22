@@ -290,14 +290,14 @@ const startGeneration = async () => {
   const params = {
     baseConfig: {
       ...basicInfoForm.value,
-      deliverId: microConfigForm.value.deliverId,
-      bannerId: microConfigForm.value.bannerId
+      deliverId: basicInfoForm.value.deliverId,
+      bannerId: basicInfoForm.value.bannerId
     },
     uiConfig: {
       mainTheme: uiConfigForm.value.mainTheme,
       secondTheme: uiConfigForm.value.secondTheme,
-      homeCardStyle: generalConfigForm.value.homeCardStyle,
-      payCardStyle: generalConfigForm.value.payCardStyle
+      homeCardStyle: uiConfigForm.value.homeCardStyle,
+      payCardStyle: uiConfigForm.value.payCardStyle
     },
     paymentConfig: paymentConfigForm.value,
     adConfig: {

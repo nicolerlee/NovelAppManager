@@ -47,8 +47,8 @@ const formattedConfigData = computed(() => {
       appid: props.basicInfoForm.appid,
       tokenId: props.basicInfoForm.token_id,
       cl: props.basicInfoForm.cl,
-      deliverId: props.microConfigForm.deliverId,
-      bannerId: props.microConfigForm.bannerId,
+      deliverId: props.basicInfoForm.deliverId,
+      bannerId: props.basicInfoForm.bannerId,
     },
     uiConfig: {
       mainTheme: props.uiConfigForm.mainTheme,
