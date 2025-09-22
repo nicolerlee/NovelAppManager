@@ -11,7 +11,7 @@
 
         <!-- 步骤内容 -->
         <div class="step-panel">
-          <!-- 步骤1: 配置基本信息 -->
+          <!-- 步骤1: 配置基本信息和微距 -->
           <div v-if="currentStep === 0">
             <AutoCreateStep1
               v-model="basicInfoForm"
@@ -21,46 +21,62 @@
             />
           </div>
 
-          <!-- 步骤2: 配置支付，广告信息 -->
+          <!-- 步骤2: 配置UI信息 -->
           <div v-if="currentStep === 1">
             <AutoCreateStep2
-              v-model="step2ConfigForm"
-              :platform="basicInfoForm.platform"
-              :current-sub-step="currentSubStep"
-              @update:current-sub-step="currentSubStep = $event"
-              ref="autoCreateStep2Ref"
+              v-model="uiConfigForm"
+              :appName="basicInfoForm.appName"
+              ref="uiConfigFormRef"
             />
           </div>
 
-          <!-- 步骤3: 配置其他通用信息 -->
+          <!-- 步骤3: 配置支付信息 -->
           <div v-if="currentStep === 2">
             <AutoCreateStep3
+              v-model="paymentConfigForm"
+              :platform="basicInfoForm.platform"
+              ref="paymentConfigFormRef"
+            />
+          </div>
+
+          <!-- 步骤4: 配置广告信息 -->
+          <div v-if="currentStep === 3">
+            <AutoCreateStep4
+              v-model="adConfigForm"
+              ref="adConfigFormRef"
+            />
+          </div>
+
+          <!-- 步骤5: 配置通用信息 -->
+          <div v-if="currentStep === 4">
+            <AutoCreateStep5
               v-model="generalConfigForm"
               :platform="basicInfoForm.platform"
-              :appName="basicInfoForm.appName"
+              :basicConfig="{appName: basicInfoForm.appName, platform: basicInfoForm.platform}"
               ref="generalConfigFormRef"
             />
           </div>
 
-          <!-- 步骤4: 展示配置数据并确认 -->
-          <div v-if="currentStep === 3">
-            <AutoCreateStep4
+          <!-- 步骤6: 展示配置数据并确认 -->
+          <div v-if="currentStep === 5">
+            <AutoCreateStep6
               :basicInfoForm="basicInfoForm"
-              :microConfigForm="step2ConfigForm.microConfig"
-              :paymentConfigForm="step2ConfigForm.paymentConfig"
-              :adConfigForm="step2ConfigForm.adConfig"
+              :uiConfigForm="uiConfigForm"
+              :microConfigForm="microConfigForm"
+              :paymentConfigForm="paymentConfigForm"
+              :adConfigForm="adConfigForm"
               :generalConfigForm="generalConfigForm"
               @reset-wizard="resetWizard"
-              ref="autoCreateStep4Ref"
+              ref="autoCreateStep6Ref"
             />
           </div>
         </div>
 
         <!-- 导航按钮 -->
         <div class="step-actions">
-          <el-button v-if="currentStep > 0 || currentSubStep > 0 && currentStep !== 3" @click="prevStep">上一步</el-button>
-          <el-button v-if="currentStep < 3" type="primary" @click="nextStep">下一步</el-button>
-          <el-button v-if="currentStep === 3" type="primary" @click="startGeneration">确认无误，开始生成小程序</el-button>
+          <el-button v-if="currentStep > 0 || currentSubStep > 0" @click="prevStep">上一步</el-button>
+          <el-button v-if="currentStep < 5" type="primary" @click="nextStep">下一步</el-button>
+          <el-button v-if="currentStep === 5" type="primary" @click="startGeneration">确认无误，开始生成小程序</el-button>
         </div>
       </div>
     </el-card>
@@ -72,9 +88,11 @@ import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import CustomSteps from '../components/common/CustomSteps.vue'
 import AutoCreateStep1 from '../components/autoCreate/AutoCreateStep1.vue'
+import AutoCreateStep2 from '../components/autoCreate/AutoCreateStep2.vue'
 import AutoCreateStep3 from '../components/autoCreate/AutoCreateStep3.vue'
 import AutoCreateStep4 from '../components/autoCreate/AutoCreateStep4.vue'
-import AutoCreateStep2 from '../components/autoCreate/AutoCreateStep2.vue'
+import AutoCreateStep5 from '../components/autoCreate/AutoCreateStep5.vue'
+import AutoCreateStep6 from '../components/autoCreate/AutoCreateStep6.vue'
 import { useRouter } from 'vue-router'
 import { useAppGenerationStore } from '../stores/appGenerationStore'
 import request from '../utils/request'
@@ -86,65 +104,14 @@ const appGenerationStore = useAppGenerationStore()
 
 // 表单引用
 const basicInfoStepRef = ref(null)
+const uiConfigFormRef = ref(null)
+const paymentConfigFormRef = ref(null)
+const adConfigFormRef = ref(null)
 const generalConfigFormRef = ref(null)
-const autoCreateStep2Ref = ref(null)
-
-// 表单校验规则
-const basicInfoFormRules = reactive({
-  appName: [{ required: true, message: 'Please input app name', trigger: 'blur' }],
-  platform: [{ required: true, message: 'Please select platform', trigger: 'change' }],
-  version: [{ required: true, message: 'Please input version', trigger: 'blur' }],
-  appCode: [{ required: true, message: 'Please input app code', trigger: 'blur' }],
-  product: [{ required: true, message: 'Please input product line', trigger: 'blur' }],
-  customer: [{ required: true, message: 'Please input customer identifier', trigger: 'blur' }],
-  appid: [{ required: true, message: 'Please input AppID', trigger: 'blur' }],
-  token_id: [{ required: true, message: 'Please input Token ID', trigger: 'blur' }],
-  cl: [{ required: true, message: 'Please input CL identifier', trigger: 'blur' }],
-  mainTheme: [],
-  secondTheme: [],
-})
-
-const step2ConfigForm = ref({
-  microConfig: { deliverId: '', bannerId: '' },
-  paymentConfig: {
-    normalPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
-    orderPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
-    renewPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
-    douzuanPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
-    wxVirtualPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
-  },
-  adConfig: {
-    rewardAd: { enabled: false, rewardAdId: '', rewardCount: null },
-    interstitialAd: { enabled: false, interstitialAdId: '', interstitialCount: null },
-    nativeAd: { enabled: false, nativeAdId: '' },
-  },
-});
-
-const stepsData = ref([
-  {
-    title: '基本信息',
-    description: '配置小程序名称、简介及主题色'
-  },
-  {
-    title: '微距，支付与广告',
-    description: '设置微距，支付和广告相关配置'
-  },
-  {
-    title: '其他通用信息',
-    description: '配置其他通用设置'
-  },
-  {
-    title: '展示配置数据并确认',
-    description: '核对所有配置数据并完成创建'
-  }
-]);
-
-const handleStepClick = (index) => {
-  currentStep.value = index;
-  currentSubStep.value = 0;
-}
+const autoCreateStep6Ref = ref(null)
 
 // 表单数据模型
+// 基本信息和微距配置
 const basicInfoForm = ref({
   appName: '',
   platform: '',
@@ -155,10 +122,69 @@ const basicInfoForm = ref({
   appid: '',
   token_id: null,
   cl: '',
-  mainTheme: '',
-  secondTheme: '',
 })
 
+// 微距配置
+const microConfigForm = ref({
+  deliverId: '',
+  bannerId: ''
+})
+
+// UI信息配置
+const uiConfigForm = ref({
+  mainTheme: '',
+  secondTheme: ''
+})
+
+// 支付信息配置
+const paymentConfigForm = ref({
+  normalPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+  orderPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+  renewPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+  douzuanPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+  wxVirtualPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+})
+
+// 广告信息配置
+const adConfigForm = ref({
+  rewardAd: { enabled: false, adUnitId: '', rewardNum: null },
+  interstitialAd: { enabled: false, adUnitId: '', showNum: null },
+  nativeAd: { enabled: false, adUnitId: '' },
+})
+
+const stepsData = ref([
+  {
+    title: '基本信息和微距',
+    description: '基本信息和微距'
+  },
+  {
+    title: 'UI信息',
+    description: '主题色和其他UI'
+  },
+  {
+    title: '支付信息',
+    description: '支付方式和网关'
+  },
+  {
+    title: '广告信息',
+    description: '广告类型和广告位ID'
+  },
+  {
+    title: '通用信息',
+    description: '其他通用设置'
+  },
+  {
+    title: '确认配置',
+    description: '核对所有配置数据并完成创建'
+  }
+]);
+
+const handleStepClick = (index) => {
+  currentStep.value = index;
+  currentSubStep.value = 0;
+}
+
+// 通用信息配置
 const generalConfigForm = ref({
   contact: '',
   payCardStyle: null,
@@ -182,7 +208,9 @@ const resetWizard = () => {
   currentStep.value = 0;
   currentSubStep.value = 0;
   basicInfoStepRef.value?.resetFields();
-  autoCreateStep2Ref.value?.resetFields();
+  uiConfigFormRef.value?.resetFields();
+  paymentConfigFormRef.value?.resetFields();
+  adConfigFormRef.value?.resetFields();
   generalConfigFormRef.value?.resetFields();
 };
 
@@ -193,76 +221,46 @@ const nextStep = async () => {
     if (currentSubStep.value === 0) {
       const valid = await basicInfoStepRef.value.validate().catch(() => false);
       if (!valid) {
-        ElMessage.error('Please fill in the complete "Basic Info"');
+        ElMessage.error('请填写完整的基本信息！');
         return;
       }
       currentSubStep.value = 1;
       return;
     } else if (currentSubStep.value === 1) {
-      if (!basicInfoForm.value.mainTheme || !basicInfoForm.value.secondTheme) {
-        ElMessage.error('还未确定小程序的主题色哦！');
+      const valid = await basicInfoStepRef.value.validate().catch(() => false);
+      if (!valid) {
+        ElMessage.error('请填写完整的微距配置！');
         return;
       }
     }
   } else if (currentStep.value === 1) {
-    // 步骤2的子步骤校验
-    if (currentSubStep.value === 0) {
-        const valid = autoCreateStep2Ref.value ? await autoCreateStep2Ref.value.validate().catch(() => false) : false;
-        if (!valid) {
-          ElMessage.error('请填写完整的"微距配置"！');
-          return;
-        }
-        currentSubStep.value++;
-        return;
-      } else if (currentSubStep.value === 1) {
-        const valid = autoCreateStep2Ref.value ? await autoCreateStep2Ref.value.validate().catch(() => false) : false;
-        if (!valid) {
-          ElMessage.error('请填写完整的"支付配置"！');
-          return;
-        }
-      
-      const hasEnabledPayment = Object.values(step2ConfigForm.value.paymentConfig).some(payment => 
-        payment.enabled && 
-        ((payment.gatewayAndroid && payment.gatewayIos) || 
-         (basicInfoForm.value.platform === '抖音' && payment === step2ConfigForm.value.paymentConfig.douzuanPay) ||
-         (basicInfoForm.value.platform === '微信' && payment === step2ConfigForm.value.paymentConfig.wxVirtualPay))
-      );
-      
-      if (!hasEnabledPayment) {
-        ElMessage.error('请至少启用并配置一种支付方式！');
-        return;
-      }
-      
-      currentSubStep.value++;
+    // 步骤2的校验
+    const valid = await uiConfigFormRef.value.validate().catch(() => false);
+    if (!valid) {
+      ElMessage.error('请填写完整的UI配置！');
       return;
-    } else if (currentSubStep.value === 2) {
-        const valid = autoCreateStep2Ref.value ? await autoCreateStep2Ref.value.validate().catch(() => false) : false;
-        if (!valid) {
-          ElMessage.error('请填写完整的"广告配置"！');
-          return;
-        }
-      
-      const hasEnabledAd = Object.values(step2ConfigForm.value.adConfig).some(ad => 
-        ad.enabled && 
-        ((ad.rewardAdId && ad.rewardCount > 0) || 
-         (ad.interstitialAdId && ad.interstitialCount > 0) ||
-         ad.nativeAdId)
-      );
-      
-      if (!hasEnabledAd) {
-        ElMessage.error('请至少启用并配置一种广告类型！');
-        return;
-      }
     }
   } else if (currentStep.value === 2) {
-    const valid = await generalConfigFormRef.value.validate().catch(() => false);
+    // 步骤3的校验
+    const valid = await paymentConfigFormRef.value.validate().catch(() => false);
     if (!valid) {
-      ElMessage.error('请填写完整的"其他通用信息"！');
+      ElMessage.error('请填写完整的支付配置！');
       return;
     }
-    currentStep.value++;
-    currentSubStep.value = 0;
-    return;
+  } else if (currentStep.value === 3) {
+    // 步骤4的校验
+    const valid = await adConfigFormRef.value.validate().catch(() => false);
+    if (!valid) {
+      ElMessage.error('请填写完整的广告配置！');
+      return;
+    }
+  } else if (currentStep.value === 4) {
+    // 步骤5的校验
+    const valid = await generalConfigFormRef.value.validate().catch(() => false);
+    if (!valid) {
+      ElMessage.error('请填写完整的通用信息！');
+      return;
+    }
   }
 
   if (currentStep.value < stepsData.value.length - 1) {
@@ -277,39 +275,42 @@ const prevStep = () => {
       currentSubStep.value = 0;
       return;
     }
-  } else if (currentStep.value === 1) {
-    if (currentSubStep.value > 0) {
-      currentSubStep.value--;
-      return;
-    } else if (currentSubStep.value === 0) {
-      currentStep.value--;
-      currentSubStep.value = 1;
-      return;
-    }
-  } else if (currentStep.value === 2) {
-    currentStep.value--;
-    currentSubStep.value = 2;
-    return;
-  } else if (currentStep.value === 3) {
+  } else if (currentStep.value === 5) {
     currentStep.value--;
     currentSubStep.value = 0;
     return;
-  }
-
-  if (currentStep.value > 0) {
+  } else if (currentStep.value > 0) {
     currentStep.value--;
     currentSubStep.value = 0;
   }
 };
 
 const startGeneration = async () => {
-  // 收集所有配置数据
+  // 收集所有配置数据 - 根据新的数据结构重组
   const params = {
-    baseConfig: basicInfoForm.value,
-    deliverConfig: step2ConfigForm.value.microConfig,
-    paymentConfig: step2ConfigForm.value.paymentConfig,
-    adConfig: step2ConfigForm.value.adConfig,
-    commonConfig: generalConfigForm.value
+    baseConfig: {
+      ...basicInfoForm.value,
+      deliverId: microConfigForm.value.deliverId,
+      bannerId: microConfigForm.value.bannerId
+    },
+    uiConfig: {
+      mainTheme: uiConfigForm.value.mainTheme,
+      secondTheme: uiConfigForm.value.secondTheme,
+      homeCardStyle: generalConfigForm.value.homeCardStyle,
+      payCardStyle: generalConfigForm.value.payCardStyle
+    },
+    paymentConfig: paymentConfigForm.value,
+    adConfig: {
+      rewardAd: adConfigForm.value.rewardAd,
+      interstitialAd: adConfigForm.value.interstitialAd,
+      nativeAd: adConfigForm.value.nativeAd
+    },
+    commonConfig: {
+      ...generalConfigForm.value,
+      // 移除不再需要的字段
+      homeCardStyle: undefined,
+      payCardStyle: undefined
+    }
   };
 
   try {

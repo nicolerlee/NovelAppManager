@@ -1,177 +1,480 @@
 <template>
-  <div class="final-config-container">
-    <h4>步骤4: 核对所有配置数据并完成创建</h4>
-    <div class="config-display-area">
-      <div v-for="(block, name) in formattedConfigData" :key="name" class="config-block">
-        <h5>{{ blockTitles[name] || name }}</h5>
-        <pre>{{ block }}</pre>
-      </div>
-    </div>
+  <div class="config-panel">
+    <h4>步骤4: 配置广告信息</h4>
+    <el-form :model="adConfig" :rules="adConfigFormRules" ref="adConfigFormRef" style="width: 100%;">
+      <div class="payment-config-grid">
+        <!-- 激励广告配置 - 所有平台通用 -->
+        <el-card v-if="currentPlatform === 'douyin' || currentPlatform === 'kuaishou' || currentPlatform === 'xiaohongshu'" class="payment-type-card" :body-style="{ padding: '0' }">
+          <div class="payment-card-wrapper">
+            <div class="payment-card-header" :class="{ 'configured': adConfig.rewardAd.enabled && adConfig.rewardAd.rewardAdId && adConfig.rewardAd.rewardCount > 0 }">
+              <div class="payment-type-info">
+                <el-icon><VideoPlay /></el-icon>
+                <div class="payment-type-title">
+                  <h4>激励广告</h4>
+                </div>
+              </div>
+              <el-tag size="small" :type="adConfig.rewardAd.enabled ? 'success' : 'info'" effect="plain">
+                {{ adConfig.rewardAd.enabled ? '已启用' : '未启用' }}
+              </el-tag>
+            </div>
 
-    <div class="action-buttons">
-      <el-button @click="emit('reset-wizard')">重置向导</el-button>
-    </div>
+            <div class="payment-card-content">
+              <div class="payment-info-list">
+                <div class="payment-info-item">
+                  <span class="label">状态</span>
+                  <el-switch v-model="adConfig.rewardAd.enabled" @change="handleAdTypeChange('rewardAd')" />
+                </div>
+                <el-form-item label="广告位ID" prop="rewardAd.rewardAdId" class="gateway-form-item">
+                  <div v-if="adConfig.rewardAd.enabled">
+                    <el-input v-model="adConfig.rewardAd.rewardAdId" placeholder="请输入激励广告ID" />
+                  </div>
+                </el-form-item>
+                <el-form-item label="激励次数" prop="rewardAd.rewardCount" class="gateway-form-item">
+                  <div v-if="adConfig.rewardAd.enabled">
+                    <el-input-number v-model="adConfig.rewardAd.rewardCount" :min="1" style="width: 100%;" />
+                  </div>
+                </el-form-item>
+              </div>
+            </div>
+          </div>
+        </el-card>
+
+        <!-- 插屏广告配置 - 所有平台通用 -->
+          <el-card v-if="currentPlatform === 'douyin' || currentPlatform === 'kuaishou' || currentPlatform === 'weixin'" class="payment-type-card" :body-style="{ padding: '0' }">
+          <div class="payment-card-wrapper">
+            <div class="payment-card-header" :class="{ 'configured': adConfig.interstitialAd.enabled && adConfig.interstitialAd.interstitialAdId && adConfig.interstitialAd.interstitialCount > 0 }">
+              <div class="payment-type-info">
+                <el-icon><Picture /></el-icon>
+                <div class="payment-type-title">
+                  <h4>插屏广告</h4>
+                </div>
+              </div>
+              <el-tag size="small" :type="adConfig.interstitialAd.enabled ? 'success' : 'info'" effect="plain">
+                {{ adConfig.interstitialAd.enabled ? '已启用' : '未启用' }}
+              </el-tag>
+            </div>
+
+            <div class="payment-card-content">
+              <div class="payment-info-list">
+                <div class="payment-info-item">
+                  <span class="label">状态</span>
+                  <el-switch v-model="adConfig.interstitialAd.enabled" @change="handleAdTypeChange('interstitialAd')" />
+                </div>
+                <el-form-item label="广告位ID" prop="interstitialAd.interstitialAdId" class="gateway-form-item">
+                  <div v-if="adConfig.interstitialAd.enabled">
+                    <el-input v-model="adConfig.interstitialAd.interstitialAdId" placeholder="请输入插屏广告ID" />
+                  </div>
+                </el-form-item>
+                <el-form-item label="展示次数" prop="interstitialAd.interstitialCount" class="gateway-form-item">
+                  <div v-if="adConfig.interstitialAd.enabled">
+                    <el-input-number v-model="adConfig.interstitialAd.interstitialCount" :min="1" style="width: 100%;" />
+                  </div>
+                </el-form-item>
+              </div>
+            </div>
+          </div>
+        </el-card>
+
+        <!-- 信息流广告配置 - 所有平台通用 -->
+          <el-card v-if="currentPlatform === 'douyin' || currentPlatform === 'weixin'" class="payment-type-card" :body-style="{ padding: '0' }">
+          <div class="payment-card-wrapper">
+            <div class="payment-card-header" :class="{ 'configured': adConfig.nativeAd.enabled && adConfig.nativeAd.nativeAdId }">
+              <div class="payment-type-info">
+                <el-icon><Document /></el-icon>
+                <div class="payment-type-title">
+                  <h4>信息流广告</h4>
+                </div>
+              </div>
+              <el-tag size="small" :type="adConfig.nativeAd.enabled ? 'success' : 'info'" effect="plain">
+                {{ adConfig.nativeAd.enabled ? '已启用' : '未启用' }}
+              </el-tag>
+            </div>
+
+            <div class="payment-card-content">
+              <div class="payment-info-list">
+                <div class="payment-info-item">
+                  <span class="label">状态</span>
+                  <el-switch v-model="adConfig.nativeAd.enabled" @change="handleAdTypeChange('nativeAd')" />
+                </div>
+                <el-form-item label="广告位ID" prop="nativeAd.nativeAdId" class="gateway-form-item">
+                  <div v-if="adConfig.nativeAd.enabled">
+                    <el-input v-model="adConfig.nativeAd.nativeAdId" placeholder="请输入信息流广告ID" />
+                  </div>
+                </el-form-item>
+              </div>
+            </div>
+          </div>
+        </el-card>
+        </div>
+    </el-form>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, reactive, watch, computed, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
+import { VideoPlay, Picture, Document } from '@element-plus/icons-vue';
 
 const props = defineProps({
-  basicInfoForm: { type: Object, required: true },
-  microConfigForm: { type: Object, required: true },
-  paymentConfigForm: { type: Object, required: true },
-  adConfigForm: { type: Object, required: true },
-  generalConfigForm: { type: Object, required: true },
-});
-
-const emit = defineEmits(['reset-wizard']);
-
-// Helper function to map Chinese platform names to English
-const mapPlatformToEnglish = (platform) => {
-  const platformMap = {
-    '抖音': 'douyin',
-    '快手': 'kuaishou',
-    '微信': 'weixin',
-    '百度': 'baidu',
-  };
-  return platformMap[platform] || platform;
-};
-
-// Computed property to combine and format all config data
-const formattedConfigData = computed(() => {
-  const combinedData = {
-    baseConfig: {
-      appName: props.basicInfoForm.appName,
-      appCode: props.basicInfoForm.appCode,
-      platform: mapPlatformToEnglish(props.basicInfoForm.platform),
-      version: props.basicInfoForm.version,
-      product: props.basicInfoForm.product,
-      customer: props.basicInfoForm.customer,
-      appid: props.basicInfoForm.appid,
-      tokenId: props.basicInfoForm.token_id,
-      cl: props.basicInfoForm.cl,
-    },
-    themeConfig: {
-      mainTheme: props.basicInfoForm.mainTheme,
-      secondTheme: props.basicInfoForm.secondTheme,
-    },
-    deliverConfig: {
-      deliverId: props.microConfigForm.deliverId,
-      bannerId: props.microConfigForm.bannerId,
-    },
-    payConfig: {
-      renewPay: props.paymentConfigForm.renewPay,
-      normalPay: props.paymentConfigForm.normalPay,
-      orderPay: props.paymentConfigForm.orderPay,
-      douzuanPay: props.paymentConfigForm.douzuanPay,
-      wxVirtualPay: props.paymentConfigForm.wxVirtualPay,
-    },
-    commonConfig: {
-      appId: props.basicInfoForm.appid,
-      buildCode: props.generalConfigForm.buildCode,
-      contact: props.generalConfigForm.contact,
-      douyinAppToken: props.generalConfigForm.douyinAppToken,
-      douyinImId: props.generalConfigForm.douyinImId,
-      homeCardStyle: props.generalConfigForm.homeCardStyle,
-      kuaishouAppToken: props.generalConfigForm.kuaishouAppToken,
-      kuaishouClientId: props.generalConfigForm.kuaishouClientId,
-      kuaishouClientSecret: props.generalConfigForm.kuaishouClientSecret,
-      mineLoginType: props.generalConfigForm.mineLoginType,
-      iaaMode: props.generalConfigForm.iaaMode,
-      iaaDialogStyle: props.generalConfigForm.iaaDialogStyle,
-      hidePayEntry: props.generalConfigForm.hidePayEntry,
-      hideScoreExchange: props.generalConfigForm.hideScoreExchange,
-      payCardStyle: props.generalConfigForm.payCardStyle,
-      readerLoginType: props.generalConfigForm.readerLoginType,
-      weixinAppToken: props.generalConfigForm.weixinAppToken,
-    },
-    adConfig: {
-      appId: props.basicInfoForm.appid,
-      reward: {
-        rewardAdId: props.adConfigForm.rewardAd.rewardAdId,
-        rewardCount: props.adConfigForm.rewardAd.rewardCount,
-        isRewardAdEnabled: props.adConfigForm.rewardAd.enabled,
+  modelValue: {
+    type: Object,
+    default: () => ({
+      rewardAd: {
+        enabled: false,
+        rewardAdId: '',
+        rewardCount: 1
       },
-      interstitial: {
-        interstitialAdId: props.adConfigForm.interstitialAd.interstitialAdId,
-        interstitialCount: props.adConfigForm.interstitialAd.interstitialCount,
-        isInterstitialAdEnabled: props.adConfigForm.interstitialAd.enabled,
+      interstitialAd: {
+        enabled: false,
+        interstitialAdId: '',
+        interstitialCount: 1
       },
       nativeAd: {
-        nativeAdId: props.adConfigForm.nativeAd.nativeAdId,
-        isNativeAdEnabled: props.adConfigForm.nativeAd.enabled,
-      },
-    },
-  };
-
-  const formattedBlocks = {};
-  for (const key in combinedData) {
-    if (combinedData.hasOwnProperty(key)) {
-      formattedBlocks[key] = JSON.stringify(combinedData[key], null, 2);
-    }
+        enabled: false,
+        nativeAdId: ''
+      }
+    })
+  },
+  platform: {
+    type: String,
+    default: 'douyin'
   }
-  return formattedBlocks;
 });
 
-const blockTitles = {
-  baseConfig: '基础配置',
-  themeConfig: '主题配置',
-  deliverConfig: '微距配置',
-  payConfig: '支付配置',
-  commonConfig: '通用配置',
-  adConfig: '广告配置',
-};
+// 获取当前平台
+const currentPlatform = computed(() => {
+  return props.platform;
+});
 
-const onBuildCodeInput = (val) => {
-  // 只允许非纯数字且非数字开头
-  if (/^\d+$/.test(val) || /^\d/.test(val)) {
-    props.generalConfigForm.buildCode = '';
-    ElMessage.warning('构建命令不能为纯数字或以数字开头');
+const emit = defineEmits(['update:modelValue']);
+
+// 内部响应式表单，从modelValue初始化
+const adConfig = reactive({ ...props.modelValue });
+
+// 表单引用
+const adConfigFormRef = ref(null);
+
+// 处理广告类型开关变化
+const handleAdTypeChange = (adType) => {
+  // 当关闭广告类型时清空对应的广告位ID
+  if (!adConfig[adType].enabled) {
+    // 使用正确的属性名称
+    if (adType === 'rewardAd') {
+      adConfig[adType].rewardAdId = '';
+      adConfig[adType].rewardCount = 1;
+    } else if (adType === 'interstitialAd') {
+      adConfig[adType].interstitialAdId = '';
+      adConfig[adType].interstitialCount = 1;
+    } else if (adType === 'nativeAd') {
+      adConfig[adType].nativeAdId = '';
+    }
   }
 };
+
+// 表单验证规则
+const adConfigFormRules = reactive({
+  'rewardAd.rewardAdId': [{
+    validator: (rule, value, callback) => {
+      if (adConfig.rewardAd.enabled && !value) {
+        callback(new Error('请输入激励广告ID'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'rewardAd.rewardCount': [{
+    validator: (rule, value, callback) => {
+      if (adConfig.rewardAd.enabled) {
+        const numValue = Number(value);
+        if (isNaN(numValue) || numValue <= 0) {
+          callback(new Error('请输入有效激励次数'));
+        } else {
+          callback();
+        }
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'interstitialAd.interstitialAdId': [{
+    validator: (rule, value, callback) => {
+      if (adConfig.interstitialAd.enabled && !value) {
+        callback(new Error('请输入插屏广告ID'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'interstitialAd.interstitialCount': [{
+    validator: (rule, value, callback) => {
+      if (adConfig.interstitialAd.enabled && (!value || value <= 0)) {
+        callback(new Error('请输入有效展示次数'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'nativeAd.nativeAdId': [{
+    validator: (rule, value, callback) => {
+      if (adConfig.nativeAd.enabled && !value) {
+        callback(new Error('请输入信息流广告ID'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }]
+});
+
+// 监听配置变化，同步到父组件
+watch(
+  adConfig,
+  (newValue) => {
+    // 使用nextTick避免立即触发反向更新
+    nextTick(() => {
+      emit('update:modelValue', { ...newValue });
+    });
+  },
+  { deep: true }
+);
+
+// 监听父组件传递的modelValue变化，更新内部配置
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    // 避免在组件初始化时的循环更新
+    if (newValue && JSON.stringify(newValue) !== JSON.stringify(adConfig)) {
+      // 深拷贝新值到adConfig
+      Object.keys(newValue).forEach(key => {
+        if (typeof newValue[key] === 'object' && newValue[key] !== null) {
+          adConfig[key] = { ...newValue[key] };
+        } else {
+          adConfig[key] = newValue[key];
+        }
+      });
+    }
+  },
+  { deep: true, immediate: false }
+);
+
+// 验证广告配置是否完整
+const validate = async () => {
+  try {
+    if (!adConfigFormRef.value) return false;
+    
+    // 验证表单字段
+    const valid = await adConfigFormRef.value.validate().catch(() => false);
+    if (!valid) {
+      ElMessage.error('请填写完整的广告配置！');
+      return false;
+    }
+    
+    // 检查是否至少启用了一种广告方式
+    const hasEnabledAd = () => {
+      const adsToCheck = [];
+      
+      // 根据当前平台决定需要检查的广告类型
+      if (currentPlatform.value === 'douyin' || currentPlatform.value === 'kuaishou' || currentPlatform.value === 'xiaohongshu') {
+        adsToCheck.push(adConfig.rewardAd);
+      }
+      
+      if (currentPlatform.value === 'douyin' || currentPlatform.value === 'kuaishou' || currentPlatform.value === 'weixin') {
+        adsToCheck.push(adConfig.interstitialAd);
+      }
+      
+      if (currentPlatform.value === 'douyin' || currentPlatform.value === 'weixin') {
+        adsToCheck.push(adConfig.nativeAd);
+      }
+      
+      // 检查是否有启用的广告类型
+      return adsToCheck.some(ad => 
+        ad.enabled && 
+        ((ad.rewardAdId || ad.interstitialAdId || ad.nativeAdId) &&
+         (!ad.rewardCount || ad.rewardCount > 0) &&
+         (!ad.interstitialCount || ad.interstitialCount > 0))
+      );
+    };
+    
+    if (!hasEnabledAd()) {
+      ElMessage.warning('建议至少启用一种广告方式！');
+    }
+    
+    return valid;
+  } catch (error) {
+    ElMessage.error('广告配置验证失败，请检查必填项');
+    return false;
+  }
+};
+
+const resetFields = () => {
+  adConfigFormRef.value?.resetFields();
+  Object.assign(adConfig, {
+    rewardAd: {
+      enabled: false,
+      rewardAdId: '',
+      rewardCount: 1
+    },
+    interstitialAd: {
+      enabled: false,
+      interstitialAdId: '',
+      interstitialCount: 1
+    },
+    nativeAd: {
+      enabled: false,
+      nativeAdId: ''
+    }
+  });
+};
+
+defineExpose({ validate, resetFields });
 </script>
 
 <style scoped>
-.final-config-container {
-  max-width: 800px;
+.config-panel {
+  max-width: 1000px;
   margin: 0 auto;
 }
 
-.config-display-area {
-  margin-top: 20px;
-  border: 1px solid #e4e7ed;
-  border-radius: 4px;
-  padding: 15px;
-  background-color: #f9f9f9;
-}
-
-.config-block {
+h4 {
   margin-bottom: 20px;
+  text-align: left;
+  color: #303133;
 }
 
-.config-block h5 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: #303133;
+.payment-config-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding: 24px;
+}
+
+.payment-type-card {
+  transition: all 0.3s ease;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+}
+
+.payment-type-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+}
+
+.payment-card-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.payment-card-content {
+  padding: 20px;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.payment-card-header {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ebeef5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.payment-card-header.configured {
+  background-color: #f0f9eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.payment-type-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.payment-type-info .el-icon {
+  font-size: 24px;
+  color: var(--el-color-primary);
+}
+
+.payment-type-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.payment-type-title h4 {
+  margin: 0;
   font-size: 16px;
-}
-
-.config-block pre {
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 10px;
-  overflow-x: auto;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-  font-size: 14px;
-  line-height: 1.5;
   color: #303133;
 }
 
-.action-buttons {
-  margin-top: 30px;
-  text-align: center;
+.payment-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
 }
-</style> 
+
+.payment-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.payment-info-item .label {
+  color: #909399;
+  font-size: 14px;
+}
+
+.gateway-form-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 0 !important;
+}
+
+.gateway-form-item :deep(.el-form-item__label) {
+  flex-shrink: 0;
+  text-align: left !important;
+  color: #909399;
+  font-size: 14px;
+  padding: 0 !important;
+  margin-right: 12px;
+  line-height: var(--el-input-height, 32px);
+}
+
+.gateway-form-item :deep(.el-form-item__content) {
+  flex-grow: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-left: 0 !important;
+  line-height: var(--el-input-height, 32px);
+}
+
+.payment-card-content :deep(.el-form-item) {
+  margin-bottom: 22px;
+  padding: 0;
+}
+
+/* 确保在不同宽度下都能正常显示 */
+@media (max-width: 768px) {
+  .payment-config-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-config-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+</style>

@@ -358,7 +358,9 @@ const initBasicConfig = (component) => {
     customer: component.config?.customer || '',
     appid: component.config?.appid || '',
     tokenId: component.config?.tokenId || '',
-    cl: component.config?.cl || ''
+    cl: component.config?.cl || '',
+    deliverId: component.config?.deliverId || '',
+    bannerId: component.config?.bannerId || ''
   }
 }
 

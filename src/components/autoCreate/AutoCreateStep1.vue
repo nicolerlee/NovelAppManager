@@ -51,56 +51,27 @@
       </el-form>
     </div>
 
-    <!-- 主题色选择 -->
+    <!-- 微距配置 -->
     <div v-if="currentSubStep === 1" class="narrow-form-container">
-      <h4>步骤1: 配置主题色</h4>
-      <div class="theme-selection-content">
-        <el-form :model="form" label-width="120px">
-          <el-form-item label="mainTheme" prop="mainTheme">
-            <el-color-picker v-model="form.mainTheme" show-alpha color-format="hex" :disabled="themeConfigured || loadingThemes" />
-            <div v-if="themeConfigured" class="theme-configured-hint">
-              <el-icon size="14"><InfoFilled /></el-icon>
-              <span>主题色已根据历史配置自动填充，不可修改</span>
-            </div>
-          </el-form-item>
-          <el-form-item label="secondTheme" prop="secondTheme">
-            <el-color-picker v-model="form.secondTheme" show-alpha color-format="hex" :disabled="themeConfigured || loadingThemes" />
-          </el-form-item>
-          <el-form-item v-if="loadingThemes">
-            <el-skeleton :loading="loadingThemes" animated>
-              <div class="loading-hint">加载历史主题色配置中...</div>
-            </el-skeleton>
-          </el-form-item>
-          <el-form-item label="预设主题" prop="predefinedThemes">
-            <div class="predefined-themes-container">
-              <div
-                v-for="theme in predefinedThemes"
-                :key="theme.name"
-                :class="['theme-option', { 'disabled': themeConfigured, 'selected': selectedThemeName === theme.name }]"
-                @click="!themeConfigured && selectPredefinedTheme(theme)"
-              >
-                <div class="theme-colors">
-                  <div class="main-color" :style="{ backgroundColor: theme.main }"></div>
-                  <div class="second-color" :style="{ backgroundColor: theme.second }"></div>
-                </div>
-                <span class="theme-name">{{ theme.name }}</span>
-              </div>
-            </div>
-          </el-form-item>
-        </el-form>
-        <div v-show="selectedThemeImage" class="theme-image-preview">
-          <img v-if="selectedThemeImage" :src="selectedThemeImage" alt="Theme Preview" />
-        </div>
-      </div>
+      <h4>步骤1: 配置微距信息</h4>
+      <el-form :model="form" :rules="microConfigRules" ref="microConfigFormRef" label-width="120px">
+        <el-form-item label="deliverId" prop="deliverId">
+          <el-input v-model="form.deliverId" placeholder="请输入deliverId" />
+          
+        </el-form-item>
+        <el-form-item label="bannerId" prop="bannerId">
+          <el-input v-model="form.bannerId" placeholder="请输入bannerId" />
+          
+        </el-form-item>
+      </el-form>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, toRefs, nextTick, onMounted } from 'vue';
+import { ref, watch, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Platform, Share, ChatDotRound, Connection, InfoFilled } from '@element-plus/icons-vue';
-import request from '../../utils/request';
 
 const props = defineProps({
   modelValue: {
@@ -147,97 +118,36 @@ const formRules = {
   customer: [{ required: true, message: 'Please input customer identifier', trigger: 'blur' }],
   appid: [{ required: true, message: 'Please input AppID', trigger: 'blur' }],
   token_id: [{ required: true, message: 'Please input Token ID', trigger: 'blur' }],
-  cl: [{ required: true, message: 'Please input CL identifier', trigger: 'blur' }],
-  mainTheme: [],
-  secondTheme: [],
+  cl: [{ required: true, message: 'Please input CL identifier', trigger: 'blur' }]
 };
 
-// 预设主题色数据（和AutoCreate.vue保持一致）
-const predefinedThemes = ref([
-  { name: '阅界视窗主题色', main: '#2552F5FF', second: '#DCE7FFFF', image: 'theme_yuejie.jpg' },
-  { name: '悦动故事主题色', main: '#EF5350FF', second: '#FFEBEEFF', image: 'theme_yuedong.jpg' },
-  { name: '风行推广主题色', main: '#F86003FF', second: '#FFEFE7FF', image: 'theme_fun.jpg' },
-  { name: '漫影主题色', main: '#FF4363FF', second: '#FFE5EBFF', image: 'theme_manying.jpg' },
-]);
-const selectedThemeImage = ref('');
-const themeConfigured = ref(false);
-const loadingThemes = ref(false);
-const selectedThemeName = ref('');
-
-// 请求主题色配置
-const fetchThemeConfig = async () => {
-  if (!form.value.appName) return;
-
-  loadingThemes.value = true;
-  try {
-    const response = await request.get('/api/novel-ui/getUiConfigByAppName', {
-      params: { appName: form.value.appName }
-    });
-    
-    if (response.code === 200 &&response.data && response.data.length > 0) {
-      // 有配置，使用第一条数据
-      const firstTheme = response.data[0];
-      form.value.mainTheme = firstTheme.mainTheme;
-      form.value.secondTheme = firstTheme.secondTheme;
-      themeConfigured.value = true;
-      ElMessage.success('已加载历史主题色配置');
-    } else {
-      // 无配置，允许用户设置
-      themeConfigured.value = false;
-    }
-  } catch (error) {
-    console.error('获取主题色配置失败:', error);
-    ElMessage.error('获取主题色配置失败，将使用默认配置');
-  } finally {
-    loadingThemes.value = false;
-  }
-};
-
-// 当子步骤切换到主题色配置时执行
-watch(
-  () => props.currentSubStep,
-  (newVal) => {
-    if (newVal === 1 && form.value.appName) {
-      fetchThemeConfig();
-    }
-  },
-  { immediate: true }
-);
-
-// 为了保持代码结构，这里留空一行
-
-// 监听appName变化，重新获取配置
-watch(
-  () => form.value.appName,
-  (newVal) => {
-    if (newVal && props.currentSubStep === 1) {
-      // 延迟执行，避免频繁请求
-      setTimeout(fetchThemeConfig, 500);
-    }
-  }
-);
-
-// 选择预设主题色
-const selectPredefinedTheme = (theme) => {
-  selectedThemeName.value = theme.name;
-  // 创建一个新的对象来更新表单数据
-  const newForm = {
-    ...form.value,
-    mainTheme: theme.main,
-    secondTheme: theme.second
-  };
-  form.value = newForm;
-  selectedThemeImage.value = `/images/theme/${theme.image}`;
-  ElMessage.success(`已应用预设主题: ${theme.name}`);
+// 微距配置校验规则
+const microConfigRules = {
+  deliverId: [{ required: true, message: 'Please input deliverId', trigger: 'blur' }],
+  bannerId: [{ required: true, message: 'Please input bannerId', trigger: 'blur' }]
 };
 
 // 表单ref和校验暴露
 const formRef = ref(null);
+const microConfigFormRef = ref(null);
 const validate = async () => {
-  if (!formRef.value) return false;
-  return await formRef.value.validate().catch(() => false);
+  if (props.currentSubStep === 0 && formRef.value) {
+    return await formRef.value.validate().catch(() => false);
+  } else if (props.currentSubStep === 1 && microConfigFormRef.value) {
+    return await microConfigFormRef.value.validate().catch(() => false);
+  }
+  return false;
 };
-defineExpose({ validate });
+
+const resetFields = () => {
+  if (props.currentSubStep === 0 && formRef.value) {
+    formRef.value.resetFields();
+  } else if (props.currentSubStep === 1 && microConfigFormRef.value) {
+    microConfigFormRef.value.resetFields();
+  }
+};
+
+defineExpose({ validate, resetFields });
 </script>
 
 <style scoped>

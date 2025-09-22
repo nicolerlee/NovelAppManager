@@ -1,442 +1,542 @@
 <template>
-  <div class="narrow-form-container">
-    <h4>步骤3: 配置其他通用信息</h4>
-    <el-form :model="form" :rules="formRules" ref="formRef" label-width="120px">
-      <el-form-item label="客服URL" prop="contact">
-        <el-input v-model="form.contact" placeholder="请输入客服URL" />
-      </el-form-item>
-
-      <el-form-item label="支付卡片样式" prop="payCardStyle" class="pay-card-style-item">
-        <el-radio-group v-model="form.payCardStyle">
-          <el-radio :value="1">样式1</el-radio>
-          <el-radio :value="2">样式2</el-radio>
-          <el-radio :value="3">样式3</el-radio>
-          <el-radio :value="4">样式4</el-radio>
-        </el-radio-group>
-        <div v-if="selectedPayCardImage" class="pay-card-image-preview">
-          <img :src="selectedPayCardImage" alt="支付卡片样式预览" />
-        </div>
-      </el-form-item>
-      <el-form-item label="首页卡片样式" prop="homeCardStyle">
-        <el-radio-group v-model="form.homeCardStyle">
-          <el-radio :value="1">样式1</el-radio>
-        </el-radio-group>
-      </el-form-item>
-
-      <el-form-item label="构建命令" prop="buildCode">
-        <el-input 
-          v-model="form.buildCode" 
-          placeholder="请输入构建命令（输入npm run build:platform(tt/ks/wx..)-xx  的xx即可）"
-          :disabled="buildCodeDisabled"
-        />
-        <div v-if="buildCodeDisabled" class="build-code-tip">
-          构建命令已自动获取，不可编辑
-        </div>
-      </el-form-item>
-
-      <!-- Conditionally show Douyin field -->
-      <template v-if="platform === 'douyin'">
-        <el-form-item label="抖音IM ID" prop="douyinImId" required>
-          <el-input v-model="form.douyinImId" placeholder="请输入抖音IM ID" />
-        </el-form-item>
-        <el-form-item label="抖音AppToken" prop="douyinAppToken">
-          <el-input
-            v-model="form.douyinAppToken"
-            type="textarea"
-            :rows="6"
-            placeholder="请输入抖音AppToken（私钥内容）"
-          />
-        </el-form-item>
-      </template>
-
-      <!-- Conditionally show Weixin fields -->
-      <template v-if="platform === 'weixin'">
-        <el-form-item label="微信AppToken" prop="weixinAppToken">
-          <el-input
-            v-model="form.weixinAppToken"
-            type="textarea"
-            :rows="6"
-            placeholder="请输入微信AppToken（私钥内容）"
-          />
-        </el-form-item>
-      </template>
-
-      <!-- Conditionally show Kuaishou fields -->
-      <template v-if="platform === 'kuaishou'">
-        <el-form-item label="快手Client ID" prop="kuaishouClientId">
-          <el-input v-model="form.kuaishouClientId" placeholder="请输入快手Client ID" />
-        </el-form-item>
-        <el-form-item label="快手Client Secret" prop="kuaishouClientSecret">
-          <el-input v-model="form.kuaishouClientSecret" placeholder="请输入快手Client Secret" show-password />
-        </el-form-item>
-        <el-form-item label="快手AppToken" prop="kuaishouAppToken">
-          <el-input
-            v-model="form.kuaishouAppToken"
-            type="textarea"
-            :rows="6"
-            placeholder="请输入快手AppToken（私钥内容）"
-          />
-        </el-form-item>
-      </template>
-
-      <el-form-item label="IAA模式">
-        <el-switch v-model="form.iaaMode" />
-        <span class="form-tip">是否开启IAA(In-App-Advertising)模式</span>
-      </el-form-item>
-
-      <el-form-item v-if="form.iaaMode" label="IAA弹窗样式" prop="iaaDialogStyle">
-        <el-radio-group v-model="form.iaaDialogStyle" class="iaa-dialog-style-card-group">
-          <el-radio-button
-            v-for="item in iaaDialogStyleOptions"
-            :key="item.value"
-            :value="item.value"
-            class="iaa-dialog-style-card"
-          >
-            <div class="iaa-dialog-style-card-inner" :class="{ selected: form.iaaDialogStyle === item.value }">
-              <img :src="item.img" :alt="item.label" />
-              <div class="iaa-dialog-style-label">{{ item.label }}</div>
+  <div class="wide-form-container">
+    <h4>步骤3: 配置支付信息</h4>
+    <el-form :model="paymentConfigForm" :rules="paymentConfigFormRules" ref="paymentConfigFormRef" style="width: 100%;">
+      <div class="payment-config-grid">
+        <!-- 普通支付配置 -->
+        <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+          <div class="payment-card-wrapper">
+            <div class="payment-card-header" :class="{ 'configured': paymentConfigForm.normalPay.enabled && paymentConfigForm.normalPay.gatewayAndroid && paymentConfigForm.normalPay.gatewayIos }">
+              <div class="payment-type-info">
+                <el-icon><Money /></el-icon>
+                <div class="payment-type-title">
+                  <h4>普通支付</h4>
+                </div>
+              </div>
+              <el-tag size="small" :type="paymentConfigForm.normalPay.enabled ? 'success' : 'info'" effect="plain">
+                {{ paymentConfigForm.normalPay.enabled ? '已启用' : '未启用' }}
+              </el-tag>
             </div>
-          </el-radio-button>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="屏蔽支付入口">
-            <el-switch v-model="form.hidePayEntry" />
-            <span class="form-tip">除微信IOS的非投流渠道，默认不屏蔽。审核失败时候可尝试屏蔽处理</span>
-          </el-form-item>
-          <el-form-item label="屏蔽积分入口">
-            <el-switch v-model="form.hideScoreExchange" />
-          </el-form-item>
-      <el-form-item label="我的页登录类型" class="login-type-item">
-        <el-radio-group v-model="form.mineLoginType">
-          <el-radio value="anonymousLogin">静默登录</el-radio>
-          <el-radio value="phoneLogin">
-            手机号授权登录
-            <span class="form-tip">无手机号权限的小程序默认使用静默登录</span>
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
 
-      <el-form-item label="阅读页登录类型" class="login-type-item">
-        <el-radio-group v-model="form.readerLoginType">
-          <el-radio value="anonymousLogin">静默登录</el-radio>
-          <el-radio value="phoneLogin">
-            手机号授权登录
-            <span class="form-tip">无手机号权限的小程序默认使用静默登录</span>
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
+            <div class="payment-card-content">
+              <div class="payment-info-list">
+                <div class="payment-info-item">
+                  <span class="label">状态</span>
+                  <el-switch v-model="paymentConfigForm.normalPay.enabled" />
+                </div>
+                <el-form-item label="网关(A)" prop="normalPay.gatewayAndroid" class="gateway-form-item">
+                  <div v-if="paymentConfigForm.normalPay.enabled">
+                    <el-input v-model="paymentConfigForm.normalPay.gatewayAndroid" placeholder="请输入网关 (Android)" />
+                  </div>
+                </el-form-item>
+                <el-form-item label="网关(I)" prop="normalPay.gatewayIos" class="gateway-form-item">
+                  <div v-if="paymentConfigForm.normalPay.enabled">
+                    <el-input v-model="paymentConfigForm.normalPay.gatewayIos" placeholder="请输入网关 (iOS)" />
+                  </div>
+                </el-form-item>
+              </div>
+            </div>
+          </div>
+        </el-card>
+
+        <!-- 订单支付配置 -->
+        <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+          <div class="payment-card-wrapper">
+            <div class="payment-card-header" :class="{ 'configured': paymentConfigForm.orderPay.enabled && paymentConfigForm.orderPay.gatewayAndroid && paymentConfigForm.orderPay.gatewayIos }">
+              <div class="payment-type-info">
+                <el-icon><Goods /></el-icon>
+                <div class="payment-type-title">
+                  <h4>通用交易支付</h4>
+                </div>
+              </div>
+              <el-tag size="small" :type="paymentConfigForm.orderPay.enabled ? 'success' : 'info'" effect="plain">
+                {{ paymentConfigForm.orderPay.enabled ? '已启用' : '未启用' }}
+              </el-tag>
+            </div>
+
+            <div class="payment-card-content">
+              <div class="payment-info-list">
+                <div class="payment-info-item">
+                  <span class="label">状态</span>
+                  <el-switch v-model="paymentConfigForm.orderPay.enabled" />
+                </div>
+                <el-form-item label="网关(A)" prop="orderPay.gatewayAndroid" class="gateway-form-item">
+                  <div v-if="paymentConfigForm.orderPay.enabled">
+                    <el-input v-model="paymentConfigForm.orderPay.gatewayAndroid" placeholder="请输入网关 (Android)" />
+                  </div>
+                </el-form-item>
+                <el-form-item label="网关(I)" prop="orderPay.gatewayIos" class="gateway-form-item">
+                  <div v-if="paymentConfigForm.orderPay.enabled">
+                    <el-input v-model="paymentConfigForm.orderPay.gatewayIos" placeholder="请输入网关 (iOS)" />
+                  </div>
+                </el-form-item>
+              </div>
+            </div>
+          </div>
+        </el-card>
+
+        <!-- 连包支付配置 -->
+        <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+          <div class="payment-card-wrapper">
+            <div class="payment-card-header" :class="{ 'configured': paymentConfigForm.renewPay.enabled && paymentConfigForm.renewPay.gatewayAndroid && paymentConfigForm.renewPay.gatewayIos }">
+              <div class="payment-type-info">
+                <el-icon><Calendar /></el-icon>
+                <div class="payment-type-title">
+                  <h4>连包支付</h4>
+                </div>
+              </div>
+              <el-tag size="small" :type="paymentConfigForm.renewPay.enabled ? 'success' : 'info'" effect="plain">
+                {{ paymentConfigForm.renewPay.enabled ? '已启用' : '未启用' }}
+              </el-tag>
+            </div>
+
+            <div class="payment-card-content">
+              <div class="payment-info-list">
+                <div class="payment-info-item">
+                  <span class="label">状态</span>
+                  <el-switch v-model="paymentConfigForm.renewPay.enabled" />
+                </div>
+                <el-form-item label="网关(A)" prop="renewPay.gatewayAndroid" class="gateway-form-item">
+                  <div v-if="paymentConfigForm.renewPay.enabled">
+                    <el-input v-model="paymentConfigForm.renewPay.gatewayAndroid" placeholder="请输入网关 (Android)" />
+                  </div>
+                </el-form-item>
+                <el-form-item label="网关(I)" prop="renewPay.gatewayIos" class="gateway-form-item">
+                  <div v-if="paymentConfigForm.renewPay.enabled">
+                    <el-input v-model="paymentConfigForm.renewPay.gatewayIos" placeholder="请输入网关 (iOS)" />
+                  </div>
+                </el-form-item>
+              </div>
+            </div>
+          </div>
+        </el-card>
+
+        <!-- 抖钻支付配置 (抖音平台特有) -->
+        <template v-if="platform === 'douyin'">
+          <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+            <div class="payment-card-wrapper">
+              <div class="payment-card-header" :class="{ 'configured': paymentConfigForm.douzuanPay.enabled && paymentConfigForm.douzuanPay.gatewayAndroid && paymentConfigForm.douzuanPay.gatewayIos }">
+                <div class="payment-type-info">
+                  <el-icon><Star /></el-icon>
+                  <div class="payment-type-title">
+                    <h4>抖钻支付</h4>
+                  </div>
+                </div>
+                <el-tag size="small" :type="paymentConfigForm.douzuanPay.enabled ? 'success' : 'info'" effect="plain">
+                  {{ paymentConfigForm.douzuanPay.enabled ? '已启用' : '未启用' }}
+                </el-tag>
+              </div>
+
+              <div class="payment-card-content">
+                <div class="payment-info-list">
+                  <div class="payment-info-item">
+                    <span class="label">状态</span>
+                    <el-switch v-model="paymentConfigForm.douzuanPay.enabled" />
+                  </div>
+                  <el-form-item label="网关(A)" prop="douzuanPay.gatewayAndroid" class="gateway-form-item">
+                    <div v-if="paymentConfigForm.douzuanPay.enabled">
+                      <el-input v-model="paymentConfigForm.douzuanPay.gatewayAndroid" placeholder="请输入网关 (Android)" />
+                    </div>
+                  </el-form-item>
+                  <el-form-item label="网关(I)" prop="douzuanPay.gatewayIos" class="gateway-form-item">
+                    <div v-if="paymentConfigForm.douzuanPay.enabled">
+                      <el-input v-model="paymentConfigForm.douzuanPay.gatewayIos" placeholder="请输入网关 (iOS)" />
+                    </div>
+                  </el-form-item>
+                </div>
+              </div>
+            </div>
+          </el-card>
+        </template>
+
+        <!-- 微信虚拟支付配置 (微信平台特有) -->
+        <template v-if="platform === 'weixin'">
+          <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+            <div class="payment-card-wrapper">
+              <div class="payment-card-header" :class="{ 'configured': paymentConfigForm.wxVirtualPay.enabled && paymentConfigForm.wxVirtualPay.gatewayAndroid && paymentConfigForm.wxVirtualPay.gatewayIos }">
+                <div class="payment-type-info">
+                  <el-icon><Wallet /></el-icon>
+                  <div class="payment-type-title">
+                    <h4>微信虚拟支付</h4>
+                  </div>
+                </div>
+                <el-tag size="small" :type="paymentConfigForm.wxVirtualPay.enabled ? 'success' : 'info'" effect="plain">
+                  {{ paymentConfigForm.wxVirtualPay.enabled ? '已启用' : '未启用' }}
+                </el-tag>
+              </div>
+
+              <div class="payment-card-content">
+                <div class="payment-info-list">
+                  <div class="payment-info-item">
+                    <span class="label">状态</span>
+                    <el-switch v-model="paymentConfigForm.wxVirtualPay.enabled" />
+                  </div>
+                  <el-form-item label="网关(A)" prop="wxVirtualPay.gatewayAndroid" class="gateway-form-item">
+                    <div v-if="paymentConfigForm.wxVirtualPay.enabled">
+                      <el-input v-model="paymentConfigForm.wxVirtualPay.gatewayAndroid" placeholder="请输入网关 (Android)" />
+                    </div>
+                  </el-form-item>
+                  <el-form-item label="网关(I)" prop="wxVirtualPay.gatewayIos" class="gateway-form-item">
+                    <div v-if="paymentConfigForm.wxVirtualPay.enabled">
+                      <el-input v-model="paymentConfigForm.wxVirtualPay.gatewayIos" placeholder="请输入网关 (iOS)" />
+                    </div>
+                  </el-form-item>
+                </div>
+              </div>
+            </div>
+          </el-card>
+        </template>
+      </div>
     </el-form>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, nextTick, toRaw, onMounted } from 'vue';
+import { ref, reactive, watch, toRaw } from 'vue';
 import { ElMessage } from 'element-plus';
-import request from '../../utils/request';
+import { Money, Goods, Calendar, Star, Wallet } from '@element-plus/icons-vue';
 
 const props = defineProps({
   modelValue: {
     type: Object,
-    required: true
+    default: () => ({
+      normalPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+      orderPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+      renewPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+      douzuanPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+      wxVirtualPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' }
+    })
   },
   platform: {
     type: String,
-    required: true
-  },
-  appName: {
-    type: String,
-    required: true
+    default: ''
   }
 });
 
 const emit = defineEmits(['update:modelValue']);
 
-// 表单数据双向绑定
-const form = ref({ ...props.modelValue});
-// 控制buildCode是否可编辑
-const buildCodeDisabled = ref(false);
+// 支付配置表单数据
+const paymentConfigForm = reactive({ ...toRaw(props.modelValue) });
 
-// 监听 props 变化，更新本地表单数据
+// 监听props变化，更新表单数据
 watch(() => props.modelValue, (newVal) => {
-  if (JSON.stringify(toRaw(newVal)) !== JSON.stringify(toRaw(form.value))) {
-    form.value = { ...newVal };
+  if (JSON.stringify(toRaw(newVal)) !== JSON.stringify(toRaw(paymentConfigForm))) {
+    Object.assign(paymentConfigForm, toRaw(newVal));
   }
 }, { deep: true });
 
-// 监听本地表单数据变化，触发更新事件
-watch(form, (newVal) => {
+// 监听表单数据变化，触发更新事件
+watch(paymentConfigForm, (newVal) => {
   if (JSON.stringify(toRaw(newVal)) !== JSON.stringify(toRaw(props.modelValue))) {
-emit('update:modelValue', { ...newVal});
+    emit('update:modelValue', { ...toRaw(newVal) });
   }
 }, { deep: true });
-
-// IAA弹窗样式选项
-const iaaDialogStyleOptions = [
-  { value: 1, label: '样式1', img: '/images/iaaDialogStyle/iaa_dialog_style1.jpg' },
-  { value: 2, label: '样式2', img: '/images/iaaDialogStyle/iaa_dialog_style2.jpg' }
-]
-
-// IAA模式切换时，自动选中样式1
-watch(() => form.value.iaaMode, (val) => {
-  if (val && !form.value.iaaDialogStyle) {
-    
-    nextTick(() => {
-      console.log('自动选中第一个IAA弹窗样式');
-      form.value.iaaDialogStyle = 1;
-      console.log('界面更新后，form.value.iaaDialogStyle:', form.value.iaaDialogStyle);
-    });
-  }
-  if (!val) {
-    form.value.iaaDialogStyle = null;
-    console.log('关闭IAA模式，清空IAA弹窗样式选择');
-  }
-});
 
 // 表单校验规则
-const formRules = {
-  contact: [{ required: true, message: '请输入客服URL', trigger: 'blur' }],
-  payCardStyle: [{ required: true, message: '请选择支付卡片样式', trigger: 'change' }],
-  homeCardStyle: [{ required: true, message: '请选择首页卡片样式', trigger: 'change' }],
-  buildCode: [
-    { required: true, message: '请输入构建命令', trigger: 'blur' },
-    {
-      validator: (rule, value, callback) => {
-        if (/^\d+$/.test(value)) {
-          callback(new Error('构建命令不能为纯数字'));
-        } else if (/^\d/.test(value)) {
-          callback(new Error('构建命令不能以数字开头'));
-        } else {
-          callback();
-        }
-      },
-      trigger: 'blur'
-    }
-  ],
-  mineLoginType: [{ required: true, message: '请选择我的页登录类型', trigger: 'change' }],
-  readerLoginType: [{ required: true, message: '请选择阅读页登录类型', trigger: 'change' }],
-  iaaDialogStyle: [
-    {
-      validator: (rule, value, callback) => {
-        if (form.value.iaaMode && !value) {
-          callback(new Error('请选择IAA弹窗样式'));
-        } else {
-          callback();
-        }
-      },
-      trigger: 'change'
-    }
-  ],
-  'douyinImId': [{
+const paymentConfigFormRules = reactive({
+  'normalPay.gatewayAndroid': [{
     validator: (rule, value, callback) => {
-      if (props.platform === 'douyin' && !value) {
-        callback(new Error('请输入抖音IM ID'));
+      if (paymentConfigForm.normalPay.enabled && !value) {
+        callback(new Error('请输入网关 (Android)'));
       } else {
         callback();
       }
     },
     trigger: 'blur'
   }],
-  'kuaishouClientId': [{
+  'normalPay.gatewayIos': [{
     validator: (rule, value, callback) => {
-      if (props.platform === 'kuaishou' && !value) {
-        callback(new Error('请输入快手Client ID'));
+      if (paymentConfigForm.normalPay.enabled && !value) {
+        callback(new Error('请输入网关 (iOS)'));
       } else {
         callback();
       }
     },
     trigger: 'blur'
   }],
-  'kuaishouClientSecret': [{
+  'orderPay.gatewayAndroid': [{
     validator: (rule, value, callback) => {
-      if (props.platform === 'kuaishou' && !value) {
-        callback(new Error('请输入快手Client Secret'));
+      if (paymentConfigForm.orderPay.enabled && !value) {
+        callback(new Error('请输入网关 (Android)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'orderPay.gatewayIos': [{
+    validator: (rule, value, callback) => {
+      if (paymentConfigForm.orderPay.enabled && !value) {
+        callback(new Error('请输入网关 (iOS)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'renewPay.gatewayAndroid': [{
+    validator: (rule, value, callback) => {
+      if (paymentConfigForm.renewPay.enabled && !value) {
+        callback(new Error('请输入网关 (Android)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'renewPay.gatewayIos': [{
+    validator: (rule, value, callback) => {
+      if (paymentConfigForm.renewPay.enabled && !value) {
+        callback(new Error('请输入网关 (iOS)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'douzuanPay.gatewayAndroid': [{
+    validator: (rule, value, callback) => {
+      if (props.platform === 'douyin' && paymentConfigForm.douzuanPay.enabled && !value) {
+        callback(new Error('请输入网关 (Android)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'douzuanPay.gatewayIos': [{
+    validator: (rule, value, callback) => {
+      if (props.platform === 'douyin' && paymentConfigForm.douzuanPay.enabled && !value) {
+        callback(new Error('请输入网关 (iOS)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'wxVirtualPay.gatewayAndroid': [{
+    validator: (rule, value, callback) => {
+      if (props.platform === 'weixin' && paymentConfigForm.wxVirtualPay.enabled && !value) {
+        callback(new Error('请输入网关 (Android)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'wxVirtualPay.gatewayIos': [{
+    validator: (rule, value, callback) => {
+      if (props.platform === 'weixin' && paymentConfigForm.wxVirtualPay.enabled && !value) {
+        callback(new Error('请输入网关 (iOS)'));
       } else {
         callback();
       }
     },
     trigger: 'blur'
   }]
-};
-
-// 支付卡片样式预览
-const selectedPayCardImage = ref('');
-watch(() => form.value.payCardStyle, (newVal) => {
-  if (newVal) {
-    selectedPayCardImage.value = `/images/payStyle/pay_style${newVal}.png`;
-  } else {
-    selectedPayCardImage.value = ''; // Clear image if no style selected
-  }
-}, { immediate: true });
-
-// 获取应用配置信息
-const fetchAppConfig = async () => {
-  try {
-    // 从props中获取appName
-    const appName = props.appName || '';
-    if (!appName) {
-      console.log('appName为空，不获取应用配置');
-      return;
-    }
-
-    console.log('开始获取应用配置，appName:', appName);
-    const res = await request.get('/api/novel-common/getAppCommonConfigByAppName', {
-      params: { appName }
-    });
-
-    if (res.code === 200 && res.data && res.data.length > 0) {
-      // 有数据，设置buildCode为第一个元素的buildCode，并设为不可编辑
-      form.value.buildCode = res.data[0].buildCode;
-      buildCodeDisabled.value = true;
-      console.log('获取应用配置成功，已设置buildCode:', form.value.buildCode);
-      ElMessage.success('已加载应用配置信息');
-    } else {
-      // 无数据，让用户自行输入
-      buildCodeDisabled.value = false;
-      console.log('没有找到应用配置，允许用户输入buildCode');
-    }
-  } catch (error) {
-    // console.error('获取应用配置失败:', error);
-    // ElMessage.error('获取应用配置失败: 网络异常');
-    buildCodeDisabled.value = false;
-  }
-};
-
-// 添加定时器变量
-let appConfigTimer = null;
-
-// 监听appName变化，确保可靠触发
-watch(
-  () => props.appName,
-  (newVal, oldVal) => {
-    console.log('appName变化监听触发:', { oldVal, newVal });
-    if (newVal && newVal !== oldVal) {
-      console.log('appName发生有效变化，延迟获取应用配置');
-      // 清除之前的定时器，避免重复请求
-      if (appConfigTimer) clearTimeout(appConfigTimer);
-      appConfigTimer = setTimeout(fetchAppConfig, 500);
-    }
-  },
-  { immediate: true, deep: true } // 立即执行且深度监听
-);
-
-// 组件挂载时主动检查appName和设置默认值
-onMounted(() => {
-  console.log('AutoCreateStep3组件已挂载');
-  
-  // 设置首页卡片样式默认值为1
-  if (form.value.homeCardStyle === undefined || form.value.homeCardStyle === null) {
-    console.log('设置首页卡片样式默认值为1');
-    form.value.homeCardStyle = 1;
-  }
-  
-  // 组件挂载后立即检查一次appName
-  // const appName = props.appName || '';
-  // if (appName) {
-  //   console.log('挂载时发现appName已存在，延迟获取应用配置');
-  //   setTimeout(fetchAppConfig, 300);
-  // }
 });
 
 // 表单ref和校验暴露
-const formRef = ref(null);
+const paymentConfigFormRef = ref(null);
 const validate = async () => {
-  if (!formRef.value) return false;
-  return await formRef.value.validate().catch(() => false);
+  if (!paymentConfigFormRef.value) return false;
+  const valid = await paymentConfigFormRef.value.validate().catch(() => false);
+  if (!valid) {
+    ElMessage.error('请填写完整的支付配置！');
+    return false;
+  }
+  
+  // 检查是否至少启用了一种支付方式
+  const hasEnabledPayment = Object.values(paymentConfigForm).some(payment =>
+    payment.enabled &&
+    ((payment.gatewayAndroid && payment.gatewayIos) ||
+     (props.platform === 'douyin' && payment === paymentConfigForm.douzuanPay) ||
+     (props.platform === 'weixin' && payment === paymentConfigForm.wxVirtualPay))
+  );
+  
+  if (!hasEnabledPayment) {
+    ElMessage.error('请至少启用并配置一种支付方式！');
+    return false;
+  }
+  
+  return valid;
 };
-defineExpose({ validate });
+
+const resetFields = () => {
+  paymentConfigFormRef.value?.resetFields();
+  Object.assign(paymentConfigForm, {
+    normalPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+    orderPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+    renewPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+    douzuanPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+    wxVirtualPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' }
+  });
+};
+
+defineExpose({ validate, resetFields });
 </script>
 
 <style scoped>
-.narrow-form-container {
-  max-width: 700px;
+.wide-form-container {
+  max-width: 1000px;
   margin: 0 auto;
 }
 
-.pay-card-style-item {
-  /* Removed display: flex; flex-direction: column; to restore original layout */
+h4 {
+  margin-bottom: 20px;
+  text-align: left;
+  color: #303133;
 }
 
-/* 新增IAA弹窗样式卡片布局 */
-.iaa-dialog-style-card-group {
-  display: flex;
-  gap: 12px;
-  margin: 12px 0 32px 0;
+.payment-config-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding: 24px;
 }
 
-.iaa-dialog-style-card {
-  padding: 0;
+.payment-type-card {
+  transition: all 0.3s ease;
   border: none;
-  background: none;
-  box-shadow: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
 }
-.iaa-dialog-style-card-inner {
+
+.payment-type-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+}
+
+.payment-card-wrapper {
   display: flex;
   flex-direction: column;
+}
+
+.payment-card-content {
+  padding: 20px;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.payment-card-header {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ebeef5;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  border: 1px solid #dcdfe6;
-  border-radius: 6px;
-  background: #fff;
-  padding: 2px 8px 2px 8px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-  min-width: 140px;
-  min-height: 180px;
-}
-.iaa-dialog-style-card-inner.selected,
-.iaa-dialog-style-card-inner:hover {
-  border-color: #4096ff;
-  box-shadow: 0 0 10px rgba(64, 150, 255, 0.2);
 }
 
-.build-code-tip {
-  margin-top: 8px;
-  color: #606266;
-  font-size: 12px;
-  line-height: 1.5;
+.payment-card-header.configured {
   background-color: #f0f9eb;
-  padding: 6px 12px;
-  border-radius: 4px;
-  border-left: 3px solid #67c23a;
-}
-.iaa-dialog-style-card-inner img {
-  width: 160px;
-  height: 240px;
-  object-fit: contain;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  background: #f8fafc;
-  border: 1px solid #ebeef5;
-}
-.iaa-dialog-style-label {
-  font-size: 15px;
-  color: #333;
-  margin-top: 2px;
-  font-weight: 500;
-  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-.pay-card-image-preview {
-  margin-top: 10px;
+.payment-type-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.payment-type-info .el-icon {
+  font-size: 24px;
+  color: var(--el-color-primary);
+}
+
+.payment-type-title h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #303133;
+}
+
+.payment-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   width: 100%;
-  max-width: 300px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  overflow: hidden;
 }
 
-.pay-card-image-preview img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
+.payment-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.login-type-item {
-  margin-bottom: 20px;
-}
-
-.form-tip {
-  font-size: 12px;
+.payment-info-item .label {
   color: #909399;
-  margin-left: 8px;
+  font-size: 14px;
+}
+
+.gateway-form-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 0 !important;
+}
+
+.gateway-form-item :deep(.el-form-item__label) {
+  flex-shrink: 0;
+  text-align: left !important;
+  color: #909399;
+  font-size: 14px;
+  padding: 0 !important;
+  margin-right: 12px;
+  line-height: var(--el-input-height, 32px);
+}
+
+.gateway-form-item :deep(.el-form-item__content) {
+  flex-grow: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-left: 0 !important;
+  line-height: var(--el-input-height, 32px);
+}
+
+.payment-card-content :deep(.el-form-item) {
+  margin-bottom: 22px;
+  padding: 0;
+  display: block;
+}
+
+.payment-card-content :deep(.el-form-item__label) {
+  display: flex;
+  text-align: right;
+  vertical-align: middle;
+  font-size: var(--el-form-label-font-size, inherit);
+  color: var(--el-text-color-regular);
+  line-height: 32px;
+  padding: 0 12px 0 0;
+  box-sizing: border-box;
+}
+
+.payment-card-content :deep(.el-form-item__content) {
+  line-height: 32px;
+  position: relative;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.payment-card-content :deep(.el-input) {
+  width: 100%;
+}
+
+.payment-card-content :deep(.el-input .el-input__inner) {
+  text-align: left;
+  color: #303133;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.payment-card-content :deep(.el-switch) {
+  width: auto;
+  flex-shrink: 0;
+  height: auto;
+  line-height: normal;
+  display: flex;
+  align-items: center;
 }
 </style>
