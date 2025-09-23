@@ -1,10 +1,10 @@
 <template>
-  <div class="macro-config-panel">
+  <div class="weiju-config-panel">
     <el-form-item label="deliverId">
-      <el-input v-model="macroConfig.deliverId" placeholder="请输入deliverId"></el-input>
+      <el-input v-model="weijuConfig.deliverId" placeholder="请输入deliverId"></el-input>
     </el-form-item>
     <el-form-item label="bannerId">
-      <el-input v-model="macroConfig.bannerId" placeholder="请输入bannerId"></el-input>
+      <el-input v-model="weijuConfig.bannerId" placeholder="请输入bannerId"></el-input>
     </el-form-item>
   </div>
 </template>
@@ -14,21 +14,22 @@ import { defineProps, defineEmits, watch } from 'vue';
 
 // 定义props
 const props = defineProps({
-  macroConfig: {
+  weijuConfig: {
     type: Object,
     required: true,
-    default: () => ({ deliverId: '', bannerId: '' })
+    // 不设置默认空字符串，确保未配置时校验不通过
+    default: () => ({ deliverId: undefined, bannerId: undefined })
   }
 });
 
 // 定义emits
-const emit = defineEmits(['update:macroConfig']);
+const emit = defineEmits(['update:weijuConfig']);
 
-// 监听macroConfig变化并触发更新事件
-Object.keys(props.macroConfig).forEach(key => {
-  watch(() => props.macroConfig[key], (newVal) => {
-    emit('update:macroConfig', {
-      ...props.macroConfig,
+// 监听weijuConfig变化并触发更新事件
+Object.keys(props.weijuConfig).forEach(key => {
+  watch(() => props.weijuConfig[key], (newVal) => {
+    emit('update:weijuConfig', {
+      ...props.weijuConfig,
       [key]: newVal
     });
   });
@@ -36,7 +37,7 @@ Object.keys(props.macroConfig).forEach(key => {
 </script>
 
 <style scoped>
-.macro-config-panel {
+.weiju-config-panel {
   padding: 0;
 }
 

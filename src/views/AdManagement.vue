@@ -312,7 +312,7 @@
           <el-form-item label="广告位ID" prop="bannerAdId">
             <el-input v-model="adForm.bannerAdId" placeholder="请输入Banner广告位ID" />
           </el-form-item>
-          <el-form-item label="是否启用" prop="isBannerAdEnabled">
+          <el-form-item label="是否启用" prop="enabled">
             <el-switch v-model="adForm.isBannerAdEnabled" />
           </el-form-item>
         </template>

@@ -36,11 +36,13 @@ const mapPlatformToEnglish = (platform) => {
 
 // Computed property to combine and format all config data
 const formattedConfigData = computed(() => {
+  const platform = mapPlatformToEnglish(props.basicInfoForm.platform);
+  
   const combinedData = {
     baseConfig: {
       appName: props.basicInfoForm.appName,
       appCode: props.basicInfoForm.appCode,
-      platform: mapPlatformToEnglish(props.basicInfoForm.platform),
+      platform: platform,
       version: props.basicInfoForm.version,
       product: props.basicInfoForm.product,
       customer: props.basicInfoForm.customer,
@@ -66,36 +68,64 @@ const formattedConfigData = computed(() => {
     commonConfig: {
       buildCode: props.generalConfigForm.buildCode,
       contact: props.generalConfigForm.contact,
-      douyinAppToken: props.generalConfigForm.douyinAppToken,
-      douyinImId: props.generalConfigForm.douyinImId,
-      kuaishouAppToken: props.generalConfigForm.kuaishouAppToken,
-      kuaishouClientId: props.generalConfigForm.kuaishouClientId,
-      kuaishouClientSecret: props.generalConfigForm.kuaishouClientSecret,
+      douyinAppToken: platform === 'douyin' ? props.generalConfigForm.douyinAppToken : undefined,
+      douyinImId: platform === 'douyin' ? props.generalConfigForm.douyinImId : undefined,
+      kuaishouAppToken: platform === 'kuaishou' ? props.generalConfigForm.kuaishouAppToken : undefined,
+      kuaishouClientId: platform === 'kuaishou' ? props.generalConfigForm.kuaishouClientId : undefined,
+      kuaishouClientSecret: platform === 'kuaishou' ? props.generalConfigForm.kuaishouClientSecret : undefined,
       mineLoginType: props.generalConfigForm.mineLoginType,
       iaaMode: props.generalConfigForm.iaaMode,
       iaaDialogStyle: props.generalConfigForm.iaaDialogStyle,
       hidePayEntry: props.generalConfigForm.hidePayEntry,
       hideScoreExchange: props.generalConfigForm.hideScoreExchange,
       readerLoginType: props.generalConfigForm.readerLoginType,
-      weixinAppToken: props.generalConfigForm.weixinAppToken,
+      weixinAppToken: platform === 'weixin' ? props.generalConfigForm.weixinAppToken : undefined,
     },
     adConfig: {
-      reward: {
-        rewardAdId: props.adConfigForm.rewardAd.adUnitId,
-        rewardCount: props.adConfigForm.rewardAd.rewardNum,
-        isRewardAdEnabled: props.adConfigForm.rewardAd.enabled,
+      rewardAd: {
+        rewardAdId: props.adConfigForm.rewardAd.rewardAdId,
+        rewardCount: props.adConfigForm.rewardAd.rewardCount,
+        enabled: props.adConfigForm.rewardAd.enabled,
       },
-      interstitial: {
-        interstitialAdId: props.adConfigForm.interstitialAd.adUnitId,
-        interstitialCount: props.adConfigForm.interstitialAd.showNum,
-        isInterstitialAdEnabled: props.adConfigForm.interstitialAd.enabled,
+      interstitialAd: {
+        interstitialAdId: props.adConfigForm.interstitialAd.interstitialAdId,
+        interstitialCount: props.adConfigForm.interstitialAd.interstitialCount,
+        enabled: props.adConfigForm.interstitialAd.enabled,
       },
-      nativeAd: {
-        nativeAdId: props.adConfigForm.nativeAd.adUnitId,
-        isNativeAdEnabled: props.adConfigForm.nativeAd.enabled,
-      },
+      // 快手平台独有的广告配置
+      bannerAd: platform === 'kuaishou' ? {
+        bannerAdId: props.adConfigForm.bannerAd?.bannerAdId,
+        enabled: props.adConfigForm.bannerAd?.enabled,
+      } : undefined,
+      feedAd: platform === 'kuaishou' ? {
+        feedAdId: props.adConfigForm.feedAd?.feedAdId,
+        enabled: props.adConfigForm.feedAd?.enabled,
+      } : undefined
     },
   };
+  
+  // 根据不同平台过滤广告配置
+  if (platform === 'weixin') {
+    // 微信平台可能不支持某些广告类型 TODO
+  } else if (platform === 'baidu') {
+    // 百度平台可能有特殊配置需求 TODO
+  }
+  
+  // 过滤undefined值，避免在JSON中显示
+  Object.keys(combinedData).forEach(configType => {
+    Object.keys(combinedData[configType]).forEach(key => {
+      if (combinedData[configType][key] === undefined) {
+        delete combinedData[configType][key];
+      } else if (typeof combinedData[configType][key] === 'object' && combinedData[configType][key] !== null) {
+        // 递归过滤嵌套对象
+        Object.keys(combinedData[configType][key]).forEach(nestedKey => {
+          if (combinedData[configType][key][nestedKey] === undefined) {
+            delete combinedData[configType][key][nestedKey];
+          }
+        });
+      }
+    });
+  });
 
   const formattedBlocks = {};
   for (const key in combinedData) {

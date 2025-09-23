@@ -2,8 +2,8 @@
   <div class="config-panel">
      <el-form :model="adConfig" :rules="adConfigFormRules" ref="adConfigFormRef" style="width: 100%;">
         <div class="payment-config-grid">
-          <!-- 激励广告配置 -->
-          <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+          <!-- 激励广告配置 - 抖音、快手平台 -->
+          <el-card v-if="currentPlatform === 'douyin' || currentPlatform === 'kuaishou'" class="payment-type-card" :body-style="{ padding: '0' }">
             <div class="payment-card-wrapper">
               <div class="payment-card-header" :class="{ 'configured': adConfig.rewardAd.enabled && adConfig.rewardAd.rewardAdId && adConfig.rewardAd.rewardCount > 0 }">
                 <div class="payment-type-info">
@@ -21,7 +21,7 @@
                 <div class="payment-info-list">
                   <div class="payment-info-item">
                     <span class="label">状态</span>
-                    <el-switch v-model="adConfig.rewardAd.enabled" /> 
+                    <el-switch v-model="adConfig.rewardAd.enabled" @change="handleAdTypeChange('rewardAd')" />
                   </div>
                   <el-form-item label="广告位ID" prop="rewardAd.rewardAdId" class="gateway-form-item">
                     <div v-if="adConfig.rewardAd.enabled">
@@ -38,8 +38,8 @@
             </div>
           </el-card>
 
-          <!-- 插屏广告配置 -->
-          <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+          <!-- 插屏广告配置 - 抖音、快手平台 -->
+          <el-card v-if="currentPlatform === 'douyin' || currentPlatform === 'kuaishou'" class="payment-type-card" :body-style="{ padding: '0' }">
             <div class="payment-card-wrapper">
               <div class="payment-card-header" :class="{ 'configured': adConfig.interstitialAd.enabled && adConfig.interstitialAd.interstitialAdId && adConfig.interstitialAd.interstitialCount > 0 }">
                 <div class="payment-type-info">
@@ -57,7 +57,7 @@
                 <div class="payment-info-list">
                   <div class="payment-info-item">
                     <span class="label">状态</span>
-                    <el-switch v-model="adConfig.interstitialAd.enabled" /> 
+                    <el-switch v-model="adConfig.interstitialAd.enabled" @change="handleAdTypeChange('interstitialAd')" />
                   </div>
                   <el-form-item label="广告位ID" prop="interstitialAd.interstitialAdId" class="gateway-form-item">
                     <div v-if="adConfig.interstitialAd.enabled">
@@ -74,18 +74,18 @@
             </div>
           </el-card>
 
-          <!-- 信息流广告配置 -->
-          <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+          <!-- Banner广告配置 - 快手平台 -->
+          <el-card v-if="currentPlatform === 'kuaishou'" class="payment-type-card" :body-style="{ padding: '0' }">
             <div class="payment-card-wrapper">
-              <div class="payment-card-header" :class="{ 'configured': adConfig.nativeAd.enabled && adConfig.nativeAd.nativeAdId }">
+              <div class="payment-card-header" :class="{ 'configured': adConfig.bannerAd.enabled && adConfig.bannerAd.bannerAdId }">
                 <div class="payment-type-info">
-                  <el-icon><Document /></el-icon>
+                  <el-icon><Monitor /></el-icon>
                   <div class="payment-type-title">
-                    <h4>信息流广告</h4>
+                    <h4>Banner广告</h4>
                   </div>
                 </div>
-                <el-tag size="small" :type="adConfig.nativeAd.enabled ? 'success' : 'info'" effect="plain">
-                  {{ adConfig.nativeAd.enabled ? '已启用' : '未启用' }}
+                <el-tag size="small" :type="adConfig.bannerAd.enabled ? 'success' : 'info'" effect="plain">
+                  {{ adConfig.bannerAd.enabled ? '已启用' : '未启用' }}
                 </el-tag>
               </div>
 
@@ -93,11 +93,42 @@
                 <div class="payment-info-list">
                   <div class="payment-info-item">
                     <span class="label">状态</span>
-                    <el-switch v-model="adConfig.nativeAd.enabled" /> 
+                    <el-switch v-model="adConfig.bannerAd.enabled" @change="handleAdTypeChange('bannerAd')" />
                   </div>
-                  <el-form-item label="广告位ID" prop="nativeAd.nativeAdId" class="gateway-form-item">
-                    <div v-if="adConfig.nativeAd.enabled">
-                      <el-input v-model="adConfig.nativeAd.nativeAdId" placeholder="请输入信息流广告ID" />
+                  <el-form-item label="广告位ID" prop="bannerAd.bannerAdId" class="gateway-form-item">
+                    <div v-if="adConfig.bannerAd.enabled">
+                      <el-input v-model="adConfig.bannerAd.bannerAdId" placeholder="请输入Banner广告ID" />
+                    </div>
+                  </el-form-item>
+                </div>
+              </div>
+            </div>
+          </el-card>
+
+          <!-- 信息流广告配置 - 快手平台 -->
+          <el-card v-if="currentPlatform === 'kuaishou'" class="payment-type-card" :body-style="{ padding: '0' }">
+            <div class="payment-card-wrapper">
+              <div class="payment-card-header" :class="{ 'configured': adConfig.feedAd.enabled && adConfig.feedAd.feedAdId }">
+                <div class="payment-type-info">
+                  <el-icon><Document /></el-icon>
+                  <div class="payment-type-title">
+                    <h4>信息流广告</h4>
+                  </div>
+                </div>
+                <el-tag size="small" :type="adConfig.feedAd.enabled ? 'success' : 'info'" effect="plain">
+                  {{ adConfig.feedAd.enabled ? '已启用' : '未启用' }}
+                </el-tag>
+              </div>
+
+              <div class="payment-card-content">
+                <div class="payment-info-list">
+                  <div class="payment-info-item">
+                    <span class="label">状态</span>
+                    <el-switch v-model="adConfig.feedAd.enabled" @change="handleAdTypeChange('feedAd')" />
+                  </div>
+                  <el-form-item label="广告位ID" prop="feedAd.feedAdId" class="gateway-form-item">
+                    <div v-if="adConfig.feedAd.enabled">
+                      <el-input v-model="adConfig.feedAd.feedAdId" placeholder="请输入信息流广告ID" />
                     </div>
                   </el-form-item>
                 </div>
@@ -110,9 +141,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-import { VideoPlay, Picture, Document } from '@element-plus/icons-vue'
+import { VideoPlay, Picture, Document, Monitor } from '@element-plus/icons-vue'
 
 const props = defineProps({
   modelValue: {
@@ -128,18 +159,50 @@ const props = defineProps({
         interstitialAdId: '',
         interstitialCount: 1
       },
-      nativeAd: {
+      bannerAd: {
         enabled: false,
-        nativeAdId: ''
+        bannerAdId: ''
+      },
+      feedAd: {
+        enabled: false,
+        feedAdId: ''
       }
     })
+  },
+  platform: {
+    type: String,
+    default: 'douyin'
   }
 })
+
+// 获取当前平台
+const currentPlatform = computed(() => {
+  return props.platform;
+});
 
 const emit = defineEmits(['update:modelValue'])
 
 // 内部响应式表单，从modelValue初始化
 const adConfig = reactive({ ...props.modelValue })
+
+// 处理广告类型开关变化
+const handleAdTypeChange = (adType) => {
+  // 当关闭广告类型时清空对应的广告位ID
+  if (!adConfig[adType].enabled) {
+    // 使用正确的属性名称
+    if (adType === 'rewardAd') {
+      adConfig[adType].rewardAdId = '';
+      adConfig[adType].rewardCount = 1;
+    } else if (adType === 'interstitialAd') {
+      adConfig[adType].interstitialAdId = '';
+      adConfig[adType].interstitialCount = 1;
+    } else if (adType === 'bannerAd') {
+      adConfig[adType].bannerAdId = '';
+    } else if (adType === 'feedAd') {
+      adConfig[adType].feedAdId = '';
+    }
+  }
+};
 
 // 表单引用
 const adConfigFormRef = ref(null)
@@ -191,9 +254,19 @@ const adConfigFormRules = reactive({
     },
     trigger: 'blur'
   }],
-  'nativeAd.nativeAdId': [{
+  'bannerAd.bannerAdId': [{
     validator: (rule, value, callback) => {
-      if (adConfig.nativeAd.enabled && !value) {
+      if (adConfig.bannerAd.enabled && !value) {
+        callback(new Error('请输入Banner广告ID'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'feedAd.feedAdId': [{
+    validator: (rule, value, callback) => {
+      if (adConfig.feedAd.enabled && !value) {
         callback(new Error('请输入信息流广告ID'));
       } else {
         callback();
@@ -204,38 +277,74 @@ const adConfigFormRules = reactive({
 })
 
 // 监听配置变化，同步到父组件
+// 使用防抖和值比较避免循环更新
+let updateTimer = null;
 watch(
   adConfig,
   (newValue) => {
-    emit('update:modelValue', { ...newValue })
+    // 清除之前的定时器
+    if (updateTimer) {
+      clearTimeout(updateTimer);
+    }
+    // 使用定时器防抖
+    updateTimer = setTimeout(() => {
+      // 只有当值确实变化时才触发更新
+      if (JSON.stringify(newValue) !== JSON.stringify(props.modelValue)) {
+        emit('update:modelValue', { ...newValue });
+      }
+    }, 100); // 100ms防抖
   },
   { deep: true }
 )
 
-// 监听父组件传递的modelValue变化，更新内部配置
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    // 深拷贝新值到adConfig
-    Object.keys(newValue).forEach(key => {
-      if (typeof newValue[key] === 'object' && newValue[key] !== null) {
-        adConfig[key] = { ...newValue[key] }
-      } else {
-        adConfig[key] = newValue[key]
-      }
-    })
-  },
-  { deep: true }
-)
+// 移除监听父组件modelValue的监听器，避免循环更新
+// 内部配置由父组件通过props初始化，后续更新通过用户操作触发emit，不再需要从父组件同步回来
+
 
 // 验证广告配置是否完整
 const validateForm = async () => {
   try {
-    await adConfigFormRef.value.validate()
-    return true
+    if (!adConfigFormRef.value) return false;
+    
+    // 验证表单字段
+    const valid = await adConfigFormRef.value.validate().catch(() => false);
+    if (!valid) {
+      ElMessage.error('广告配置验证失败，请检查必填项');
+      return false;
+    }
+    
+    // 检查是否至少启用了一种广告方式
+    const hasEnabledAd = () => {
+      const adsToCheck = [];
+      
+      // 根据当前平台决定需要检查的广告类型
+      if (currentPlatform.value === 'douyin' || currentPlatform.value === 'kuaishou') {
+        adsToCheck.push(adConfig.rewardAd);
+        adsToCheck.push(adConfig.interstitialAd);
+      }
+      
+      if (currentPlatform.value === 'kuaishou') {
+        adsToCheck.push(adConfig.bannerAd);
+        adsToCheck.push(adConfig.feedAd);
+      }
+      
+      // 检查是否有启用的广告类型
+      return adsToCheck.some(ad => 
+        ad.enabled && 
+        ((ad.rewardAdId || ad.interstitialAdId || ad.bannerAdId || ad.feedAdId) &&
+         (!ad.rewardCount || ad.rewardCount > 0) &&
+         (!ad.interstitialCount || ad.interstitialCount > 0))
+      );
+    };
+    
+    if (!hasEnabledAd()) {
+      ElMessage.warning('建议至少启用一种广告方式！');
+    }
+    
+    return valid;
   } catch (error) {
-    ElMessage.error('广告配置验证失败，请检查必填项')
-    return false
+    ElMessage.error('广告配置验证失败，请检查必填项');
+    return false;
   }
 }
 
