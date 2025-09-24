@@ -28,7 +28,11 @@
           <el-table-column prop="id" label="ID" width="80" />
           <el-table-column prop="userId" label="用户ID" width="100" />
           <el-table-column prop="userName" label="用户名" width="100" />
-          <el-table-column prop="opType" label="操作类型" width="100" :formatter="formatOpType" />
+          <el-table-column prop="opType" label="操作类型" width="100">
+            <template #default="{ row }">
+              <span v-html="formatOpType(row)"></span>
+            </template>
+          </el-table-column>
           <el-table-column prop="opStatus" label="操作状态" width="100" :formatter="formatOpStatus" />
           <el-table-column prop="methodName" label="方法名" width="200" />
           <el-table-column prop="requestType" label="请求类型" width="80" />
@@ -110,7 +114,26 @@ const formatJson = (jsonString) => {
 // 格式化操作类型
 const formatOpType = (row) => {
   // 根据实际业务需求添加映射
-  return row.opType === 1 ? '查询' : '未知';
+
+  switch (row.opType) {
+    case 1:
+      return '查询';
+    case 2:
+      // 新增操作标红
+      return '<span style="color: #f56c6c;">新增</span>';
+    case 3:
+      // 修改操作标红
+      return '<span style="color: #f56c6c;">修改</span>';
+    case 4:
+      // 删除操作标红
+      return '<span style="color: #f56c6c;">删除</span>';
+    case 5:
+      return '导出';
+    case 6:
+      return '导入';
+    default:
+      return '其他';
+  }
 };
 
 // 格式化操作状态

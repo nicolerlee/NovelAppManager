@@ -5,7 +5,8 @@
         <el-col :span="6">
           <el-input
             v-model="searchKeyword"
-            placeholder="请输入用户名或userId"
+            placeholder="请输入用户ID"
+            :prefix-icon="Search"
             clearable
           >
             <template #prefix>
@@ -13,27 +14,30 @@
             </template>
           </el-input>
         </el-col>
-        <el-col :span="8">
-          <el-date-picker
-            v-model="dateRange"
-            type="daterange"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            :default-time="['00:00:00', '23:59:59']"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-          />
-        </el-col>
-        <el-col :span="4">
-          <el-button type="primary" @click="handleSearch">
-            <el-icon><Search /></el-icon>
-            搜索
-          </el-button>
-        </el-col>
-        <el-col :span="6" class="text-right">
-          <el-button type="default" @click="resetFilters">
-            重置
-          </el-button>
+        <el-col :span="14">
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <el-date-picker
+              v-model="dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              :shortcuts="dateShortcuts"
+              unlink-panels
+              @change="handleDateChange"
+              clearable
+              style="width: auto;"
+            />
+            <el-button type="primary" @click="handleSearch">
+              <el-icon><Search /></el-icon>
+              搜索
+            </el-button>
+            <el-button type="default" @click="resetFilters">
+              重置
+            </el-button>
+          </div>
         </el-col>
       </el-row>
     </div>
@@ -48,13 +52,9 @@
         empty-text="暂无操作记录数据"
         empty-image=""  
       >
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="userId" label="用户ID" width="120" />
-        <el-table-column prop="operationType" label="操作类型" width="150" />
-        <el-table-column prop="operationContent" label="操作内容" min-width="200" />
-        <el-table-column prop="ipAddress" label="IP地址" width="140" />
-        <el-table-column prop="operationTime" label="操作时间" width="180">
+        <el-table-column prop="username" label="用户名" width="120" />
+         <el-table-column prop="operationTime" label="时间" width="220">
           <template #default="scope">
             {{ formatDate(scope.row.operationTime) }}
           </template>
@@ -66,21 +66,35 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="operationContent" label="操作" min-width="80" />
+        <el-table-column prop="requestUrl" label="请求地址" min-width="200" />
+        <el-table-column label="内容" width="100" fixed="right">
+          <template #default="scope">
+            <el-button type="primary" size="small" @click="handleViewDetail(scope.row)">查看详情</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
-
-    <div class="pagination-section">
-      <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="totalCount"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
   </div>
+  
+  <!-- 详情弹窗 -->
+  <el-dialog v-model="dialogVisible" title="操作详情" width="800px">
+    <div v-if="selectedRow">
+      <div class="dialog-section">
+        <h4>请求参数</h4>
+        <pre v-if="selectedRow.requestParams">{{ formatJson(selectedRow.requestParams) }}</pre>
+        <p v-else>无请求参数</p>
+      </div>
+      <div class="dialog-section">
+        <h4>返回结果</h4>
+        <pre v-if="selectedRow.responseResult">{{ formatJson(selectedRow.responseResult) }}</pre>
+        <p v-else>无返回结果</p>
+      </div>
+    </div>
+    <template #footer>
+      <el-button @click="dialogVisible = false">关闭</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -93,84 +107,109 @@ const searchKeyword = ref('');
 const dateRange = ref([]);
 const loading = ref(false);
 
-// 分页参数
-const currentPage = ref(1);
-const pageSize = ref(10);
-const totalCount = ref(0);
+// 日期快捷选项
+const dateShortcuts = [
+  {
+    text: '最近一周',
+    value: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+      return [start, end];
+    }
+  },
+  {
+    text: '最近一个月',
+    value: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+      return [start, end];
+    }
+  },
+  {
+    text: '最近三个月',
+    value: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+      return [start, end];
+    }
+  }
+];
+
+// 日期变化处理
+const handleDateChange = (value) => {
+  console.log('日期选择变化:', value);
+  dateRange.value = value;
+  // 日期变化后自动搜索
+  handleSearch();
+};
 
 // 归档数据
 const archiveData = ref([]);
 
+// 详情弹窗相关状态
+const dialogVisible = ref(false);
+const selectedRow = ref(null);
+
+// 查看详情
+const handleViewDetail = (row) => {
+  selectedRow.value = row;
+  dialogVisible.value = true;
+};
+
+// 格式化JSON显示
+const formatJson = (jsonString) => {
+  try {
+    // 如果是字符串，尝试解析为JSON
+    const obj = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+    return JSON.stringify(obj, null, 2);
+  } catch (e) {
+    // 如果解析失败，直接返回原始字符串
+    return jsonString;
+  }
+};
+
 // 获取归档数据的方法
 const fetchArchiveData = async (params) => {
   try {
-    const response = await request.get('/archive/operations', {
+    const response = await request.get('/api/op-log/queryUserArchive', {
       params: {
-        keyword: params.keyword,
+        userId: params.userId,
         startTime: params.startTime,
-        endTime: params.endTime,
-        page: params.page,
-        pageSize: params.pageSize
+        endTime: params.endTime
       }
     });
-    return response;
+    
+    // 适配新的返回数据结构
+    if (response.code === 200 && Array.isArray(response.data)) {
+      // 将API返回的数据格式化为表格需要的格式
+      const formattedData = response.data.map((item, index) => ({
+        id: index + 1,
+        username: item.userName,
+        userId: item.userId,
+        operationContent: item.opName,
+        operationTime: item.updateTime,
+        requestUrl: item.requestUrl,
+        status: item.opStatus === 1 ? 'success' : 'danger',
+        requestParams: item.requestParams, // 请求参数
+        responseResult: item.responseResult // 返回结果
+      }));
+      
+      return {
+    data: formattedData
+  };
+    }
+    
+    return {
+        data: []
+      };
   } catch (error) {
     console.error('获取归档数据失败:', error);
     // 模拟数据，防止接口调不通时页面空白
     return {
-      data: [
-        {
-          id: 1,
-          username: 'admin',
-          userId: '1001',
-          operationType: '用户删除',
-          operationContent: '删除用户ID为10086的账号',
-          ipAddress: '192.168.1.100',
-          operationTime: '2023-10-15 14:30:25',
-          status: 'success'
-        },
-        {
-          id: 2,
-          username: 'system',
-          userId: '9999',
-          operationType: '系统配置修改',
-          operationContent: '修改系统安全配置参数',
-          ipAddress: '127.0.0.1',
-          operationTime: '2023-10-14 09:15:42',
-          status: 'success'
-        },
-        {
-          id: 3,
-          username: 'admin',
-          userId: '1001',
-          operationType: '权限变更',
-          operationContent: '修改用户组管理员权限',
-          ipAddress: '192.168.1.100',
-          operationTime: '2023-10-13 16:45:18',
-          status: 'success'
-        },
-        {
-          id: 4,
-          username: 'hacker',
-          userId: '1005',
-          operationType: '异常登录',
-          operationContent: '尝试使用管理员账号登录',
-          ipAddress: '203.0.113.42',
-          operationTime: '2023-10-12 23:01:33',
-          status: 'danger'
-        },
-        {
-          id: 5,
-          username: 'admin',
-          userId: '1001',
-          operationType: '数据导出',
-          operationContent: '导出用户数据报表',
-          ipAddress: '192.168.1.100',
-          operationTime: '2023-10-10 11:20:05',
-          status: 'success'
-        }
-      ],
-      total: 5
+      data: []
     };
   }
 };
@@ -195,16 +234,13 @@ const handleSearch = async () => {
   loading.value = true;
   try {
     const params = {
-      keyword: searchKeyword.value,
+      userId: searchKeyword.value || null, // 使用searchKeyword作为userId
       startTime: dateRange.value && dateRange.value.length === 2 ? dateRange.value[0] : null,
-      endTime: dateRange.value && dateRange.value.length === 2 ? dateRange.value[1] : null,
-      page: currentPage.value,
-      pageSize: pageSize.value
+      endTime: dateRange.value && dateRange.value.length === 2 ? dateRange.value[1] : null
     };
     
-    // const result = await fetchArchiveData(params);
+    const result = await fetchArchiveData(params);
     archiveData.value = result.data || [];
-    totalCount.value = result.total || 0;
   } catch (error) {
     console.error('搜索操作失败:', error);
   } finally {
@@ -216,20 +252,6 @@ const handleSearch = async () => {
 const resetFilters = () => {
   searchKeyword.value = '';
   dateRange.value = [];
-  currentPage.value = 1;
-  pageSize.value = 10;
-  handleSearch();
-};
-
-// 分页处理
-const handleSizeChange = (size) => {
-  pageSize.value = size;
-  currentPage.value = 1; // 重置为第一页
-  handleSearch();
-};
-
-const handleCurrentChange = (current) => {
-  currentPage.value = current;
   handleSearch();
 };
 
@@ -256,9 +278,27 @@ onMounted(() => {
   overflow-y: auto;
 }
 
-.pagination-section {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
+
+  /* 详情弹窗样式 */
+  .dialog-section {
+    margin-bottom: 10px;
+  }
+  
+  .dialog-section h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .dialog-section pre {
+    margin: 0;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 12px;
+  }
 </style>
