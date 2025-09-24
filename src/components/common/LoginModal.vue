@@ -344,7 +344,7 @@ const handleRegister = async () => {
 }
 
 .toggle-password-btn:hover {
-  color: #4096ff;
+  color: rgb(96, 92, 229);
 }
 
 .login-modal-overlay {
@@ -378,7 +378,8 @@ const handleRegister = async () => {
 
 .login-left-panel {
   width: 50%;
-  background: linear-gradient(135deg, #4096ff, #59b1ff);
+  /* background: linear-gradient(135deg, #4096ff, #59b1ff); */
+  background: rgb(96, 92, 229);
   color: #fff;
   padding: 60px 40px;
   display: flex;
@@ -473,7 +474,7 @@ const handleRegister = async () => {
 }
 
 .tab-item.active {
-  color: #4096ff;
+  color: rgb(96, 92, 229);
 }
 
 .tab-item.active::after {
@@ -483,7 +484,7 @@ const handleRegister = async () => {
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #4096ff;
+  background-color: rgb(96, 92, 229);
 }
 
 .login-form-container {
@@ -537,7 +538,7 @@ const handleRegister = async () => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #4096ff;
+  border-color: rgb(96, 92, 229);
 }
 
 .error-message {
@@ -615,14 +616,14 @@ const handleRegister = async () => {
 }
 
 .forgot-password {
-  color: #4096ff;
+  color: rgb(96, 92, 229);
   text-decoration: none;
 }
 
 .login-btn {
   width: 100%;
   height: 44px;
-  background-color: #4096ff;
+  background-color: rgb(96, 92, 229);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -632,7 +633,7 @@ const handleRegister = async () => {
 }
 
 .login-btn:hover {
-  background-color: #2780e3;
+  background-color: rgb(96, 92, 229);
 }
 
 .register-link {
@@ -643,7 +644,7 @@ const handleRegister = async () => {
 }
 
 .register-btn {
-  color: #4096ff;
+  color: rgb(96, 92, 229);
   text-decoration: none;
   font-weight: 500;
 }
@@ -656,7 +657,7 @@ const handleRegister = async () => {
 }
 
 .agreement a {
-  color: #4096ff;
+  color: rgb(96, 92, 229);
   text-decoration: none;
 }
 </style>

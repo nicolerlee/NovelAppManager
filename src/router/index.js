@@ -4,7 +4,12 @@ import { ElMessage } from 'element-plus'
 const routes = [
   {
     path: '/',
-    redirect: '/apps'
+    redirect: '/home'
+  },
+    {
+    path: '/home',
+    name: 'Home',
+    component: () => import('../views/Home.vue')
   },
   {
     path: '/apps',
