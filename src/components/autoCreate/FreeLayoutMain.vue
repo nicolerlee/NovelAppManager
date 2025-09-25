@@ -198,6 +198,7 @@ const generalConfigRules = ref({
     { required: true, message: '请输入构建命令', trigger: 'blur' },
     {
       validator: (rule, value, callback) => {
+
         if (/^\d+$/.test(value)) {
           callback(new Error('构建命令不能为纯数字'));
         } else if (/^\d/.test(value)) {
@@ -579,10 +580,12 @@ watch(() => uiConfig.value.secondTheme, () => {
   themeUpdateKey.value++;
 })
 
-// 监听小程序名称变化，同步到手机模拟区
+// 监听小程序名称变化，同步到手机模拟区并触发主题配置查询
 watch(() => basicConfig.value.appName, (newVal) => {
   if (newVal) {
     appName.value = newVal;
+    // 当appName变化时，重新查询主题配置
+    fetchUiThemeConfig();
   }
 })
 
