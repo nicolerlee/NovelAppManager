@@ -419,7 +419,8 @@ const handleCreatePayment = async (type) => {
     ElMessage.warning('请先选择小程序')
     return
   }
-
+  
+  isEdit.value = false
   currentPaymentType.value = type
   form.value = {
     status: '禁用',
