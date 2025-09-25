@@ -63,6 +63,7 @@ const formattedConfigData = computed(() => {
       normalPay: props.paymentConfigForm.normalPay,
       orderPay: props.paymentConfigForm.orderPay,
       douzuanPay: props.paymentConfigForm.douzuanPay,
+      imPay: props.paymentConfigForm.imPay,
       wxVirtualPay: props.paymentConfigForm.wxVirtualPay,
     },
     commonConfig: {

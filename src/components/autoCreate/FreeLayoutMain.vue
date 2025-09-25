@@ -12,7 +12,7 @@
       </template>
       <div class="workspace-container">
         <div class="sidebar">
-          <h3>模块待选区</h3>
+          <h3 style="margin-top: 20px;">模块待选区</h3>
           <div class="component-list">
             <div 
                   v-for="item in filteredComponents" 
@@ -434,6 +434,11 @@ const initPaymentConfig = (component) => {
       gatewayAndroid: component.config?.douzuanPay?.gatewayAndroid || '',
       gatewayIos: component.config?.douzuanPay?.gatewayIos || ''
     },
+    imPay: {
+      enabled: component.config?.imPay?.enabled || false,
+      gatewayAndroid: component.config?.imPay?.gatewayAndroid || '',
+      gatewayIos: component.config?.imPay?.gatewayIos || ''
+    },
     wxVirtualPay: {
       enabled: component.config?.wxVirtualPay?.enabled || false,
       gatewayAndroid: component.config?.wxVirtualPay?.gatewayAndroid || '',
@@ -461,6 +466,10 @@ const checkPaymentConfigCompleted = (component) => {
     
     // 特殊处理：抖音平台的抖钻支付只需启用即可
     if (currentPlatform === 'douyin' && config.douzuanPay && payment === config.douzuanPay) {
+      return true;
+    }
+      // 特殊处理：抖音平台的IM支付只需启用即可
+    if (currentPlatform === 'douyin' && config.imPay && payment === config.imPay) {
       return true;
     }
     
@@ -1702,8 +1711,12 @@ const navigateToAutoCreateStep6 = () => {
   display: block !important;
 }
 
+.basic-config-form{
+  margin-top: 15px;
+}
 .basic-config-form .el-form-item {
   margin-bottom: 15px;
+  
 }
 
 .basic-config-form .el-input, .basic-config-form .el-select {
@@ -1720,6 +1733,7 @@ const navigateToAutoCreateStep6 = () => {
   padding: 15px;
   overflow-y: auto;
   min-height: 300px;
+  width: 300px;
   /* 隐藏滚动条但保留滚动功能 */
   ::-webkit-scrollbar {width: 0;}
   -ms-overflow-style: none;
@@ -1858,7 +1872,8 @@ const navigateToAutoCreateStep6 = () => {
 .component-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  width: 300px;
   margin-top: 15px;
 }
 .component-item {
@@ -1867,6 +1882,8 @@ const navigateToAutoCreateStep6 = () => {
   align-items: center;
   gap: 10px;
   padding: 10px;
+  width: 250px;
+  height: 100px;
   user-select: none;
   touch-action: none;
 }

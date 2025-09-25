@@ -3,7 +3,7 @@
     <!-- 基本信息表单 -->
     <div v-if="currentSubStep === 0" class="narrow-form-container">
       <h4>步骤1: 配置基本信息</h4>
-      <el-form :model="form" :rules="formRules" ref="formRef" label-width="120px">
+      <el-form :model="form" :rules="formRules" ref="formRef" label-width="120px" style="margin-top: 20px;">
         <el-form-item label="appName" prop="appName">
           <el-input v-model="form.appName" placeholder="请输入小程序名称" />
         </el-form-item>
@@ -54,7 +54,7 @@
     <!-- 微距配置 -->
     <div v-if="currentSubStep === 1" class="narrow-form-container">
       <h4>步骤1: 配置微距信息</h4>
-      <el-form :model="form" :rules="microConfigRules" ref="microConfigFormRef" label-width="120px">
+      <el-form :model="form" :rules="microConfigRules" ref="microConfigFormRef" label-width="120px"  style="margin-top: 20px;">
         <el-form-item label="deliverId" prop="deliverId">
           <el-input v-model="form.deliverId" placeholder="请输入deliverId" />
           
@@ -153,6 +153,7 @@ defineExpose({ validate, resetFields });
 <style scoped>
 .narrow-form-container {
   max-width: 600px;
+  min-height: 400px;
   margin: 0 auto;
 }
 .theme-selection-content {

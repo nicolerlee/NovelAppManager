@@ -3,7 +3,7 @@
     <el-card class="workflow-container">
       <template #header>
         <div class="header">
-          <h3>创意小程序孵化器 - 创建向导</h3>
+          <h3>小程序生产工厂 - 向导式</h3>
         </div>
       </template>
       <div class="workflow-content">
@@ -147,6 +147,7 @@ const paymentConfigForm = ref({
   orderPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
   renewPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
   douzuanPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+  imPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
   wxVirtualPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
 })
 
@@ -522,9 +523,7 @@ const startGeneration = async () => {
 </script>
 
 <style scoped>
-. {
-  padding: 20px;
-}
+
 
 .workflow-container {
   max-width: 1200px;

@@ -76,7 +76,7 @@
                 </div>
               </el-card>
 
-              <!-- 订单支付配置 -->
+              <!-- 通用支付配置 -->
               <el-card class="payment-type-card" :body-style="{ padding: '0' }">
                 <div class="payment-card-wrapper">
                   <div class="payment-card-header" :class="{ 'configured': paymentConfig?.orderPay }">
@@ -131,7 +131,7 @@
                 </div>
               </el-card>
 
-              <!-- 续费支付配置 -->
+              <!-- 连包支付配置 -->
               <el-card class="payment-type-card" :body-style="{ padding: '0' }">
                 <div class="payment-card-wrapper">
                   <div class="payment-card-header" :class="{ 'configured': paymentConfig?.renewPay }">
@@ -236,6 +236,62 @@
                         <el-icon><Edit /></el-icon>编辑
                       </el-button>
                       <el-button type="danger" link @click="handleDeletePayment('douzuanPay')">
+                        <el-icon><Delete /></el-icon>删除
+                      </el-button>
+                    </div>
+                  </div>
+                </el-card>
+              </template>
+              <!-- im支付配置 -->
+              <template v-if="selectedApp && selectedApp.platform === '抖音'">
+                <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+                  <div class="payment-card-wrapper">
+                    <div class="payment-card-header" :class="{ 'configured': paymentConfig?.imPay }">
+                      <div class="payment-type-info">
+                        <el-icon><Star /></el-icon>
+                        <div class="payment-type-title">
+                          <h4>{{ getPaymentTypeName('imPay') }}</h4>
+                        </div>
+                      </div>
+                      <el-tag size="small" :type="paymentConfig?.imPay ? 'success' : 'info'" effect="plain">
+                        {{ paymentConfig?.imPay ? '已配置' : '未配置' }}
+                      </el-tag>
+                    </div>
+
+                    <div class="payment-card-content" v-loading="loadingPaymentConfig">
+                      <template v-if="paymentConfig?.imPay">
+                        <div class="payment-info-list">
+                          <div class="payment-info-item">
+                            <span class="label">状态</span>
+                            <el-tag size="small" :type="paymentConfig.imPay.enabled ? 'success' : 'danger'" effect="light">
+                              {{ paymentConfig.imPay.enabled ? '已启用' : '未启用' }}
+                            </el-tag>
+                          </div>
+                           <div class="payment-info-item">
+                            <span class="label">网关 (Android)</span>
+                            <span class="value">{{ paymentConfig.imPay.gatewayAndroid }}</span>
+                          </div>
+                          <div class="payment-info-item">
+                            <span class="label">网关 (iOS)</span>
+                            <span class="value">{{ paymentConfig.imPay.gatewayIos }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <el-empty description="暂未配置IM支付" :image-size="60" />
+                        <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                          <el-button type="primary" @click="handleCreatePayment('imPay')">
+                            <el-icon><Plus /></el-icon>新建配置
+                          </el-button>
+                        </div>
+                      </template>
+                    </div>
+
+                    <div class="payment-card-footer" v-if="paymentConfig?.imPay">
+                      <el-button type="primary" link @click="handleEditPayment('imPay')">
+                        <el-icon><Edit /></el-icon>编辑
+                      </el-button>
+                      <el-button type="danger" link @click="handleDeletePayment('imPay')">
                         <el-icon><Delete /></el-icon>删除
                       </el-button>
                     </div>
@@ -440,8 +496,8 @@ const handleEditPayment = (type) => {
   currentPaymentType.value = type
   form.value = {
     status: paymentConfig.value[type]?.enabled ? '启用' : '禁用',
-    gatewayAndroid: paymentConfig.value[type]?.gatewayAndroid || '',
-    gatewayIos: paymentConfig.value[type]?.gatewayIos || ''
+    gatewayAndroid: paymentConfig.value[type]?.gatewayAndroid,
+    gatewayIos: paymentConfig.value[type]?.gatewayIos
   }
   dialogVisible.value = true
 }
@@ -487,7 +543,7 @@ const handleDeletePayment = (type) => {
 }
 
 const handleSave = async () => {
-  if (!form.value.gatewayAndroid || !form.value.gatewayIos) {
+  if (form.value.gatewayAndroid==null || form.value.gatewayIos==null) {
     ElMessage.error('请填写完整信息')
     return
   }
@@ -526,6 +582,7 @@ const getPaymentTypeName = (type) => {
     orderPay: '通用交易支付',
     renewPay: '连包支付',
     douzuanPay: '抖钻支付',
+    imPay: 'IM支付',
     wxVirtualPay: '微信虚拟支付'
   }
   return names[type] || type

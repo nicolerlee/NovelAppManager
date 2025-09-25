@@ -147,6 +147,41 @@
               </div>
             </div>
           </el-card>
+
+           <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+            <div class="payment-card-wrapper">
+              <div class="payment-card-header" :class="{ 'configured': paymentConfigForm.imPay.enabled && paymentConfigForm.imPay.gatewayAndroid && paymentConfigForm.imPay.gatewayIos }">
+                <div class="payment-type-info">
+                  <el-icon><Star /></el-icon>
+                  <div class="payment-type-title">
+                    <h4>IM支付</h4>
+                  </div>
+                </div>
+                <el-tag size="small" :type="paymentConfigForm.imPay.enabled ? 'success' : 'info'" effect="plain">
+                  {{ paymentConfigForm.imPay.enabled ? '已启用' : '未启用' }}
+                </el-tag>
+              </div>
+
+              <div class="payment-card-content">
+                <div class="payment-info-list">
+                  <div class="payment-info-item">
+                    <span class="label">状态</span>
+                    <el-switch v-model="paymentConfigForm.imPay.enabled" />
+                  </div>
+                  <el-form-item label="网关(A)" prop="imPay.gatewayAndroid" class="gateway-form-item">
+                    <div v-if="paymentConfigForm.imPay.enabled">
+                      <el-input v-model="paymentConfigForm.imPay.gatewayAndroid" placeholder="请输入网关 (Android)" />
+                    </div>
+                  </el-form-item>
+                  <el-form-item label="网关(I)" prop="imPay.gatewayIos" class="gateway-form-item">
+                    <div v-if="paymentConfigForm.imPay.enabled">
+                      <el-input v-model="paymentConfigForm.imPay.gatewayIos" placeholder="请输入网关 (iOS)" />
+                    </div>
+                  </el-form-item>
+                </div>
+              </div>
+            </div>
+          </el-card>
         </template>
 
         <!-- 微信虚拟支付配置 (微信平台特有) -->
@@ -204,6 +239,7 @@ const props = defineProps({
       orderPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
       renewPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
       douzuanPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+      imPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
       wxVirtualPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' }
     })
   },
@@ -314,6 +350,26 @@ const paymentConfigFormRules = reactive({
     },
     trigger: 'blur'
   }],
+  'imPay.gatewayAndroid': [{
+    validator: (rule, value, callback) => {
+      if (props.platform === 'douyin' && paymentConfigForm.imPay.enabled && !value) {
+        callback(new Error('请输入网关 (Android)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'imPay.gatewayIos': [{
+    validator: (rule, value, callback) => {
+      if (props.platform === 'douyin' && paymentConfigForm.imPay.enabled && !value) {
+        callback(new Error('请输入网关 (iOS)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
   'wxVirtualPay.gatewayAndroid': [{
     validator: (rule, value, callback) => {
       if (props.platform === 'weixin' && paymentConfigForm.wxVirtualPay.enabled && !value) {
@@ -351,6 +407,7 @@ const validate = async () => {
     payment.enabled &&
     ((payment.gatewayAndroid && payment.gatewayIos) ||
      (props.platform === 'douyin' && payment === paymentConfigForm.douzuanPay) ||
+      (props.platform === 'douyin' && payment === paymentConfigForm.imPay) ||
      (props.platform === 'weixin' && payment === paymentConfigForm.wxVirtualPay))
   );
   
@@ -369,6 +426,7 @@ const resetFields = () => {
     orderPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
     renewPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
     douzuanPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+    imPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
     wxVirtualPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' }
   });
 };

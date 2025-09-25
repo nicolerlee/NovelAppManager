@@ -3,7 +3,7 @@
     <div class="sidebar">
       <div class="logo-container">
         <img src="/images/logo/wenqu_logo.png" class="logo-image" />
-        <div class="logo-text">WENQU</div>
+        <div class="logo-text">WENQU 2.0</div>
       </div>
       <div class="sidebar-menu">
 
@@ -321,7 +321,7 @@ body, html, #app {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
 }
 .login-content{
   position: fixed;

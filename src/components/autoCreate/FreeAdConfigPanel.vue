@@ -372,10 +372,10 @@ defineExpose({
   color: #303133;
 }
 
-/* 修改为2列布局 */
+/* 固定为2列布局 */
 .payment-config-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   padding: 8px;
   max-height: 600px;
