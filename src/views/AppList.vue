@@ -1,80 +1,60 @@
 <template>
   <div class="app-list">
     <div class="card-container">
-      <el-card 
+      <el-card
         class="data-card douyin-card"
         :class="{ 'is-active': selectedPlatform === '抖音' }"
         @click="handlePlatformSelect('抖音')"
       >
-        <template #header>
-          <div class="card-header">
-            <span>抖音小程序</span>
-          </div>
-        </template>
+        <img src="/images/logo/douyin_logo.png" class="card-logo" />
         <div class="card-value">{{ statistics.douyin }}</div>
         <div class="card-trend">
           小程序总数 <span class="count">{{ statistics.douyinCount }}</span>
         </div>
       </el-card>
 
-      <el-card 
+      <el-card
         class="data-card kuaishou-card"
         :class="{ 'is-active': selectedPlatform === '快手' }"
         @click="handlePlatformSelect('快手')"
       >
-        <template #header>
-          <div class="card-header">
-            <span>快手小程序</span>
-          </div>
-        </template>
+        <img src="/images/logo/kuaishou_logo.png" class="card-logo" />
         <div class="card-value">{{ statistics.kuaishou }}</div>
         <div class="card-trend">
           小程序总数 <span class="count">{{ statistics.kuaishouCount }}</span>
         </div>
       </el-card>
 
-      <el-card 
+      <el-card
         class="data-card weixin-card"
         :class="{ 'is-active': selectedPlatform === '微信' }"
         @click="handlePlatformSelect('微信')"
       >
-        <template #header>
-          <div class="card-header">
-            <span>微信小程序</span>
-          </div>
-        </template>
+        <img src="/images/logo/weixin_logo.png" class="card-logo" />
         <div class="card-value">{{ statistics.weixin }}</div>
         <div class="card-trend">
           小程序总数 <span class="count">{{ statistics.weixinCount }}</span>
         </div>
       </el-card>
 
-      <el-card 
+      <el-card
         class="data-card bilibili-card"
         :class="{ 'is-active': selectedPlatform === 'B站' }"
         @click="handlePlatformSelect('B站')"
       >
-        <template #header>
-          <div class="card-header">
-            <span>B站小程序</span>
-          </div>
-        </template>
+        <img src="/images/logo/bilibili_logo.png" class="card-logo" />
         <div class="card-value">{{ statistics.bilibili }}</div>
         <div class="card-trend">
           小程序总数 <span class="count">{{ statistics.bilibiliCount }}</span>
         </div>
       </el-card>
 
-      <el-card 
-        class="data-card baidu-card"
+      <el-card
+        class="data-card baidu-card"  
         :class="{ 'is-active': selectedPlatform === '百度' }"
         @click="handlePlatformSelect('百度')"
       >
-        <template #header>
-          <div class="card-header">
-            <span>百度小程序</span>
-          </div>
-        </template>
+        <img src="/images/logo/baidu_logo.png" class="card-logo" />
         <div class="card-value">{{ statistics.baidu }}</div>
         <div class="card-trend">
           小程序总数 <span class="count">{{ statistics.baiduCount }}</span>
@@ -86,8 +66,12 @@
       <template #header>
         <div class="header">
           <h3>
-            {{ selectedPlatform ? selectedPlatform + '小程序列表' : '全部小程序列表' }}
-            <el-tag 
+            {{
+              selectedPlatform
+                ? selectedPlatform + "小程序列表"
+                : "全部小程序列表"
+            }}
+            <el-tag
               v-if="selectedPlatform"
               class="platform-tag"
               :type="getPlatformType(selectedPlatform)"
@@ -98,11 +82,18 @@
               {{ selectedPlatform }}
             </el-tag>
           </h3>
-          <div style="display: flex; align-items: center; gap: 15px; margin-left: 15px;">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 15px;
+              margin-left: 15px;
+            "
+          >
             <el-input
               v-model="searchQuery"
               placeholder="搜索小程序"
-              style="width: 220px;"
+              style="width: 220px"
               clearable
             >
               <template #prefix>
@@ -114,12 +105,8 @@
         </div>
       </template>
 
-      <el-table 
-        :data="filteredAppList" 
-        style="width: 100%"
-        v-loading="loading"
-      >
-        <el-table-column 
+      <el-table :data="filteredAppList" style="width: 100%" v-loading="loading">
+        <el-table-column
           v-for="col in tableColumns"
           :key="col.prop"
           :prop="col.prop"
@@ -129,31 +116,28 @@
           <template #default="scope" v-if="col.slot">
             <!-- 平台列 -->
             <template v-if="col.prop === 'platform'">
-              <el-tag 
+              <el-tag
                 :type="getPlatformType(scope.row.platform)"
                 :effect="'light'"
               >
                 {{ scope.row.platform }}
               </el-tag>
             </template>
-            
+
             <!-- 状态列 -->
             <template v-if="col.prop === 'status'">
-              <el-tag :type="scope.row.status === '运行中' ? 'success' : 'danger'">
+              <el-tag
+                :type="scope.row.status === '运行中' ? 'success' : 'danger'"
+              >
                 {{ scope.row.status }}
               </el-tag>
             </template>
-
-           
           </template>
         </el-table-column>
 
         <el-table-column label="操作" width="250" fixed="right">
           <template #default="scope">
-            <el-button 
-              size="small"
-              @click="handleEdit(scope.row)"
-            >
+            <el-button size="small" @click="handleEdit(scope.row)">
               编辑
             </el-button>
             <el-button
@@ -184,53 +168,70 @@
             <el-option label="B站小程序" value="B站" />
           </el-select>
         </el-form-item>
-        
+
         <el-form-item label="appName">
-          <el-input v-model="appForm.appName" placeholder="请输入小程序名称" :disabled="isEdit" />
+          <el-input
+            v-model="appForm.appName"
+            placeholder="请输入小程序名称"
+            :disabled="isEdit"
+          />
         </el-form-item>
-        
+
         <el-form-item label="version">
           <el-input v-model="appForm.version" placeholder="请输入版本号" />
         </el-form-item>
-        
+
         <el-form-item label="appCode">
-          <el-input v-model="appForm.appCode" placeholder="例：tt_miniapp_yunyounovel" />
+          <el-input
+            v-model="appForm.appCode"
+            placeholder="例：tt_miniapp_yunyounovel"
+          />
         </el-form-item>
-        
+
         <el-form-item label="product">
           <el-input v-model="appForm.product" placeholder="例：yunyounovel" />
         </el-form-item>
-        
+
         <el-form-item label="customer">
-          <el-input v-model="appForm.customer" placeholder="例：tt_yunyounovel" />
+          <el-input
+            v-model="appForm.customer"
+            placeholder="例：tt_yunyounovel"
+          />
         </el-form-item>
-        
+
         <el-form-item label="appid">
-          <el-input v-model="appForm.appid" placeholder="请输入AppID" :disabled="isEdit" />
+          <el-input
+            v-model="appForm.appid"
+            placeholder="请输入AppID"
+            :disabled="isEdit"
+          />
         </el-form-item>
-        
+
         <el-form-item label="token_id">
-          <el-input-number 
-            v-model="appForm.token_id" 
+          <el-input-number
+            v-model="appForm.token_id"
             :min="1"
             placeholder="请输入Token ID"
             style="width: 100%"
           />
         </el-form-item>
-        
+
         <el-form-item label="cl">
-          <el-input v-model="appForm.cl" placeholder="例：tt_miniapp_yunyounovel" />
+          <el-input
+            v-model="appForm.cl"
+            placeholder="例：tt_miniapp_yunyounovel"
+          />
         </el-form-item>
-        
+
         <el-form-item label="deliverId">
           <el-input v-model="appForm.deliverId" placeholder="例：ad_12345" />
         </el-form-item>
-        
+
         <el-form-item label="bannerId">
           <el-input v-model="appForm.bannerId" placeholder="例：banner_6789" />
         </el-form-item>
       </el-form>
-      
+
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
@@ -242,59 +243,58 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted ,inject} from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search } from '@element-plus/icons-vue'
-import request from '../utils/request'
-import { pinyin } from 'pinyin-pro'
+import { ref, computed, onMounted, inject } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Search } from "@element-plus/icons-vue";
+import request from "../utils/request";
+import { pinyin } from "pinyin-pro";
 
-const auth = inject('auth', null);
-
+const auth = inject("auth", null);
 
 // 平台映射
 const platformMap = {
-  'douyin': '抖音',
-  'kuaishou': '快手',
-  'weixin': '微信',
-  'baidu': '百度',
-  'bilibili': 'B站'
-}
+  douyin: "抖音",
+  kuaishou: "快手",
+  weixin: "微信",
+  baidu: "百度",
+  bilibili: "B站",
+};
 
 // 统计数据
 const statistics = ref({
-  douyin: '抖音小程序',
+  douyin: "抖音小程序",
   douyinCount: 0,
-  kuaishou: '快手小程序',
+  kuaishou: "快手小程序",
   kuaishouCount: 0,
-  weixin: '微信小程序',
+  weixin: "微信小程序",
   weixinCount: 0,
-  baidu: '百度小程序',
+  baidu: "百度小程序",
   baiduCount: 0,
-  bilibili: 'B站小程序',
-  bilibiliCount: 0
-})
+  bilibili: "B站小程序",
+  bilibiliCount: 0,
+});
 
 // 小程序列表数据
-const appList = ref([])
-const selectedPlatform = ref('')
-const loading = ref(false)
-const searchQuery = ref('')
+const appList = ref([]);
+const selectedPlatform = ref("");
+const loading = ref(false);
+const searchQuery = ref("");
 
 // 获取小程序列表
 const fetchAppList = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const res = await request.get('/api/novel-apps/appLists')
-    const data = res.data
-    
+    const res = await request.get("/api/novel-apps/appLists");
+    const data = res.data;
+
     // 处理数据
-    let allApps = []
+    let allApps = [];
     Object.entries(data).forEach(([platform, apps]) => {
       // 更新统计数据
-      statistics.value[`${platform}Count`] = apps.length
-      
+      statistics.value[`${platform}Count`] = apps.length;
+
       // 转换应用数据
-      const convertedApps = apps.map(app => ({
+      const convertedApps = apps.map((app) => ({
         id: app.id,
         platform: platformMap[app.platform] || app.platform,
         appName: app.appName,
@@ -309,81 +309,85 @@ const fetchAppList = async () => {
         mainTheme: app.mainTheme,
         secondTheme: app.secondTheme,
         version: app.version,
-        status: '运行中',
+        status: "运行中",
         createTime: new Date(app.createTime).toLocaleDateString(),
-        updateTime: new Date(app.updateTime).toLocaleDateString()
-      }))
-      
-      allApps = [...allApps, ...convertedApps]
-    })
-    
-    appList.value = allApps
-  } catch (error) {
-    console.error('获取应用列表失败:', error)
-    ElMessage.error('获取应用列表失败')
-  } finally {
-    loading.value = false
-  }
-}
+        updateTime: new Date(app.updateTime).toLocaleDateString(),
+      }));
 
-const dialogVisible = ref(false)
-const isEdit = ref(false)
+      allApps = [...allApps, ...convertedApps];
+    });
+
+    appList.value = allApps;
+  } catch (error) {
+    console.error("获取应用列表失败:", error);
+    ElMessage.error("获取应用列表失败");
+  } finally {
+    loading.value = false;
+  }
+};
+
+const dialogVisible = ref(false);
+const isEdit = ref(false);
 const appForm = ref({
-  platform: '',
-  appName: '',
-  appCode: '',
-  product: '',
-  customer: '',
-  appid: '',
+  platform: "",
+  appName: "",
+  appCode: "",
+  product: "",
+  customer: "",
+  appid: "",
   token_id: null,
-  cl: '',
-  deliverId: '',
-  bannerId: '',
-  mainTheme: '',
-  secondTheme: '',
-  version: ''
-})
+  cl: "",
+  deliverId: "",
+  bannerId: "",
+  mainTheme: "",
+  secondTheme: "",
+  version: "",
+});
 
 // 根据选中平台过滤小程序列表
 const filteredAppList = computed(() => {
-  let list = appList.value
+  let list = appList.value;
   if (selectedPlatform.value) {
-    list = list.filter(app => app.platform === selectedPlatform.value)
+    list = list.filter((app) => app.platform === selectedPlatform.value);
   }
-  if (!searchQuery.value) return list
-  const q = searchQuery.value.toLowerCase()
+  if (!searchQuery.value) return list;
+  const q = searchQuery.value.toLowerCase();
   const isSingleCharQuery = q.length === 1;
-  return list.filter(app => {
-    const name = app.appName || ''
+  return list.filter((app) => {
+    const name = app.appName || "";
     // 获取全拼和首字母
-    const namePinyinFirst = pinyin(name, { 
-      pattern: 'first', 
-      type: 'array',
-      toneType: 'none',
-      nonZh: 'consecutive'
-    }).join('').toLowerCase()
-    const namePinyinFull = pinyin(name, { 
-      pattern: 'pinyin', 
-      type: 'array',
-      toneType: 'none',
-      nonZh: 'consecutive'
-    }).join('').toLowerCase()
-    
+    const namePinyinFirst = pinyin(name, {
+      pattern: "first",
+      type: "array",
+      toneType: "none",
+      nonZh: "consecutive",
+    })
+      .join("")
+      .toLowerCase();
+    const namePinyinFull = pinyin(name, {
+      pattern: "pinyin",
+      type: "array",
+      toneType: "none",
+      nonZh: "consecutive",
+    })
+      .join("")
+      .toLowerCase();
+
     // 检查原始名称
-    if (name.toLowerCase().includes(q)) return true
-    
+    if (name.toLowerCase().includes(q)) return true;
+
     // 检查拼音首字母
     if (isSingleCharQuery) {
       // 对于单字符查询，严格匹配首字母
       if (namePinyinFirst.length > 0 && namePinyinFirst[0] === q) return true;
     } else {
       // 对于多字符查询，检查是否以首字母开头
-      if (namePinyinFirst.startsWith(q)) return true
+      if (namePinyinFirst.startsWith(q)) return true;
     }
-    
+
     // 检查全拼
-    if (namePinyinFull.includes(q)) return true
-    
+    if (namePinyinFull.includes(q)) return true;
+
     // 检查其他字段
     return (
       (app.appid && app.appid.toLowerCase().includes(q)) ||
@@ -391,48 +395,47 @@ const filteredAppList = computed(() => {
       (app.product && app.product.toLowerCase().includes(q)) ||
       (app.customer && app.customer.toLowerCase().includes(q)) ||
       (app.cl && app.cl.toLowerCase().includes(q))
-    )
-  })
-})
+    );
+  });
+});
 
 const getPlatformType = (platform) => {
   const types = {
-    '抖音': 'info',
-    '快手': 'danger',
-    '微信': 'success',
-    '百度': 'primary',
-    'B站': 'primary'
-  }
-  return types[platform] || 'info'
-}
+    抖音: "info",
+    快手: "danger",
+    微信: "success",
+    百度: "primary",
+    B站: "primary",
+  };
+  return types[platform] || "info";
+};
 
 const handleAddApp = () => {
-  isEdit.value = false
+  isEdit.value = false;
   appForm.value = {
-    platform: '',
-    appName: '',
-    appCode: '',
-    product: '',
-    customer: '',
-    appid: '',
+    platform: "",
+    appName: "",
+    appCode: "",
+    product: "",
+    customer: "",
+    appid: "",
     token_id: null,
-    cl: '',
-    deliverId: '',
-    bannerId: '',
-    mainTheme: '',
-    secondTheme: '',
-    version: ''
-  }
-  dialogVisible.value = true
-}
-
+    cl: "",
+    deliverId: "",
+    bannerId: "",
+    mainTheme: "",
+    secondTheme: "",
+    version: "",
+  };
+  dialogVisible.value = true;
+};
 
 const handleEdit = (app) => {
   if (!auth.isLogin.value) {
-    auth.showLogin()
-    return
+    auth.showLogin();
+    return;
   }
-  isEdit.value = true
+  isEdit.value = true;
   appForm.value = {
     id: app.id,
     platform: app.platform,
@@ -445,74 +448,80 @@ const handleEdit = (app) => {
     cl: app.cl,
     deliverId: app.deliverId,
     bannerId: app.bannerId,
-    version: app.version
-  }
-  dialogVisible.value = true
-}
+    version: app.version,
+  };
+  dialogVisible.value = true;
+};
 
 const handleDelete = async (app) => {
   if (!auth.isLogin.value) {
-    auth.showLogin()
-    return
+    auth.showLogin();
+    return;
   }
   try {
-    await ElMessageBox.confirm(`确定要删除${app.platform}小程序：${app.appName}吗？`, '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-    loading.value = true
-    const res = await request.get('/api/novel-apps/delete', {
-      params: { appId: app.appid }
-    })
+    await ElMessageBox.confirm(
+      `确定要删除${app.platform}小程序：${app.appName}吗？`,
+      "提示",
+      {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }
+    );
+    loading.value = true;
+    const res = await request.get("/api/novel-apps/delete", {
+      params: { appId: app.appid },
+    });
     if (res.code === 200) {
-      ElMessage.success('删除成功')
-      await fetchAppList()
+      ElMessage.success("删除成功");
+      await fetchAppList();
     } else {
-      throw new Error(res.message || '删除失败')
+      throw new Error(res.message || "删除失败");
     }
   } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error(error.message || '删除失败')
+    if (error !== "cancel") {
+      ElMessage.error(error.message || "删除失败");
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handleSave = async () => {
-  if (!appForm.value.platform || !appForm.value.appName || !appForm.value.appid || 
-      !appForm.value.appCode || !appForm.value.product || !appForm.value.customer || 
-      !appForm.value.cl) {
-    ElMessage.error('请填写完整信息')
-    return
+  if (
+    !appForm.value.platform ||
+    !appForm.value.appName ||
+    !appForm.value.appid ||
+    !appForm.value.appCode ||
+    !appForm.value.product ||
+    !appForm.value.customer ||
+    !appForm.value.cl
+  ) {
+    ElMessage.error("请填写完整信息");
+    return;
   }
 
   // 编辑模式下增加二次确认弹窗
   if (isEdit.value) {
     try {
-      await ElMessageBox.confirm(
-        '编辑将会同步修改代码，请谨慎操作',
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-        }
-      )
+      await ElMessageBox.confirm("编辑将会同步修改代码，请谨慎操作", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      });
     } catch (e) {
       // 用户取消
-      return
+      return;
     }
   }
-  
+
   try {
-    loading.value = true
-    
+    loading.value = true;
+
     // 转换平台值为后端需要的格式
-    const platformCode = Object.entries(platformMap).find(([key, value]) => 
-      value === appForm.value.platform
-    )?.[0]
+    const platformCode = Object.entries(platformMap).find(
+      ([key, value]) => value === appForm.value.platform
+    )?.[0];
 
     // 构造请求数据，保持和后端接口一致的字段名
     const requestData = {
@@ -528,116 +537,116 @@ const handleSave = async () => {
       bannerId: appForm.value.bannerId,
       mainTheme: appForm.value.mainTheme,
       secondTheme: appForm.value.secondTheme,
-      version: appForm.value.version
-    }
+      version: appForm.value.version,
+    };
 
     if (isEdit.value) {
       // 添加 id 字段
-      requestData.id = appForm.value.id
-      
+      requestData.id = appForm.value.id;
+
       // 发送更新请求
-      const res = await request.post('/api/novel-apps/update', requestData)
+      const res = await request.post("/api/novel-apps/update", requestData);
       if (res.code === 200) {
-        ElMessage.success('更新成功')
-        await fetchAppList()
-        dialogVisible.value = false
+        ElMessage.success("更新成功");
+        await fetchAppList();
+        dialogVisible.value = false;
       }
     } else {
       // 发送创建请求
-      const res = await request.post('/api/novel-apps/create', requestData)
+      const res = await request.post("/api/novel-apps/create", requestData);
       if (res.code === 200) {
-        ElMessage.success('添加成功')
-        await fetchAppList()
-        dialogVisible.value = false
+        ElMessage.success("添加成功");
+        await fetchAppList();
+        dialogVisible.value = false;
       }
     }
   } catch (error) {
-    console.error('保存失败:', error)
-    ElMessage.error('保存失败')
+    console.error("保存失败:", error);
+    ElMessage.error("保存失败");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // 平台选择处理
 const handlePlatformSelect = (platform) => {
   if (selectedPlatform.value === platform) {
-    selectedPlatform.value = ''
+    selectedPlatform.value = "";
   } else {
-    selectedPlatform.value = platform
+    selectedPlatform.value = platform;
   }
-}
+};
 
 // 清除平台选择
 const clearPlatformSelect = () => {
-  selectedPlatform.value = ''
-}
+  selectedPlatform.value = "";
+};
 
 // 修改表格列配置
 const tableColumns = [
   {
-    prop: 'platform',
-    label: '平台',
-    width: '100',
-    slot: true
+    prop: "platform",
+    label: "平台",
+    width: "100",
+    slot: true,
   },
   {
-    prop: 'appName',
-    label: '小程序名称',
-    width: '150'
+    prop: "appName",
+    label: "小程序名称",
+    width: "150",
   },
   {
-    prop: 'version',
-    label: '版本号',
-    width: '100'
+    prop: "version",
+    label: "版本号",
+    width: "100",
   },
   {
-    prop: 'appid',
-    label: 'AppID',
-    width: '200'
+    prop: "appid",
+    label: "AppID",
+    width: "200",
   },
   {
-    prop: 'appCode',
-    label: '应用代号',
-    width: '180'
+    prop: "appCode",
+    label: "应用代号",
+    width: "180",
   },
   {
-    prop: 'product',
-    label: '产品线',
-    width: '120'
+    prop: "product",
+    label: "产品线",
+    width: "120",
   },
   {
-    prop: 'token_id',
-    label: 'Token ID',
-    width: '100'
+    prop: "token_id",
+    label: "Token ID",
+    width: "100",
   },
   {
-    prop: 'cl',
-    label: 'CL标识',
-    width: '180'
+    prop: "cl",
+    label: "CL标识",
+    width: "180",
   },
   {
-    prop: 'deliverId',
-    label: 'deliverId',
-    width: '120'
+    prop: "deliverId",
+    label: "deliverId",
+    width: "120",
   },
   {
-    prop: 'bannerId',
-    label: 'bannerId',
-    width: '120'
+    prop: "bannerId",
+    label: "bannerId",
+    width: "120",
   },
   {
-    prop: 'status',
-    label: '状态',
-    width: '100',
-    slot: true
-  }
-]
+    prop: "status",
+    label: "状态",
+    width: "100",
+    slot: true,
+  },
+];
 
 // 页面加载时获取数据
 onMounted(() => {
-  fetchAppList()
-})
+  fetchAppList();
+});
 </script>
 
 <style scoped>
@@ -647,7 +656,6 @@ onMounted(() => {
   overflow-x: auto;
   margin: 0;
   box-sizing: border-box;
-  
 }
 
 .card-container {
@@ -655,6 +663,7 @@ onMounted(() => {
   width: auto;
   padding-right: 20px;
   margin-bottom: 20px;
+  margin-top: 20px;
   flex-wrap: nowrap;
   box-sizing: border-box;
 }
@@ -664,12 +673,11 @@ onMounted(() => {
   flex-shrink: 0;
   margin-left: 20px;
   box-sizing: border-box;
-
 }
 
 .data-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
@@ -684,44 +692,75 @@ onMounted(() => {
   font-size: 24px;
   font-weight: bold;
   margin: 16px 0;
-  color: #303133;
+  color: inherit;
 }
 
 .card-trend {
   font-size: 14px;
-  color: #909399;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 .count {
-  color: #f56c6c;
+  color: inherit;
   font-weight: bold;
 }
 
-/* 平台卡片样式 */
-.douyin-card :deep(.el-card__header) {
-  background-color: #2c2c2c;
-  color: white;
+/* 平台卡片样式 - 上半部分渐变（终点为白色），下半部分纯白色背景 */
+.douyin-card {
+  background: linear-gradient(180deg, #d0d0d0 0%, #ffffff 100%), #ffffff;
+  background-size: 100% 50%, 100% 100%;
+  background-position: top, bottom;
+  background-repeat: no-repeat, no-repeat;
+  border: none;
+  color: #333;
 }
 
-.kuaishou-card :deep(.el-card__header) {
-  background-color: #ff4e33;
-  color: white;
+.kuaishou-card {
+  background: linear-gradient(180deg, #ffd6cc 0%, #ffffff 100%), #ffffff;
+  background-size: 100% 50%, 100% 100%;
+  background-position: top, bottom;
+  background-repeat: no-repeat, no-repeat;
+  border: none;
+  color: #c42d12;
 }
 
-.weixin-card :deep(.el-card__header) {
-  background-color: #07c160;
-  color: white;
+.weixin-card {
+  background: linear-gradient(180deg, #b6f0cd 0%, #ffffff 100%), #ffffff;
+  background-size: 100% 50%, 100% 100%;
+  background-position: top, bottom;
+  background-repeat: no-repeat, no-repeat;
+  border: none;
+  color: #058a47;
 }
 
-.baidu-card :deep(.el-card__header) {
-  background-color: #4e6ef2;
-  color: white;
+.baidu-card {
+  background: linear-gradient(180deg, #d9e0ff 0%, #ffffff 100%), #ffffff;
+  background-size: 100% 50%, 100% 100%;
+  background-position: top, bottom;
+  background-repeat: no-repeat, no-repeat;
+  border: none;
+  color: #2d45c9;
 }
 
+.bilibili-card {
+  background: linear-gradient(180deg, #ffdde3 0%, #ffffff 100%), #ffffff;
+  background-size: 100% 50%, 100% 100%;
+  background-position: top, bottom;
+  background-repeat: no-repeat, no-repeat;
+  border: none;
+  color: #d64569;
+}
+
+/* 平台卡片头部样式 */
+.douyin-card :deep(.el-card__header),
+.kuaishou-card :deep(.el-card__header),
+.weixin-card :deep(.el-card__header),
+.baidu-card :deep(.el-card__header),
 .bilibili-card :deep(.el-card__header) {
-  background-color: #FB7299;
+  background: transparent;
   color: white;
-
+  padding: 16px;
+  border-bottom: none;
 }
 
 /* 卡片选中态样式 */
@@ -746,7 +785,7 @@ onMounted(() => {
   border-color: #4e6ef2;
 }
 .bilibili-card.is-active {
-  border-color: #FB7299;
+  border-color: #fb7299;
 }
 
 .platform-tag {
@@ -820,5 +859,39 @@ onMounted(() => {
   border-radius: 2px;
   margin-right: 8px;
   vertical-align: middle;
+}
+.card-logo {
+  width: 70px;
+  height: 70px;
+}
+
+/* 输入框基础样式 */
+:deep(.el-input__wrapper) {
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  border-color: #605ce5 !important;
+  box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+/* 输入框文本和占位符 */
+:deep(.el-input__inner) {
+  color: #605ce5 !important;
+}
+
+:deep(.el-input__inner::placeholder) {
+  color: #a6a6a6 !important;
+}
+
+/* 搜索图标颜色 */
+:deep(.el-input__prefix .el-icon),
+:deep(.el-input__suffix .el-icon) {
+  color: #605ce5 !important;
 }
 </style>
