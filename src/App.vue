@@ -4,65 +4,70 @@
       <div class="logo-container">
         <img src="/images/logo/wenqu_logo.png" class="logo-image" />
         <div class="logo-text">WENQU 2.0</div>
-      </div>
-      <div class="sidebar-menu">
 
-        <router-link to="/home" class="menu-item" active-class="menu-item-active">
-          <el-icon><HomeFilled /></el-icon>
-          <span>首页</span>
+      </div>
+       <router-link to="/home" class="menu-item" active-class="menu-item-active">
+          <svg width="20px" height="20px" viewBox="0 0 20 20"><defs><rect id="path-bitl8fdbrr-1" x="0" y="0" width="20" height="20"></rect></defs><g stroke="none" stroke-width="1" fill="currentColor" fill-rule="evenodd"><g id="home"><g id="path-1"></g><path d="M17.5,6.6368772 L17.5,17.5 L11.5,17.5 L11.5,12.2874897 L8.5,12.2874897 L8.5,17.5 L4.74999658,17.5 L4.73392336,17.5 C3.50016156,17.5 2.5,16.4998384 2.5,15.2660766 L2.5,15.2660766 L2.5,15.2660766 L2.5,6.6368772 L10,2.5 L17.5,6.6368772 Z" id="vector" fill="currentColor" fill-rule="nonzero" mask="url(#mask-bitl8fdbrr-2)"></path></g></g></svg>
+          <span style="margin-left: 8px;">首页</span>
         </router-link>
 
         <router-link to="/apps" class="menu-item" active-class="menu-item-active">
-          <el-icon><Platform /></el-icon>
-          <span>小程序列表</span>
+          <svg t="1666080077986" class="icon" viewBox="0 0 1024 1024" p-id="4159" width="20" height="20"><path d="M640 128l213.333333 213.333333v513.28l-0.298666 4.864a41.386667 41.386667 0 0 1-36.266667 36.266667l-4.778667 0.256H298.666667l-7.509334-0.213333a128 128 0 0 1-120.277333-120.277334L170.666667 768V171.008l0.256-4.693333c2.133333-19.882667 17.877333-35.712 37.717333-38.016L213.674667 128H640z m42.666667 426.666667H341.333333v42.666666l0.298667 4.992a42.666667 42.666667 0 0 0 37.376 37.376L384 640h298.666667v-85.333333z m-85.333334-170.666667H341.333333v85.333333h256V384z" p-id="4160" fill="currentColor"></path></svg>
+          <span style="margin-left: 8px;">小程序列表</span>
         </router-link>
 
         <router-link to="/config" class="menu-item" active-class="menu-item-active">
-          <el-icon><Setting /></el-icon>
-          <span>微距(for测试同学)</span>
+          <svg t="1666078013248" class="icon" viewBox="0 0 1024 1024" p-id="12494" width="20" height="20"><path d="M529.066667 165.034667l104.533333 216.405333 206.378667 20.181333a42.666667 42.666667 0 0 1 23.808 74.666667l-162.176 140.885333 46.037333 224.384a42.666667 42.666667 0 0 1-64.298667 44.8l-192.725333-119.637333-192.597333 119.637333a42.666667 42.666667 0 0 1-64.298667-44.8l45.994667-224.384-162.133334-140.842666a42.666667 42.666667 0 0 1 23.808-74.666667L348.16 381.44l104.106667-216.32a42.666667 42.666667 0 0 1 76.8-0.085333z" p-id="12495" fill="currentColor"></path></svg>
+          <span style="margin-left: 8px;">微距(for测试同学)</span>
         </router-link>
 
-        <router-link to="/ads" class="menu-item" active-class="menu-item-active">
+        <!-- <router-link to="/ads" class="menu-item" active-class="menu-item-active">
           <el-icon><Picture /></el-icon>
-          <span>广告</span>
+          <span style="margin-left: 8px;">广告</span>
         </router-link>
 
         <router-link to="/payment" class="menu-item" active-class="menu-item-active">
           <el-icon><Money /></el-icon>
-          <span>支付</span>
+          <span style="margin-left: 8px;">支付</span>
         </router-link>
 
         <router-link to="/ui-config" class="menu-item" active-class="menu-item-active">
           <el-icon><PictureRounded /></el-icon>
-          <span>UI配置</span>
+          <span style="margin-left: 8px;">UI配置</span>
         </router-link>
 
         <router-link to="/general-config" class="menu-item" active-class="menu-item-active">
           <el-icon><Tools /></el-icon>
-          <span>通用配置</span>
-        </router-link>
+          <span style="margin-left: 8px;">通用配置</span>
+        </router-link> -->
 
         <router-link to="/wenqu-auto" class="menu-item" active-class="menu-item-active">
-          <el-icon><MagicStick /></el-icon>
-          <span>文曲自动化</span>
+          <svg width="20px" height="20px" viewBox="0 0 20 20"><g id="\u63A7\u4EF6" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="icon/24*24/\u5171\u4EAB\u7EAA\u8981"><path d="M0,0 L20,0 L20,20 L0,20 L0,0 Z" id="user-m-(Background/Mask)"></path><path d="M3.9814865,17.5 C3.1632841,17.5 2.5,16.8367159 2.5,16.0185135 C2.5,13.0555537 4.69500581,10.8333333 7.91666667,10.8333333 C11.1383275,10.8333333 13.3333333,13.0555537 13.3333333,16.0185213 L13.3333333,16.0185213 L13.3333333,17.5 Z M14.1666611,12.5 C16.3981145,12.5 18.2198735,14.0671857 18.328234,16.1884318 L18.3333333,16.3888909 L18.3333333,17.5 L15,17.5 L15,16.0185213 C15,14.6451046 14.5283862,13.4308432 13.7015175,12.5232804 C13.8531848,12.5078334 14.008899,12.5 14.1666611,12.5 Z M14.1666667,6.66666667 C15.461084,6.66666667 16.5104167,7.75797259 16.5104167,9.10416667 C16.5104167,10.4503607 15.461084,11.5416667 14.1666667,11.5416667 C12.8722493,11.5416667 11.8229167,10.4503607 11.8229167,9.10416667 C11.8229167,7.75797259 12.8722493,6.66666667 14.1666667,6.66666667 Z M7.91666667,2.5 C9.728851,2.5 11.1979167,4.01103897 11.1979167,5.875 C11.1979167,7.73896103 9.728851,9.25 7.91666667,9.25 C6.10448233,9.25 4.63541667,7.73896103 4.63541667,5.875 C4.63541667,4.01103897 6.10448233,2.5 7.91666667,2.5 Z" id="\u5F62\u72B6\u7ED3\u5408" fill="currentColor"></path></g></g></svg>
+          <span style="margin-left: 8px;">文曲自动化</span>
         </router-link>
 
         <router-link to="/wenqu-ai" class="menu-item" active-class="menu-item-active">
-          <el-icon><Star /></el-icon>
-          <span>文曲AI</span>
+          <svg t="1666080077986" class="icon" viewBox="0 0 1024 1024" p-id="4159" width="20" height="20"><path d="M640 128l213.333333 213.333333v513.28l-0.298666 4.864a41.386667 41.386667 0 0 1-36.266667 36.266667l-4.778667 0.256H298.666667l-7.509334-0.213333a128 128 0 0 1-120.277333-120.277334L170.666667 768V171.008l0.256-4.693333c2.133333-19.882667 17.877333-35.712 37.717333-38.016L213.674667 128H640z m42.666667 426.666667H341.333333v42.666666l0.298667 4.992a42.666667 42.666667 0 0 0 37.376 37.376L384 640h298.666667v-85.333333z m-85.333334-170.666667H341.333333v85.333333h256V384z" p-id="4160" fill="currentColor"></path></svg>
+          <span style="margin-left: 8px;">文曲AI</span>
         </router-link>
 
         <router-link to="/toolbox" class="menu-item" active-class="menu-item-active">
-          <el-icon><Grid /></el-icon>
-          <span>工具箱</span>
+          <svg width="20px" height="20px" viewBox="0 0 20 20"><defs><rect id="path-tu_jwkx0s7-1" x="0" y="0" width="20" height="20"></rect></defs><g stroke="none" stroke-width="1" fill="currentColor" fill-rule="evenodd"><g id="recycler"><g id="path-1"></g><path d="M12.5,9.16666667 L12.5,14.1666667 L10.8333333,14.1666667 L10.8333333,9.16666667 L12.5,9.16666667 Z M9.16666667,9.16666667 L9.16666667,14.1666667 L8.33332869,14.1666667 L8.22880635,14.1601738 C7.81790632,14.1087513 7.5,13.7581652 7.5,13.3333281 L7.5,9.16666667 L9.16666667,9.16666667 Z M2.5,5 L2.5,6.66666667 L4.16666667,6.66666667 L4.16666287,15 C4.16666497,16.3807125 5.28595418,17.5 6.66666667,17.5 L6.66666153,17.5 L6.66666153,17.5 L15.8333333,17.5 L15.8333333,6.66666667 L17.5,6.66666667 L17.5,5 L2.5,5 Z M12.5,2.5 L7.5,2.5 L7.5,4.16666667 L12.5,4.16666667 L12.5,2.5 Z" id="vector" fill="currentColor" fill-rule="nonzero" mask="url(#mask-tu_jwkx0s7-2)"></path></g></g></svg>
+          <span style="margin-left: 8px;">工具箱</span>
         </router-link>
 
         <!-- 后台管理菜单，仅研发可见 -->
         <router-link v-if="auth.isLogin.value && auth.userInfo.value?.type === 0" to="/admin" class="menu-item" active-class="menu-item-active">
-          <el-icon><Key /></el-icon>
-          <span>后台管理</span>
+          <svg t="1666080077986" class="icon" viewBox="0 0 1024 1024" p-id="4159" width="20" height="20"><path d="M640 128l213.333333 213.333333v513.28l-0.298666 4.864a41.386667 41.386667 0 0 1-36.266667 36.266667l-4.778667 0.256H298.666667l-7.509334-0.213333a128 128 0 0 1-120.277333-120.277334L170.666667 768V171.008l0.256-4.693333c2.133333-19.882667 17.877333-35.712 37.717333-38.016L213.674667 128H640z m42.666667 426.666667H341.333333v42.666666l0.298667 4.992a42.666667 42.666667 0 0 0 37.376 37.376L384 640h298.666667v-85.333333z m-85.333334-170.666667H341.333333v85.333333h256V384z" p-id="4160" fill="currentColor"></path></svg>
+          <span style="margin-left: 8px;">后台管理</span>
         </router-link>
-      </div>
+
+        <div style="height: auto; flex:1"></div>
+
+        <div class="about-wenqu-content">
+          <svg t="1663830167881" class="icon" viewBox="0 0 1024 1024" p-id="3917" width="20" height="20"><path d="M512 85.333333c235.648 0 426.666667 191.018667 426.666667 426.666667s-191.018667 426.666667-426.666667 426.666667S85.333333 747.648 85.333333 512 276.352 85.333333 512 85.333333z m42.666667 597.333334h-85.333334v85.333333h85.333334v-85.333333zM512 256a170.666667 170.666667 0 0 0-170.453333 162.133333L341.333333 426.666667h85.333334a85.333333 85.333333 0 1 1 91.733333 85.12L512 512h-42.666667v107.178667h85.333334v-27.221334A170.752 170.752 0 0 0 512 256z" p-id="3918" fill="currentColor"></path></svg>
+          <div class="about-wenqu-text">关于文曲</div>
+        </div>
     </div>
 
     <div class="main-content">
@@ -184,7 +189,7 @@ const agentOption = ref({
       zIndex: 1000,
     },
     asstBtn: {
-      isNeed: true,
+      isNeed: false,
     },
     footer: {
       isShow: true,
@@ -256,6 +261,7 @@ body, html, #app {
   overflow-y: auto;
   overflow-x: hidden;
   border-right: 1px solid #e0e0e0;
+  height: 100%;
 }
 
 .logo-container {
@@ -279,9 +285,6 @@ body, html, #app {
   object-fit: contain;
 }
 
-.sidebar-menu {
-  
-}
 
 .menu-item {
   display: flex;
@@ -299,9 +302,8 @@ body, html, #app {
     padding-right: 8px;
 }
 
-.menu-item:hover {
+.menu-item:hover:not(.menu-item-active) {
   background-color: rgba(96, 92, 229, .10);
-  
 }
 
 .menu-item-active {
@@ -322,6 +324,11 @@ body, html, #app {
   display: flex;
   flex-direction: column;
   overflow: auto;
+  background-color: rgb(244, 247, 252);
+  background-image: url(/images/home/home_bg_content1.png), url(/images/home/home_bg_content2.png);
+  background-repeat: no-repeat, no-repeat;
+  background-position: calc(100% + 310px) 0px, center calc(100% + 400px);
+  background-size: 439px 607px, 888px 579px;
 }
 .login-content{
   position: fixed;
@@ -357,6 +364,29 @@ body, html, #app {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+.about-wenqu-content{
+ margin-bottom: 40px; 
+ display: flex;
+ flex-direction: row; 
+ align-items: center; 
+ height: 25px;
+ cursor: pointer;
+ transition: all 0.3s ease;
+}
+.about-wenqu-content:hover svg{
+ color: #605ce5;
+}
+.about-wenqu-content:hover .about-wenqu-text{
+ color: #605ce5;
+}
+.about-wenqu-text{
+ color: rgb(39, 38, 77); 
+ line-height: 25px; 
+ height: 25px;
+ font-size: 14px;
+ margin-left: 8px;
+ transition: color 0.3s ease;
 }
 
 </style>
