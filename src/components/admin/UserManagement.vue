@@ -1,87 +1,84 @@
 <template>
   <div class="user-management-container">
-    <el-card>
-      <template #header>
-        <div class="card-header">
-          <span>用户管理</span>
-          <div class="search-container">
-            <el-input
-              v-model="searchKey"
-              placeholder="输入用户ID或用户名搜索..."
-              prefix-icon="Search"
-              :style="{ width: '200px' }"
+    <div class="card-header">
+      <div class="search-container">
+        <el-input
+          v-model="searchKey"
+          placeholder="输入用户ID或用户名搜索..."
+          prefix-icon="Search"
+          :style="{ width: '200px' }"
+        />
+        <el-button
+          type="primary"
+          size="middle"
+          @click="handleSearch"
+          :style="{ marginLeft: '10px' }"
+        >
+          搜索
+        </el-button>
+      </div>
+    </div>
+    <div class="user-management-content">
+      <el-table :data="userList" style="width: 100%">
+        <el-table-column prop="id" label="用户ID" width="200" />
+        <el-table-column prop="userName" label="用户名" width="200" />
+        <el-table-column prop="phone" label="电话" width="150" />
+        <el-table-column prop="type" label="用户类型" width="120">
+          <template #default="scope">
+            <span :class="getUserTypeClass(scope.row.type)">{{
+              formatUserType(scope.row)
+            }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="scope">
+            <span :class="getStatusClass(scope.row.status)">{{
+              formatStatus(scope.row)
+            }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="avatar" label="头像" width="120">
+          <template #default="scope">
+            <img
+              v-if="scope.row.avatar"
+              :src="scope.row.avatar"
+              alt="头像"
+              class="avatar"
+              width="36"
+              height="36"
             />
+            <span v-else>无头像</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="300" fixed="right">
+          <template #default="scope">
             <el-button
+              v-if="scope.row.status === 1"
               type="primary"
               size="small"
-              @click="handleSearch"
-              :style="{ marginLeft: '10px' }"
+              @click="handleApproveUser(scope.row.id)"
+              >通过审核</el-button
             >
-              搜索
-            </el-button>
-          </div>
-        </div>
-      </template>
-      <div class="user-management-content">
-        <el-table :data="userList" style="width: 100%">
-          <el-table-column prop="id" label="用户ID" width="200" />
-          <el-table-column prop="userName" label="用户名" width="200" />
-          <el-table-column prop="phone" label="电话" width="150" />
-          <el-table-column prop="type" label="用户类型" width="120">
-            <template #default="scope">
-              <span :class="getUserTypeClass(scope.row.type)">{{ formatUserType(scope.row) }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="status" label="状态" width="100">
-            <template #default="scope">
-              <span :class="getStatusClass(scope.row.status)">{{
-                formatStatus(scope.row)
-              }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="avatar" label="头像" width="120">
-            <template #default="scope">
-              <img
-                v-if="scope.row.avatar"
-                :src="scope.row.avatar"
-                alt="头像"
-                class="avatar"
-                width="36"
-                height="36"
-              />
-              <span v-else>无头像</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="300" fixed="right">
-            <template #default="scope">
-              <el-button
-                v-if="scope.row.status === 1"
-                type="primary"
-                size="small"
-                @click="handleApproveUser(scope.row.id)"
-                >通过审核</el-button
-              >
-              <el-button
-                type="danger"
-                size="small"
-                @click="handleDeleteUser(scope.row.id)"
-                >删除</el-button
-              >
-            </template>
-          </el-table-column>
-        </el-table>
-      </div>
-      <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="currentPage"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
+            <el-button
+              type="danger"
+              size="small"
+              @click="handleDeleteUser(scope.row.id)"
+              >删除</el-button
+            >
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <div class="pagination-container">
+      <el-pagination
+        v-model:current-page="currentPage"
+        :page-sizes="[10, 20, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
   </div>
 </template>
 
@@ -163,7 +160,7 @@ const handleApproveUser = (id) => {
       try {
         // 调用审核通过的API接口
         const res = await request.get(`/api/novel-auth/users/approve/${id}`);
-        
+
         if (res.code === 200) {
           ElMessage.success("审核已通过");
           // 刷新用户列表
@@ -192,7 +189,7 @@ const handleDeleteUser = (id) => {
       try {
         // 调用删除用户的API接口
         const res = await request.get(`/api/novel-auth/users/delete/${id}`);
-        
+
         if (res.code === 200) {
           ElMessage.success("删除成功");
           // 刷新用户列表
@@ -261,7 +258,7 @@ onMounted(() => {
   padding: 10px;
 }
 .user-management-content {
-  max-height: 500px;
+  max-height: 800px;
   overflow-y: auto;
 }
 .card-header {
@@ -276,7 +273,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .pagination-container {
@@ -334,5 +331,173 @@ onMounted(() => {
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 12px;
+}
+/* 自定义审核通过按钮样式 */
+:deep(.el-button--primary) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
+}
+/* 自定义分页组件样式 - 全面覆盖所有元素 */
+
+/* 基础颜色设置 */
+:deep(.el-pagination.is-background) {
+  --el-pagination-button-color: #605ce5 !important;
+  --el-pagination-hover-color: #605ce5 !important;
+  --el-pagination-active-color: #605ce5 !important;
+}
+
+/* 分页数字按钮 - 全面覆盖 */
+:deep(.el-pagination.is-background .el-pager li) {
+  color: #605ce5 !important;
+}
+
+:deep(.el-pagination.is-background .el-pager li:not(.disabled):hover) {
+  color: #605ce5 !important;
+  background-color: #f5f3ff !important;
+}
+
+:deep(.el-pagination.is-background .el-pager li:not(.disabled).active) {
+  color: #605ce5 !important;
+  background-color: #f5f3ff !important;
+  font-weight: bold !important;
+}
+
+/* 上一页/下一页按钮 */
+:deep(.el-pagination__prev.is-arrow),
+:deep(.el-pagination__next.is-arrow) {
+  color: #605ce5 !important;
+}
+
+:deep(.el-pagination__prev.is-arrow:not(.disabled):hover),
+:deep(.el-pagination__next.is-arrow:not(.disabled):hover) {
+  color: #605ce5 !important;
+  background-color: #f5f3ff !important;
+}
+
+/* 每页显示条数选择框 - 完整样式 */
+:deep(.el-pagination__sizes .el-input__wrapper) {
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-pagination__sizes .el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-pagination__sizes .el-input__inner) {
+  color: #605ce5 !important;
+}
+
+:deep(.el-pagination__sizes .el-input__inner:focus) {
+  border-color: #605ce5 !important;
+}
+
+/* 下拉选项框 */
+:deep(.el-select-dropdown__item) {
+  color: #605ce5 !important;
+}
+
+:deep(.el-select-dropdown__item.selected) {
+  color: #605ce5 !important;
+  font-weight: bold !important;
+}
+
+:deep(.el-select-dropdown__item.hover) {
+  background-color: #f5f3ff !important;
+  color: #605ce5 !important;
+}
+
+/* 分页文本和输入框 */
+:deep(.el-pagination__total),
+:deep(.el-pagination__jump),
+:deep(.el-pagination__jump .el-input__inner) {
+  color: #605ce5 !important;
+}
+
+:deep(.el-pagination__jump .el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-pagination__jump .el-input__inner:focus) {
+  border-color: #605ce5 !important;
+}
+
+/* 输入框基础样式 */
+:deep(.el-input__wrapper) {
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  border-color: #605ce5 !important;
+  box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+/* 输入框文本和占位符 */
+:deep(.el-input__inner) {
+  color: #605ce5 !important;
+}
+
+:deep(.el-input__inner::placeholder) {
+  color: #a6a6a6 !important;
+}
+
+/* 搜索图标颜色 */
+:deep(.el-input__prefix .el-icon),
+:deep(.el-input__suffix .el-icon) {
+  color: #605ce5 !important;
+}
+
+/* ElMessageBox弹窗样式 */
+:deep(.el-message-box) {
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-message-box__title) {
+  color: #605ce5 !important;
+  font-weight: bold !important;
+}
+
+/* 弹窗按钮样式 */
+:deep(.el-message-box__btns .el-button--primary) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.el-message-box__btns .el-button--primary:hover) {
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
+}
+
+:deep(.el-message-box__btns .el-button--default) {
+  color: #303133 !important;
+  border-color: #dcdfe6 !important;
+  transition: all 0.3s ease !important;
+}
+
+:deep(.el-message-box__btns .el-button--default:hover) {
+  color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+/* 弹窗内容文字颜色 */
+:deep(.el-message-box__content) {
+  color: #606266 !important;
+}
+
+/* 弹窗图标颜色 */
+:deep(.el-message-box__status svg) {
+  color: #605ce5 !important;
 }
 </style>

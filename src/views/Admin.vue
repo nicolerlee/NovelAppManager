@@ -1,12 +1,7 @@
 <template>
   <div class="admin-container">
     <el-card class="admin-card">
-      <template #header>
-        <div class="card-header">
-          <span>后台管理中心</span>
-        </div>
-      </template>
-      
+
       <el-tabs v-model="activeTab" type="card">
         <el-tab-pane label="用户管理" name="userManagement">
           <UserManagement />
@@ -46,5 +41,21 @@ const activeTab = ref('userManagement');
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+/* 自定义卡片式标签页样式 */
+:deep(.el-tabs--card .el-tabs__item) {
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-tabs--card .el-tabs__item.is-active) {
+  color: #605ce5 !important;
+  border-bottom-color: #605ce5 !important;
+  font-weight: 600;
+}
+
+:deep(.el-tabs--card .el-tabs__item:hover:not(.is-active)) {
+  color: #605ce5;
 }
 </style>
