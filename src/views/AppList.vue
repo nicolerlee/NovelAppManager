@@ -645,17 +645,15 @@ onMounted(() => {
   width: 100%;
   max-width: none;
   overflow-x: auto;
-  padding: 0 10px;
   margin: 0;
   box-sizing: border-box;
+  
 }
 
 .card-container {
   display: flex;
   width: auto;
-  padding: 10px;
   padding-right: 20px;
-  gap: 10px;
   margin-bottom: 20px;
   flex-wrap: nowrap;
   box-sizing: border-box;
@@ -664,8 +662,9 @@ onMounted(() => {
 .data-card {
   width: 305px;
   flex-shrink: 0;
-  margin: 0;
+  margin-left: 20px;
   box-sizing: border-box;
+
 }
 
 .data-card:hover {
@@ -758,6 +757,8 @@ onMounted(() => {
 /* 表格样式优化 */
 .app-table {
   margin-top: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
   border-radius: 8px;
 }
 
@@ -782,8 +783,24 @@ onMounted(() => {
   border-radius: 4px;
 }
 
-:deep(.el-button--primary) {
-  background-color: #409eff;
+/* 编辑对话框中按钮的样式 */
+.dialog-footer :deep(.el-button--primary) {
+  background-color: #605ce5;
+  border-color: #605ce5;
+}
+
+.dialog-footer :deep(.el-button--primary:hover) {
+  background-color: #5652d8;
+  border-color: #5652d8;
+}
+
+.dialog-footer :deep(.el-button:not(.el-button--primary)) {
+  transition: all 0.3s ease;
+}
+
+.dialog-footer :deep(.el-button:not(.el-button--primary):hover) {
+  color: #605ce5;
+  border-color: #605ce5;
 }
 
 :deep(.el-button--success) {

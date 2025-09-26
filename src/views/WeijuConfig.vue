@@ -2,9 +2,9 @@
   <div class="weiju-config">
     <el-card class="app-list-card">
       <template #header>
-    <div class="header">
+      <div class="header">
           <h3>小程序列表</h3>
-          <div>
+          <div style="display: flex;flex-direction: row;align-items: center;justify-content: space-between;">
             <el-input
               v-model="searchQuery"
               placeholder="搜索小程序"
@@ -14,7 +14,7 @@
                 <el-icon><Search /></el-icon>
               </template>
             </el-input>
-            <el-button type="primary" @click="handleRefresh">刷新数据</el-button>
+            <div class="refresh-btn" @click="handleRefresh">刷新数据</div>
           </div>
         </div>
       </template>
@@ -112,7 +112,7 @@
               </el-table>
               
               <div class="config-actions">
-                <el-button type="primary" @click="handleSaveBusinessType">保存配置</el-button>
+                <div class="refresh-btn" style="margin-right: 10px;" @click="handleSaveBusinessType">保存配置</div>
                 <el-button type="danger" @click="handleDeleteConfirm">删除配置</el-button>
                 <el-button @click="handleCopyBusinessTypeConfig">复制配置</el-button>
                 <el-button @click="handlePasteBusinessTypeConfig">粘贴配置</el-button>
@@ -154,10 +154,11 @@
     </el-table>
 
               <div class="config-actions">
-                <el-button type="primary" @click="handleSavePublicSwitch">保存配置</el-button>
+                <div class="refresh-btn" style="margin-right: 10px;" @click="handleSavePublicSwitch">保存配置</div>
                 <el-button type="danger" @click="handleDeleteBannerConfirm">删除配置</el-button>
                 <el-button @click="handleCopyPublicSwitchConfig">复制配置</el-button>
                 <el-button @click="handlePastePublicSwitchConfig">粘贴配置</el-button>
+
               </div>
             </div>
           </el-tab-pane>
@@ -1014,6 +1015,9 @@ onMounted(() => {
 
 .config-actions {
   margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
   text-align: center;
 }
 
@@ -1070,5 +1074,27 @@ onMounted(() => {
   margin-bottom: 4px;
   object-fit: contain;
   background: #fff;
+}
+
+.refresh-btn{
+  width: 96px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  background-color: #605ce5;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* 自定义标签页选中颜色 */
+:deep(.el-tabs__item.is-active) {
+  color: #605ce5 !important;
+  font-weight: 600;
+}
+
+:deep(.el-tabs__active-bar) {
+  background-color: #605ce5 !important;
 }
 </style>

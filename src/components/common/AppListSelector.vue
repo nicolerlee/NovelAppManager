@@ -13,7 +13,8 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-          <el-button type="primary" @click="handleRefresh">刷新数据</el-button>
+          <div class="refresh-btn" @click="handleRefresh">刷新数据</div>
+          
         </div>
       </div>
     </template>
@@ -273,5 +274,17 @@ defineExpose({
     flex: none;
     max-height: 300px;
   }
+}
+
+.refresh-btn{
+  width: 96px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  background-color: #605ce5;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
 }
 </style>

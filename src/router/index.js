@@ -14,7 +14,7 @@ const routes = [
   {
     path: '/apps',
     name: 'AppList',
-    component: () => import('../views/Dashboard.vue')
+    component: () => import('../views/AppList.vue')
   },
   {
     path: '/config',
