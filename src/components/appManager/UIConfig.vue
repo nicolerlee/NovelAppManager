@@ -129,8 +129,8 @@
 <script setup lang="ts">
 import { ref, inject, nextTick, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import request from '../utils/request'
-import AppListSelector from '../components/common/AppListSelector.vue'
+import request from '../../utils/request'
+import AppListSelector from '../common/AppListSelector.vue'
 
 const auth = inject('auth')
 
@@ -582,7 +582,7 @@ if (selectedApp.value?.appId) {
 }
 
 .theme-option:hover {
-  border-color: #409eff;
+  border-color: #605ce5;
   box-shadow: 0 2px 8px rgba(64, 158, 255, 0.15);
 }
 
@@ -639,7 +639,7 @@ if (selectedApp.value?.appId) {
 
 /* 主题选项选中状态 */
 .theme-option-selected {
-  border: 2px solid #409eff;
+  border: 2px solid #605ce5;
   box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
   background-color: #f0f7ff;
 }
@@ -665,4 +665,89 @@ if (selectedApp.value?.appId) {
     max-height: 300px;
   }
 }
+
+
+
+
+
+/* 自定义审核通过按钮样式 */
+:deep(.el-button--primary) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
+}
+
+/* 自定义单选按钮样式 */
+:deep(.el-radio__input.is-checked .el-radio__inner) {
+  border-color: #605ce5 !important;
+  background-color: #605ce5 !important;
+}
+
+:deep(.el-radio__input.is-checked .el-radio__inner::after) {
+  background-color: #fff !important;
+}
+
+:deep(.el-radio__input.is-focus .el-radio__inner) {
+  border-color: #605ce5 !important;
+  box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+:deep(.el-radio__input:hover .el-radio__inner) {
+  border-color: #605ce5 !important;
+}
+
+
+:deep(.el-input__wrapper) {
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  border-color: #605ce5 !important;
+  box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+
+:deep(.el-input__inner::placeholder) {
+  color: #a6a6a6 !important;
+}
+
+/* 自定义单选按钮样式 */
+:deep(.el-radio-button__orig-radio:checked + .el-radio-button__inner) {
+  color: #fff !important;
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-radio-button__orig-radio:checked + .el-radio-button__inner:hover) {
+  color: #fff !important;
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
+}
+
+:deep(.el-radio-button__inner:hover) {
+  color: #605ce5 !important;
+  border-color: #d3cffe !important;
+}
+
+:deep(.el-radio-button__orig-radio:focus + .el-radio-button__inner) {
+  border-color: #605ce5 !important;
+  box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+/* 单选按钮组边框样式 */
+:deep(.el-radio-group) {
+  .el-radio-button:first-child .el-radio-button__inner {
+    background-color:  #605ce5 !important;
+  }
+}
+
 </style>

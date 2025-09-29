@@ -190,8 +190,8 @@
 import { onMounted ,ref, inject, watch ,computed} from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
-import request from '../utils/request'
-import AppListSelector from '../components/common/AppListSelector.vue'
+import request from '../../utils/request'
+import AppListSelector from '../common/AppListSelector.vue'
 
 const auth = inject('auth')
 
@@ -719,7 +719,7 @@ watch(() => configForm.value.iaaMode, (val) => {
 }
 .iaa-dialog-style-card-inner.selected,
 .iaa-dialog-style-card-inner:hover {
-  border-color: #409eff;
+  border-color: #5652d8;
   box-shadow: 0 2px 8px 0 rgba(64,158,255,0.06); /* 只做轻微阴影，不要蓝色 */
 }
 .iaa-dialog-style-card-inner img {
@@ -737,5 +737,118 @@ watch(() => configForm.value.iaaMode, (val) => {
   margin-top: 2px;
   font-weight: 500;
   text-align: center;
+}
+
+/* 自定义审核通过按钮样式 */
+:deep(.el-button--primary) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
+}
+
+/* 自定义单选按钮样式 */
+:deep(.el-radio__input.is-checked .el-radio__inner) {
+  border-color: #605ce5 !important;
+  background-color: #605ce5 !important;
+}
+
+:deep(.el-radio__input.is-checked .el-radio__inner::after) {
+  background-color: #fff !important;
+}
+
+:deep(.el-radio__input.is-focus .el-radio__inner) {
+  border-color: #605ce5 !important;
+  box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+:deep(.el-radio__input:hover .el-radio__inner) {
+  border-color: #605ce5 !important;
+}
+
+
+:deep(.el-input__wrapper) {
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  border-color: #605ce5 !important;
+  box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+
+:deep(.el-input__inner::placeholder) {
+  color: #a6a6a6 !important;
+}
+
+/* 单选按钮标签样式 */
+:deep(.el-radio__label) {
+  color: #333 !important;
+}
+
+:deep(.el-radio__input.is-checked + .el-radio__label) {
+  color: #605ce5 !important;
+  font-weight: 500;
+}
+
+/* Element Plus 2.5.6 版本 el-input 和 el-switch 主题样式 */
+/* 自定义el-input样式 */
+:deep(.el-input__wrapper) {
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+/* 确保textarea类型的el-input在focus状态下边框颜色变为主题色 */
+:deep(.el-input__wrapper.is-focus) {
+  border-color: #605ce5 !important;
+  box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+/* 使用Element Plus 2.5.6的CSS变量覆盖默认主题色 - 针对所有el-input组件 */
+:deep(.el-input) {
+  --el-input-focus-border: #605ce5 !important;
+  --el-input-focus-box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+:deep(.el-input__inner::placeholder) {
+  color: #a6a6a6 !important;
+}
+
+/* Element Plus 2.5.6 版本 el-switch 主题样式 - 使用布尔值简化版本 */
+/* 使用全局CSS变量覆盖Element Plus默认主题色 */
+.el-switch {
+  --el-switch-on-color: #605ce5 !important;
+  --el-switch-off-color: #dcdfe6 !important;
+}
+
+/* 确保选中状态的样式正确应用 */
+:deep(.el-switch__input:checked + .el-switch__core) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+/* 优化文本颜色 */
+:deep(.el-switch__label.is-active) {
+  color: #605ce5 !important;
+}
+:deep(.el-switch__label) {
+  color: #909399 !important;
+}
+
+/* 确保滑块显示正常 */
+:deep(.el-switch__core .el-switch__button) {
+  background-color: #ffffff !important;
 }
 </style>

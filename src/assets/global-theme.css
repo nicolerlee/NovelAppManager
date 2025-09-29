@@ -1,0 +1,72 @@
+/* 全局主题样式 - Element Plus 主题色覆盖 */
+/* 主要用于覆盖ElMessageBox等全局组件的样式 */
+
+/* 设置全局CSS变量 */
+:root {
+  /* 主色调 - 紫色主题 */
+  --el-color-primary: #605ce5 !important;
+  --el-color-primary-light-3: #8b87f3 !important;
+  --el-color-primary-light-5: #a6a2f7 !important;
+  --el-color-primary-light-7: #c1bdfb !important;
+  --el-color-primary-light-9: #e6e5ff !important;
+  
+  /* 警告色 - 使用紫色代替默认的黄色 */
+  --el-color-warning: #605ce5 !important;
+  --el-color-warning-light-3: #8b87f3 !important;
+  --el-color-warning-light-5: #a6a2f7 !important;
+  --el-color-warning-light-7: #c1bdfb !important;
+  --el-color-warning-light-9: #e6e5ff !important;
+}
+
+/* ElMessageBox全局样式覆盖 */
+.el-message-box {
+  border-color: #605ce5 !important;
+}
+
+.el-message-box__title {
+  color: #605ce5 !important;
+  font-weight: bold !important;
+}
+
+.el-message-box__btns .el-button--primary {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+.el-message-box__btns .el-button--primary:hover {
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
+}
+
+.el-message-box__btns .el-button--default {
+  color: #303133 !important;
+  border-color: #dcdfe6 !important;
+}
+
+.el-message-box__btns .el-button--default:hover {
+  color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+/* 针对warning类型的样式覆盖 */
+.el-message-box--warning {
+  border-color: #605ce5 !important;
+}
+
+.el-message-box--warning .el-message-box__title {
+  color: #605ce5 !important;
+  font-weight: bold !important;
+}
+
+.el-message-box--warning .el-message-box__status .el-icon {
+  color: #605ce5 !important;
+}
+
+.el-message-box--warning .el-message-box__status svg {
+  color: #605ce5 !important;
+}
+
+.el-message-box--warning .el-message-box__btns .el-button--primary {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}

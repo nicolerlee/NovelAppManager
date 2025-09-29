@@ -254,7 +254,7 @@ body, html, #app {
 
 .sidebar {
   width: 214px;
-  background-image: linear-gradient(rgb(234, 242, 255) 0%, rgb(234, 242, 255) 190px, rgb(234, 242, 255) 25%, rgb(230, 230, 255) 100%);
+  background-image: linear-gradient(rgb(234, 242, 255) 0%, rgb(234, 242, 255) 190px, rgb(234, 242, 255) 25%, #e6e6ff 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -388,5 +388,10 @@ body, html, #app {
  margin-left: 8px;
  transition: color 0.3s ease;
 }
+
+
+
+
+
 
 </style>

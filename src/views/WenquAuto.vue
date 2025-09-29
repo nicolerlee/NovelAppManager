@@ -1,12 +1,6 @@
 <template>
   <div class="wenqu-auto-module">
-    <el-card>
-      <template #header>
-        <div class="header">
-          <h3>文曲小程序自动化工厂</h3>
-        </div>
-      </template>
-      <div class="feature-grid">
+     <div class="feature-grid">
         <el-card class="feature-card" shadow="hover" @click="goToCreate">
           <div class="feature-icon gen-app">
             <el-icon><DocumentAdd /></el-icon>
@@ -47,7 +41,6 @@
           </div>
         </el-card>
       </div>
-    </el-card>
   </div>
 </template>
 

@@ -7,6 +7,8 @@ import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { createPinia } from 'pinia'
 import axios from 'axios'
+// 导入全局主题样式，覆盖Element Plus默认主题
+import './assets/global-theme.css'
 
 window.global = window
 

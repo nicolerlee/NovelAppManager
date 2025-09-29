@@ -881,9 +881,9 @@ onMounted(() => {
 }
 
 /* 输入框文本和占位符 */
-:deep(.el-input__inner) {
+/* :deep(.el-input__inner) {
   color: #605ce5 !important;
-}
+} */
 
 :deep(.el-input__inner::placeholder) {
   color: #a6a6a6 !important;

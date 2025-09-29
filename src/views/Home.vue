@@ -14,91 +14,171 @@
         <div class="home-title-left">文曲一下，</div>
         <div class="home-title-right">
           <div class="home-title-right-item">
-            <div class="text-item" :class="{ 'active': activeTexts[0] === 0 }">需</div>
-            <div class="text-item from-bottom" :class="{ 'active': activeTexts[0] === 1 }">开</div>
+            <div class="text-item" :class="{ active: activeTexts[0] === 0 }">
+              需
+            </div>
+            <div
+              class="text-item from-bottom"
+              :class="{ active: activeTexts[0] === 1 }"
+            >
+              开
+            </div>
           </div>
           <div class="home-title-right-item">
-            <div class="text-item" :class="{ 'active': activeTexts[1] === 0 }">求</div>
-            <div class="text-item from-bottom" :class="{ 'active': activeTexts[1] === 1 }">发</div>
+            <div class="text-item" :class="{ active: activeTexts[1] === 0 }">
+              求
+            </div>
+            <div
+              class="text-item from-bottom"
+              :class="{ active: activeTexts[1] === 1 }"
+            >
+              发
+            </div>
           </div>
           <div class="home-title-right-item">
-            <div class="text-item" :class="{ 'active': activeTexts[2] === 0 }">变</div>
-            <div class="text-item from-bottom" :class="{ 'active': activeTexts[2] === 1 }">更</div>
+            <div class="text-item" :class="{ active: activeTexts[2] === 0 }">
+              变
+            </div>
+            <div
+              class="text-item from-bottom"
+              :class="{ active: activeTexts[2] === 1 }"
+            >
+              更
+            </div>
           </div>
           <div class="home-title-right-item">
-            <div class="text-item" :class="{ 'active': activeTexts[3] === 0 }">简</div>
-            <div class="text-item from-bottom" :class="{ 'active': activeTexts[3] === 1 }">高</div>
+            <div class="text-item" :class="{ active: activeTexts[3] === 0 }">
+              简
+            </div>
+            <div
+              class="text-item from-bottom"
+              :class="{ active: activeTexts[3] === 1 }"
+            >
+              高
+            </div>
           </div>
           <div class="home-title-right-item">
-            <div class="text-item" :class="{ 'active': activeTexts[4] === 0 }">单</div>
-            <div class="text-item from-bottom" :class="{ 'active': activeTexts[4] === 1 }">效</div>
+            <div class="text-item" :class="{ active: activeTexts[4] === 0 }">
+              单
+            </div>
+            <div
+              class="text-item from-bottom"
+              :class="{ active: activeTexts[4] === 1 }"
+            >
+              效
+            </div>
           </div>
         </div>
       </div>
       <div class="home-entry">
-        <div class="home-entry-item" 
-             @click="navigateToAppManager"
-             @mouseenter="hoveredItems[0] = true" 
-             @mouseleave="hoveredItems[0] = false">
-          <img class="home-entry-item-bg" src="/images/home/home_entry_1_bg.png"/>
-          <img class="home-entry-item-icon" 
-               :src="hoveredItems[0] ? '/images/home/home_entry_1_hover.svg' : '/images/home/home_entry_1_normal.svg'"/>
+        <div
+          class="home-entry-item"
+          @click="navigateToAppManager"
+          @mouseenter="hoveredItems[0] = true"
+          @mouseleave="hoveredItems[0] = false"
+        >
+          <img
+            class="home-entry-item-bg"
+            src="/images/home/home_entry_1_bg.png"
+          />
+          <img
+            class="home-entry-item-icon"
+            :src="
+              hoveredItems[0]
+                ? '/images/home/home_entry_1_hover.svg'
+                : '/images/home/home_entry_1_normal.svg'
+            "
+          />
           <div class="home-entry-item-title">小程序管理</div>
           <div class="home-entry-item-desc1">可视化管理</div>
           <div class="home-entry-item-desc2">模块灵活配置，编辑，即时生效</div>
         </div>
-        <div class="home-entry-item" 
-             @click="navigateToWenquAuto"
-             @mouseenter="hoveredItems[1] = true" 
-             @mouseleave="hoveredItems[1] = false">
-          <img class="home-entry-item-bg" src="/images/home/home_entry_2_bg.png"/>
-          <img class="home-entry-item-icon" 
-               :src="hoveredItems[1] ? '/images/home/home_entry_2_hover.svg' : '/images/home/home_entry_2_normal.svg'"/>
-           <div class="home-entry-item-title">文曲自动化</div>
+        <div
+          class="home-entry-item"
+          @click="navigateToWenquAuto"
+          @mouseenter="hoveredItems[1] = true"
+          @mouseleave="hoveredItems[1] = false"
+        >
+          <img
+            class="home-entry-item-bg"
+            src="/images/home/home_entry_2_bg.png"
+          />
+          <img
+            class="home-entry-item-icon"
+            :src="
+              hoveredItems[1]
+                ? '/images/home/home_entry_2_hover.svg'
+                : '/images/home/home_entry_2_normal.svg'
+            "
+          />
+          <div class="home-entry-item-title">文曲自动化</div>
           <div class="home-entry-item-desc1">小程序生产，构建，发布</div>
           <div class="home-entry-item-desc2">全自动，更高效</div>
         </div>
 
-        <div class="home-entry-item"
-             @click="navigateToWenquAI" 
-             @mouseenter="hoveredItems[2] = true" 
-             @mouseleave="hoveredItems[2] = false">
-          <img class="home-entry-item-bg" src="/images/home/home_entry_3_bg.png"/>
-          <img class="home-entry-item-icon" 
-               :src="hoveredItems[2] ? '/images/home/home_entry_3_hover.svg' : '/images/home/home_entry_3_normal.svg'"/>
+        <div
+          class="home-entry-item"
+          @click="navigateToWenquAI"
+          @mouseenter="hoveredItems[2] = true"
+          @mouseleave="hoveredItems[2] = false"
+        >
+          <img
+            class="home-entry-item-bg"
+            src="/images/home/home_entry_3_bg.png"
+          />
+          <img
+            class="home-entry-item-icon"
+            :src="
+              hoveredItems[2]
+                ? '/images/home/home_entry_3_hover.svg'
+                : '/images/home/home_entry_3_normal.svg'
+            "
+          />
           <div class="home-entry-item-title">文曲AI</div>
           <div class="home-entry-item-desc1">智能体，大模型，MCP</div>
           <div class="home-entry-item-desc2">AI赋能</div>
         </div>
-
       </div>
       <div class="quick-entry">
         <div>快捷入口</div>
         <div class="quick-entry-content">
-          <div class="quick-entry-item">
-            <img class="quick-entry-item-icon" src="/images/home/home_quick_entry1.png"/>
+          <div class="quick-entry-item" @click="navigateToWenquAgent">
+            <img
+              class="quick-entry-item-icon"
+              src="/images/home/home_quick_entry1.png"
+            />
             <div class="quick-entry-item-content">
-              <div >文曲下凡智能体，在线问答</div>
-              <div style="flex: 1;"></div>
-              <div style="color: rgb(96, 92, 229);font-size: 14px;">立即了解</div>
+              <div>文曲下凡智能体，在线问答</div>
+              <div style="flex: 1"></div>
+              <div style="color: rgb(96, 92, 229); font-size: 14px">
+                立即了解
+              </div>
             </div>
           </div>
           <div class="quick-entry-item">
-            <img class="quick-entry-item-icon" src="/images/home/home_quick_entry2.png"/>
+            <img
+              class="quick-entry-item-icon"
+              src="/images/home/home_quick_entry2.png"
+            />
             <div class="quick-entry-item-content">
               <div>文曲大模型</div>
-              <div style="flex: 1;"></div>
-              <div style="color: rgb(96, 92, 229);font-size: 14px;">立即了解</div>
-
+              <div style="flex: 1"></div>
+              <div style="color: rgb(96, 92, 229); font-size: 14px">
+                立即了解
+              </div>
             </div>
           </div>
           <div class="quick-entry-item">
-            <img class="quick-entry-item-icon" src="/images/home/home_quick_entry2.png"/>
+            <img
+              class="quick-entry-item-icon"
+              src="/images/home/home_quick_entry2.png"
+            />
             <div class="quick-entry-item-content">
               <div>更多精彩，敬请期待</div>
-              <div style="flex: 1;"></div>
-              <div style="color: rgb(96, 92, 229);font-size: 14px;">立即了解</div>
-
+              <div style="flex: 1"></div>
+              <div style="color: rgb(96, 92, 229); font-size: 14px">
+                立即了解
+              </div>
             </div>
           </div>
         </div>
@@ -108,8 +188,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
-import { NavigationFailureType } from "vue-router";
+import { ref, onMounted, onUnmounted,inject } from "vue";
+import { NavigationFailureType, useRouter } from "vue-router";
+const auth = inject('auth')
+const agentClient = inject("agentClient", null);
+
+const router = useRouter();
 
 // 创建响应式数据来跟踪每个文字的当前活动文本索引
 const activeTexts = ref([0, 0, 0, 0, 0]);
@@ -124,7 +208,7 @@ const startTextAnimation = () => {
   if (animationTimer) {
     clearInterval(animationTimer);
   }
-  
+
   // 每隔5秒触发一次动画
   animationTimer = setInterval(() => {
     // 按顺序更新每个文字
@@ -150,19 +234,28 @@ onUnmounted(() => {
   }
 });
 
-
-const navigateToAppManager=()=>{
+const navigateToAppManager = () => {
   console.log("navigateToAppManager");
+  router.push("/app-manager");
+};
 
-}
-
-const navigateToWenquAuto=()=>{
+const navigateToWenquAuto = () => {
   console.log("navigateToWenquAuto");
-}
+  router.push("/wenqu-auto");
+};
 
-const navigateToWenquAI=()=>{
+const navigateToWenquAI = () => {
   console.log("navigateToWenquAI");
-}
+  router.push("/wenqu-ai");
+};
+
+const navigateToWenquAgent = () => {
+    if (!auth.isLogin.value) {
+      auth.showLogin();
+      return;
+    }
+    agentClient.value.showChatBot();
+};
 </script>
 
 <style scoped>
@@ -256,17 +349,16 @@ const navigateToWenquAI=()=>{
   transform: translateY(0);
 }
 
-.home-entry{
+.home-entry {
   margin-top: 7vh;
   height: 280px;
   display: flex;
   flex-direction: row;
   justify-content: start;
   align-items: center;
-
 }
 
-.home-entry-item{ 
+.home-entry-item {
   position: relative;
   width: 265px;
   height: 246px;
@@ -281,7 +373,7 @@ const navigateToWenquAI=()=>{
   transform: scale(1.05);
 }
 
-.home-entry-item-bg{
+.home-entry-item-bg {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -295,7 +387,7 @@ const navigateToWenquAI=()=>{
   transform: scale(1.05);
 }
 
-.home-entry-item-icon{
+.home-entry-item-icon {
   position: absolute;
   width: 100px;
   height: 100px;
@@ -309,7 +401,7 @@ const navigateToWenquAI=()=>{
   transform: scale(1.05);
 }
 
-.home-entry-item-title{ 
+.home-entry-item-title {
   padding-top: 54px;
   padding-left: 22px;
   font-size: 16px;
@@ -318,60 +410,58 @@ const navigateToWenquAI=()=>{
   color: rgb(39, 38, 77);
   font-weight: 600;
 }
-.home-entry-item-desc1{ 
-    font-size: 14px;
-    line-height: 24px;
-    padding-left: 24px;
-    margin-top: 15px;
+.home-entry-item-desc1 {
+  font-size: 14px;
+  line-height: 24px;
+  padding-left: 24px;
+  margin-top: 15px;
 }
-.home-entry-item-desc2{ 
-    font-size: 14px;
-    line-height: 24px;
-    padding-left: 24px;
+.home-entry-item-desc2 {
+  font-size: 14px;
+  line-height: 24px;
+  padding-left: 24px;
 }
 
-.quick-entry{
+.quick-entry {
   margin-top: 5vh;
-
 }
-.quick-entry-title{ 
+.quick-entry-title {
   font-size: 16px;
   color: rgb(39, 38, 77);
   line-height: 24px;
 }
 
-.quick-entry-content{
-    margin-top: 16px;
-    height: 172px;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+.quick-entry-content {
+  margin-top: 16px;
+  height: 172px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
-.quick-entry-item{
-    display: flex;
-    -webkit-box-align: center;
-    align-items: center;
-    min-width: 156.7px;
-    height: 148px;
-    padding: 20px;
-    border-radius: 8px;
-    background-color: rgb(255, 255, 255);
-    cursor: pointer;
-    box-shadow: rgba(122, 92, 204, 0.06) 0px 5px 20px 0px;
-    margin-right: 24px;
-    flex-direction: row;
+.quick-entry-item {
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  min-width: 156.7px;
+  height: 148px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: rgb(255, 255, 255);
+  cursor: pointer;
+  box-shadow: rgba(122, 92, 204, 0.06) 0px 5px 20px 0px;
+  margin-right: 24px;
+  flex-direction: row;
 }
-.quick-entry-item-icon{
-     flex-shrink: 0;
-    margin-right: 16px;
-    width: 120px;
-    height: 108px;
-    overflow: hidden;
-    border-radius: 8px;
-
+.quick-entry-item-icon {
+  flex-shrink: 0;
+  margin-right: 16px;
+  width: 120px;
+  height: 108px;
+  overflow: hidden;
+  border-radius: 8px;
 }
-.quick-entry-item-content{
+.quick-entry-item-content {
   width: 180px;
   height: 108px;
   display: flex;

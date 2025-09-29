@@ -1,12 +1,6 @@
 <template>
   <div class="wenqu-ai-page">
-    <el-card>
-      <template #header>
-        <div class="header">
-          <h3>文曲AI能力中心</h3>
-        </div>
-      </template>
-      <div class="feature-grid">
+     <div class="feature-grid">
         <el-card class="feature-card" shadow="hover" @click="navigateToWenquAgent">
           <div class="feature-icon">
             <el-icon><ChatDotRound /></el-icon>
@@ -15,6 +9,7 @@
           <div class="feature-desc">文曲智能对话/向导能力。</div>
           <el-button class="内测-button" type="primary" plain>内测中</el-button>
         </el-card>
+
         <el-card class="feature-card" shadow="hover" disabled>
           <div class="feature-icon not-open">
             <el-icon><Position/></el-icon>
@@ -40,7 +35,6 @@
           <el-button type="info" plain disabled>暂未开放</el-button>
         </el-card>
       </div>
-    </el-card>
   </div>
 </template>
 
@@ -92,6 +86,7 @@ const navigateToWenquAgent = () => {
   position: relative;
   overflow: hidden;
 }
+
 .内测-button {
   padding: 8px 16px;
   border-radius: 20px;
@@ -121,7 +116,7 @@ const navigateToWenquAgent = () => {
 .feature-icon {
   font-size: 48px;
   margin-bottom: 18px;
-  color: #409eff;
+  color: #605ce5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,4 +142,17 @@ const navigateToWenquAgent = () => {
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+/* 自定义审核通过按钮样式 */
+:deep(.el-button--primary) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+  color: #fff !important;
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
+}
+
 </style>

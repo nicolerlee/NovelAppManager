@@ -1,12 +1,6 @@
 <template>
   <div class="toolbox-module">
-    <el-card>
-      <template #header>
-        <div class="header">
-          <h3>工具箱</h3>
-        </div>
-      </template>
-      <div class="feature-grid">
+    <div class="feature-grid">
         <el-card class="feature-card" shadow="hover" @click="goToReleaseCheck">
           <div class="feature-icon release-check">
             <el-icon><Check /></el-icon>
@@ -14,8 +8,15 @@
           <div class="feature-title">发版前检查</div>
           <div class="feature-desc">自动化检查发版前的各项配置和依赖</div>
         </el-card>
+
+        <el-card class="feature-card" shadow="hover" @click="goToReleaseCheck">
+          <div class="feature-icon release-check">
+            <el-icon><Check /></el-icon>
+          </div>
+          <div class="feature-title">更多工具箱</div>
+          <div class="feature-desc">即将开放</div>
+        </el-card>
       </div>
-    </el-card>
   </div>
 </template>
 

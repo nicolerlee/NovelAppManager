@@ -380,11 +380,11 @@
       <el-form :model="form" label-width="120px">
         <el-form-item label="状态">
           <el-switch
-            v-model="form.status"
+            v-model="form.enabled"
             active-text="启用"
             inactive-text="禁用"
-            :active-value="'启用'"
-            :inactive-value="'禁用'"
+            :active-value="true"
+            :inactive-value="false"
           />
         </el-form-item>
         <el-form-item label="网关 (Android)">
@@ -410,8 +410,8 @@ import { ref, inject } from 'vue'
 const auth = inject('auth')
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Money, Goods, Calendar, Star, Edit, Delete, Plus, Wallet } from '@element-plus/icons-vue'
-import request from '../utils/request'
-import AppListSelector from '../components/common/AppListSelector.vue'
+import request from '../../utils/request'
+import AppListSelector from '../common/AppListSelector.vue'
 
 const loadingPaymentConfig = ref(false)
 const selectedApp = ref(null)
@@ -423,7 +423,7 @@ const form = ref({
   merchantId: '',
   merchantKey: '',
   notifyUrl: '',
-  status: '启用'
+  enabled: false
 })
 const currentPaymentType = ref('')
 
@@ -479,7 +479,7 @@ const handleCreatePayment = async (type) => {
   isEdit.value = false
   currentPaymentType.value = type
   form.value = {
-    status: '禁用',
+    enabled: false,
     gatewayAndroid: '',
     gatewayIos: ''
   }
@@ -495,7 +495,7 @@ const handleEditPayment = (type) => {
   isEdit.value = true
   currentPaymentType.value = type
   form.value = {
-    status: paymentConfig.value[type]?.enabled ? '启用' : '禁用',
+    enabled: paymentConfig.value[type]?.enabled,
     gatewayAndroid: paymentConfig.value[type]?.gatewayAndroid,
     gatewayIos: paymentConfig.value[type]?.gatewayIos
   }
@@ -552,7 +552,7 @@ const handleSave = async () => {
     const requestData = {
       appId: selectedApp.value.appid,
       payType: currentPaymentType.value,
-      enabled: form.value.status === '启用',
+      enabled: form.value.enabled,
       gatewayAndroid: form.value.gatewayAndroid,
       gatewayIos: form.value.gatewayIos
     }
@@ -751,5 +751,245 @@ const getPaymentTypeName = (type) => {
 .payment-info-item .value {
   color: #303133;
   font-weight: 500;
+}
+
+/* 自定义按钮主题样式 */
+
+
+:deep(.el-button:hover) {
+  background-color: #5752d81e !important;
+  border-color: #5652d8 !important;
+   color: #605ce5 !important;
+}
+:deep(.el-button--primary) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+  color: #fff !important;
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
+}
+
+:deep(.el-button--primary:active) {
+  background-color: #4c48c5 !important;
+  border-color: #4c48c5 !important;
+}
+
+:deep(.el-button--primary:focus) {
+  box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+/* 自定义link类型按钮样式 - 只修改文本颜色 */
+/* 处理同时有primary和link属性的按钮 */
+:deep(.el-button--primary.is-link) {
+  color: #605ce5 !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+:deep(.el-button--primary.is-link:hover) {
+  color: #5652d8 !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+:deep(.el-button--primary.is-link:active) {
+  color: #4c48c5 !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* 处理同时有danger和link属性的按钮 */
+:deep(.el-button--danger.is-link) {
+  color: #f56c6c !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+:deep(.el-button--danger.is-link:hover) {
+  color: #f78989 !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+:deep(.el-button--danger.is-link:active) {
+  color: #dd6161 !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* 处理普通link按钮 */
+:deep(.el-button--link) {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* 自定义普通按钮样式 */
+:deep(.el-button--default) {
+  color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-button--default:hover) {
+  color: #5652d8 !important;
+  border-color: #5652d8 !important;
+  background-color: rgba(96, 92, 229, 0.06) !important;
+}
+
+/* 自定义info类型按钮样式 */
+:deep(.el-button--info) {
+  background-color: #e6f7ff !important;
+  border-color: #5652d8 !important;
+  color: #605ce5 !important;
+}
+
+:deep(.el-button--info:hover) {
+  background-color: #bae7ff !important;
+  border-color: #5652d8 !important;
+  color: #5652d8 !important;
+}
+
+
+:deep(.el-input__wrapper) {
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  border-color: #605ce5 !important;
+  box-shadow: 0 0 0 1px #605ce5 !important;
+}
+
+
+:deep(.el-input__inner::placeholder) {
+  color: #a6a6a6 !important;
+}
+
+/* Element Plus 2.5.6 版本 el-switch 主题样式 - 使用布尔值简化版本 */
+/* 使用全局CSS变量覆盖Element Plus默认主题色 */
+.el-switch {
+  --el-switch-on-color: #605ce5 !important;
+  --el-switch-off-color: #dcdfe6 !important;
+}
+
+/* ElMessageBox弹窗样式修改 - 增强版本 */
+/* 基础弹窗样式 */
+:deep(.el-message-box) {
+  border-color: #605ce5 !important;
+}
+
+/* 标题样式 */
+:deep(.el-message-box__title) {
+  color: #605ce5 !important;
+  font-weight: bold !important;
+}
+
+/* 针对warning类型的弹窗样式增强 */
+:deep(.el-message-box--warning) {
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-message-box--warning .el-message-box__title) {
+  color: #605ce5 !important;
+  font-weight: bold !important;
+}
+
+/* 弹窗按钮样式 - 增强特异性 */
+:deep(.el-message-box__btns .el-button) {
+  transition: all 0.3s ease !important;
+}
+
+:deep(.el-message-box__btns .el-button--primary) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-message-box__btns .el-button--primary:hover) {
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
+}
+
+:deep(.el-message-box__btns .el-button--default) {
+  color: #303133 !important;
+  border-color: #dcdfe6 !important;
+}
+
+:deep(.el-message-box__btns .el-button--default:hover) {
+  color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+/* warning类型的按钮样式 */
+:deep(.el-message-box--warning .el-message-box__btns .el-button--primary) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-message-box--warning .el-message-box__btns .el-button--primary:hover) {
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
+}
+
+/* 弹窗内容文字颜色 */
+:deep(.el-message-box__content) {
+  color: #606266 !important;
+}
+
+/* 弹窗图标颜色 */
+:deep(.el-message-box__status svg) {
+  color: #605ce5 !important;
+}
+
+/* 增强图标颜色，覆盖warning类型默认的黄色 */
+:deep(.el-message-box__status .el-icon-warning) {
+  color: #605ce5 !important;
+}
+
+/* 更通用的选择器，确保样式覆盖 */
+:deep(.el-message-box__btns) {
+  .el-button--primary {
+    background-color: #605ce5 !important;
+    border-color: #605ce5 !important;
+  }
+  
+  .el-button--primary:hover {
+    background-color: #5652d8 !important;
+    border-color: #5652d8 !important;
+  }
+  
+  .el-button--default {
+    color: #303133 !important;
+    border-color: #dcdfe6 !important;
+  }
+  
+  .el-button--default:hover {
+    color: #605ce5 !important;
+    border-color: #605ce5 !important;
+  }
+}
+
+/* 确保选中状态的样式正确应用 */
+:deep(.el-switch__input:checked + .el-switch__core) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+/* 优化文本颜色 */
+:deep(.el-switch__label.is-active) {
+  color: #605ce5 !important;
+}
+:deep(.el-switch__label) {
+  color: #909399 !important;
+}
+
+/* 确保滑块显示正常 */
+:deep(.el-switch__core .el-switch__button) {
+  background-color: #ffffff !important;
 }
 </style>

@@ -3,7 +3,7 @@
     <template #header>
       <div class="header">
         <h3>{{ title || '小程序列表' }}</h3>
-        <div>
+        <div class="header-content">
           <el-input
             v-model="searchQuery"
             placeholder="搜索小程序"
@@ -247,6 +247,11 @@ defineExpose({
   align-items: center;
 }
 
+.header-content{
+  display: flex;
+  flex-direction: row;
+
+}
 .empty-description {
   text-align: center;
   color: #909399;
@@ -286,5 +291,16 @@ defineExpose({
   border-radius: 4px;
   font-size: 14px;
   cursor: pointer;
+}
+
+/* 自定义审核通过按钮样式 */
+:deep(.el-button--primary) {
+  background-color: #605ce5 !important;
+  border-color: #605ce5 !important;
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: #5652d8 !important;
+  border-color: #5652d8 !important;
 }
 </style>

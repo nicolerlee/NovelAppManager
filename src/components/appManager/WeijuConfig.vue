@@ -202,7 +202,7 @@
 import { ref, computed, onMounted, nextTick, watch, inject } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import request from '../utils/request'
+import request from '../../utils/request'
 import { pinyin } from 'pinyin-pro'
 
 // 小程序列表相关

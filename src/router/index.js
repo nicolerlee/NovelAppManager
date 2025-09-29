@@ -19,25 +19,30 @@ const routes = [
   {
     path: '/config',
     name: 'Config',
-    component: () => import('../views/WeijuConfig.vue')
+    component: () => import('../components/appManager/WeijuConfig.vue')
   },
   {
     path: '/ads',
     name: 'AdManagement',
-    component: () => import('../views/AdManagement.vue')
+    component: () => import('../components/appManager/AdManagement.vue')
   },
   {
     path: '/payment',
     name: 'Payment',
-    component: () => import('../views/Payment.vue')
+    component: () => import('../components/appManager/Payment.vue')
   },
   { path: '/ui-config',
     name: 'UIConfig',
-    component: () => import('../views/UIConfig.vue')
+    component: () => import('../components/appManager/UIConfig.vue')
+  },
+  { path: '/app-manager',
+    name: 'AppManager',
+    component: () => import('../components/appManager/AppManagerEntry.vue'),
+    meta: { title: '小程序管理中心' }
   },
   { path: '/general-config',
     name: 'GeneralConfig',
-    component: () => import('../views/GeneralConfig.vue')
+    component: () => import('../components/appManager/GeneralConfig.vue')
   },
   { path: '/toolbox',
     name: 'ToolBox',
