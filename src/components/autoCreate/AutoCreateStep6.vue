@@ -4,7 +4,9 @@
     <div class="config-display-area">
       <div v-for="(block, name) in formattedConfigData" :key="name" class="config-block">
         <h5>{{ blockTitles[name] || name }}</h5>
-        <pre>{{ block }}</pre>
+        <div class="json-highlight-wrapper">
+          <pre v-html="highlightJson(block)"></pre>
+        </div>
       </div>
     </div>
   </div>
@@ -144,6 +146,31 @@ const blockTitles = {
   commonConfig: '通用配置',
   adConfig: '广告配置',
 };
+
+// JSON语法高亮函数
+const highlightJson = (jsonStr) => {
+  if (!jsonStr) return '';
+  
+  // 转义HTML特殊字符
+  let html = jsonStr
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  
+  // 语法高亮规则
+  // 字符串
+  html = html.replace(/"([^"\\]|\\.)*"/g, '<span class="json-string">$&</span>');
+  // 数字
+  html = html.replace(/\b\d+\.?\d*\b/g, '<span class="json-number">$&</span>');
+  // 布尔值
+  html = html.replace(/\b(true|false)\b/g, '<span class="json-boolean">$&</span>');
+  // null
+  html = html.replace(/\bnull\b/g, '<span class="json-null">$&</span>');
+  // 键名
+  html = html.replace(/"([^"\\]|\\.)*":/g, '<span class="json-key">$&</span>');
+  
+  return html;
+};
 </script>
 
 <style scoped>
@@ -155,31 +182,129 @@ const blockTitles = {
 .config-display-area {
   margin-top: 20px;
   border: 1px solid #e4e7ed;
-  border-radius: 4px;
-  padding: 15px;
+  border-radius: 8px;
+  padding: 20px;
   background-color: #f9f9f9;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
 .config-block {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.config-block:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-color: #e6e6e6;
 }
 
 .config-block h5 {
   margin-top: 0;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: #303133;
   font-size: 16px;
+  font-weight: 600;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .config-block pre {
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 10px;
+  background: #f6f8fa;
+  color: #444;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 13px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
   overflow-x: auto;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #303133;
+  line-height: 1.6;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  border-left: 4px solid #605ce5;
 }
+
+/* 优化滚动条样式 */
+.config-block pre::-webkit-scrollbar {
+  height: 6px;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+}
+
+.config-block pre::-webkit-scrollbar-thumb {
+  background-color: #c0c0c0;
+  border-radius: 3px;
+}
+
+.config-block pre::-webkit-scrollbar-thumb:hover {
+  background-color: #a0a0a0;
+}
+  /* JSON语法高亮样式 */
+  .json-highlight-wrapper {
+    position: relative;
+  }
+  
+  .json-highlight-wrapper pre {
+    background: #f6f8fa !important;
+    color: #444 !important;
+    font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace !important;
+    font-size: 13px !important;
+    padding: 12px 16px !important;
+    border-radius: 6px !important;
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    margin: 0 !important;
+    overflow-x: auto !important;
+    line-height: 1.6 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+    border-left: 4px solid #605ce5 !important;
+  }
+  
+  /* JSON元素颜色样式 */
+  .json-string {
+    color: #e3116c !important;
+  }
+  
+  .json-number {
+    color: #098658 !important;
+  }
+  
+  .json-boolean {
+    color: #005cc5 !important;
+    font-weight: bold !important;
+  }
+  
+  .json-null {
+    color: #5f6368 !important;
+    font-style: italic !important;
+  }
+  
+  .json-key {
+    color: #605ce5 !important;
+    font-weight: 600 !important;
+  }
+  
+  /* 增强整体显示效果 */
+  h4 {
+    color: #303133;
+    font-size: 18px;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .final-config-container {
+      max-width: 100%;
+      padding: 0 16px;
+    }
+    
+    .config-block pre {
+      font-size: 12px !important;
+    }
+  }
 </style>

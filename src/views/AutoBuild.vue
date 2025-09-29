@@ -177,7 +177,7 @@
             <div class="build-complete">
               <el-result icon="success" title="构建完成" sub-title="请查看下方日志确认构建结果。">
                 <template #extra>
-                  <el-button type="primary" @click="goBack">返回AI+首页</el-button>
+                  <el-button type="primary" @click="goBack">返回文曲AI</el-button>
                   <el-button @click="currentStep = 1">重新构建</el-button>
                 </template>
               </el-result>
