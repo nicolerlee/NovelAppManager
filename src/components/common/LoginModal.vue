@@ -207,7 +207,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, watch, onUnmounted,inject } from "vue";
+import { ref, defineProps, defineEmits, watch, onUnmounted, onMounted, inject } from "vue";
 import { ElMessage } from "element-plus";
 import {
   View,
@@ -314,6 +314,23 @@ const handleRegister = async () => {
 
   } 
 };
+
+// ESC键关闭登录框
+const handleKeydown = (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+};
+
+// 组件挂载时添加键盘事件监听器
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown);
+});
+
+// 组件卸载时移除键盘事件监听器
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown);
+});
 </script>
 
 <style scoped>

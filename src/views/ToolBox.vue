@@ -36,7 +36,7 @@ const goToReleaseCheck = () => {
     return
   }
   // 这里暂时只是一个示例，实际的路由可能需要根据具体情况调整
-  ElMessage.info('即将前往发版前检查工具')
+  ElMessage.error('暂未开放')
 }
 </script>
 

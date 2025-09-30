@@ -1,7 +1,7 @@
 <template>
   <div class="flex-container">
     <div class="sidebar">
-      <div class="logo-container">
+      <div class="logo-container" @click="handleLogoClick">
         <img src="/images/logo/wenqu_logo.png" class="logo-image" />
         <div class="logo-text">WENQU 2.0</div>
 
@@ -160,6 +160,11 @@ const handleNavigateToAdmin = () => {
   router.push('/admin');
 };
 
+// 处理logo点击，返回首页
+const handleLogoClick = () => {
+  router.push('/home');
+};
+
 
 
 //智能体终端
@@ -272,6 +277,12 @@ body, html, #app {
   align-items: center;
   margin: 24px 0px 16px;
   padding-left: 40px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.02);
 }
 
 .logo-text{
