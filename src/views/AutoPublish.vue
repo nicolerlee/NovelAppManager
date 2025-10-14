@@ -481,6 +481,8 @@ const connectPublishLogSocket = (taskId) => {
             // 如果是快手平台，先获取二维码再进入下一步
             if(selectedPlatform.value === 'mp-kuaishou' && publishTaskId.value) {
                await fetchKuaishouQRCode(publishTaskId.value)
+            }else if(selectedPlatform.value === 'mp-weixin' && publishTaskId.value) {
+              await fetchWeixinQRCode(publishTaskId.value)
             }
 
             publishTaskId.value = null
@@ -503,6 +505,10 @@ const connectPublishLogSocket = (taskId) => {
           generateDouyinQRCode(qrCodeUrl.value) // 抖音使用generateQRCode生成二维码
         }else if(message.body.startsWith('[快手] 二维码生成成功:')){
           // 快手二维码日志表示二维码已生成，但需要调用接口获取
+          // 不在此处直接处理，留待发布成功后获取
+          // 已经由publish success逻辑触发获取
+        }else if(message.body.startsWith('[微信] 二维码生成成功:')){
+          // 微信二维码日志表示二维码已生成，但需要调用接口获取
           // 不在此处直接处理，留待发布成功后获取
           // 已经由publish success逻辑触发获取
         }
@@ -539,6 +545,38 @@ const fetchKuaishouQRCode = async (taskId) => {
   } catch (error) {
     console.error('获取快手体验版二维码失败:', error) // 打印完整的错误对象
     ElMessage.error('获取快手体验版二维码失败: ' + (error?.message || ''))
+    qrCodeImage.value = null // 获取失败则不显示二维码
+  }
+}
+
+
+// 在发布成功后，如果当前是快手平台，调用接口获取二维码
+const fetchWeixinQRCode = async (taskId) => {
+  if (!taskId || selectedPlatform.value !== 'mp-weixin') return
+  try {
+    // 使用axios获取原始响应，绕过拦截器的data处理
+    const response = await request({
+      method: 'GET',
+      url: `/api/novel-publish/qrcode/${taskId}`,
+      responseType: 'arraybuffer' // 告知axios以ArrayBuffer形式处理响应
+    })
+
+    if (response.status === 200 && response.data) {
+      // 将ArrayBuffer转换为Blob对象，并创建Object URL
+      const blob = new Blob([response.data], { type: response.headers['content-type'] || 'image/png' });
+      qrCodeImage.value = URL.createObjectURL(blob);
+      console.log("微信二维码Object URL:", qrCodeImage.value);
+
+    } else {
+      // 更详细的错误提示
+      const errorMsg = `获取微信体验版二维码失败: 状态码 ${response.status}, 消息: ${response.statusText || '未知错误'}`;
+      ElMessage.error(errorMsg)
+      console.error(errorMsg, response); // 打印完整的响应对象
+      qrCodeImage.value = null // 获取失败则不显示二维码
+    }
+  } catch (error) {
+    console.error('获取微信体验版二维码失败:', error) // 打印完整的错误对象
+    ElMessage.error('获取微信体验版二维码失败: ' + (error?.message || ''))
     qrCodeImage.value = null // 获取失败则不显示二维码
   }
 }

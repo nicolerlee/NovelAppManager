@@ -744,10 +744,6 @@ if (selectedApp.value?.appId) {
 }
 
 /* 单选按钮组边框样式 */
-:deep(.el-radio-group) {
-  .el-radio-button:first-child .el-radio-button__inner {
-    background-color:  #605ce5 !important;
-  }
-}
+/* 已移除错误的first-child背景色设置，让选中状态样式正常生效 */
 
 </style>
