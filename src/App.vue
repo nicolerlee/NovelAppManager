@@ -53,7 +53,7 @@
 
         <router-link to="/toolbox" class="menu-item" active-class="menu-item-active">
           <svg width="20px" height="20px" viewBox="0 0 20 20"><defs><rect id="path-tu_jwkx0s7-1" x="0" y="0" width="20" height="20"></rect></defs><g stroke="none" stroke-width="1" fill="currentColor" fill-rule="evenodd"><g id="recycler"><g id="path-1"></g><path d="M12.5,9.16666667 L12.5,14.1666667 L10.8333333,14.1666667 L10.8333333,9.16666667 L12.5,9.16666667 Z M9.16666667,9.16666667 L9.16666667,14.1666667 L8.33332869,14.1666667 L8.22880635,14.1601738 C7.81790632,14.1087513 7.5,13.7581652 7.5,13.3333281 L7.5,9.16666667 L9.16666667,9.16666667 Z M2.5,5 L2.5,6.66666667 L4.16666667,6.66666667 L4.16666287,15 C4.16666497,16.3807125 5.28595418,17.5 6.66666667,17.5 L6.66666153,17.5 L6.66666153,17.5 L15.8333333,17.5 L15.8333333,6.66666667 L17.5,6.66666667 L17.5,5 L2.5,5 Z M12.5,2.5 L7.5,2.5 L7.5,4.16666667 L12.5,4.16666667 L12.5,2.5 Z" id="vector" fill="currentColor" fill-rule="nonzero" mask="url(#mask-tu_jwkx0s7-2)"></path></g></g></svg>
-          <span style="margin-left: 8px;">工具箱</span>
+          <span style="margin-left: 8px;">百宝箱</span>
         </router-link>
 
         <!-- 后台管理菜单，仅研发可见 -->
@@ -386,7 +386,7 @@ body, html, #app {
  transition: all 0.3s ease;
 }
 .about-wenqu-content:hover svg{
- color: #605ce5;
+ color: rgb(97, 93, 229);
 }
 .about-wenqu-content:hover .about-wenqu-text{
  color: #605ce5;

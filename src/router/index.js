@@ -96,13 +96,21 @@ const routes = [
     name: 'WenquAi',
     component: () => import('../views/WenquAi.vue')
   },
-  { 
+  {
     path: '/admin',
     name: 'Admin',
     component: () => import('../views/Admin.vue'),
-    meta: { 
+    meta: {
       title: '后台管理',
       requiresAdmin: true
+    }
+  },
+  {
+    path: '/generate-preview-qrcode',
+    name: 'GeneratePreviewQrCode',
+    component: () => import('../components/toolBox/generatePreviewQrCode.vue'),
+    meta: {
+      title: '生成预览二维码'
     }
   }
 ]

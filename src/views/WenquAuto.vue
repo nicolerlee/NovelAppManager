@@ -7,12 +7,7 @@
           </div>
           <div class="feature-title">生产小程序</div>
           <div class="feature-desc">流水线自动批量生产小程序</div>
-          <div class="expert-tag">
-            <el-tag type="primary" effect="dark" size="large">
-              <el-icon><Star /></el-icon>
-              <span>产品级</span>
-            </el-tag>
-          </div>
+         
         </el-card>
         <el-card class="feature-card" shadow="hover" @click="goToBuild">
           <div class="feature-icon build-app">
@@ -20,12 +15,6 @@
           </div>
           <div class="feature-title">编译小程序</div>
           <div class="feature-desc">构建系统，快速编译可执行小程序包</div>
-          <div class="expert-tag">
-            <el-tag type="success" effect="dark" size="large">
-              <el-icon><Star /></el-icon>
-              <span>专家级</span>
-            </el-tag>
-          </div>
         </el-card>
         <el-card class="feature-card" shadow="hover" @click="goToPublish">
           <div class="feature-icon publish-center">
@@ -33,12 +22,6 @@
           </div>
           <div class="feature-title">发布小程序</div>
           <div class="feature-desc">集成自动发布/预览生成二维码，覆盖主流小程序平台</div>
-          <div class="expert-tag">
-            <el-tag type="warning" effect="dark" size="large">
-              <el-icon><Star /></el-icon>
-              <span>工程师级</span>
-            </el-tag>
-          </div>
         </el-card>
       </div>
   </div>
@@ -108,7 +91,7 @@ const goToCreate = () => {
   overflow: hidden;
 }
 .feature-card:hover {
-  box-shadow: 0 6px 24px 0 rgba(64,158,255,0.12);
+  box-shadow: 0 6px 24px 0 rgba(97, 93, 229, 0.12);
   transform: translateY(-4px) scale(1.03);
 }
 .feature-card::after {
@@ -118,7 +101,7 @@ const goToCreate = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(103, 194, 58, 0.1) 0%, rgba(103, 194, 58, 0) 100%);
+  background: linear-gradient(135deg, rgba(97, 93, 229, 0.1) 0%, rgba(103, 194, 58, 0) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }

@@ -153,7 +153,7 @@ const navigateToPayment = () => {
 }
 
 .feature-card:hover {
-  box-shadow: 0 6px 24px 0 #409eff1f;
+  box-shadow: 0 6px 24px 0 rgba(97, 93, 229, 0.122);
   transform: translateY(-4px) scale(1.03);
 }
 
@@ -164,7 +164,7 @@ const navigateToPayment = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #409eff1a 0%, #409eff00 100%);
+  background: linear-gradient(135deg, rgba(97, 93, 229, 0.102) 0%, rgba(64, 158, 255, 0) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -215,8 +215,8 @@ const navigateToPayment = () => {
 }
 
 :deep(.el-button--primary:hover) {
-  background-color: #5652d8 !important;
-  border-color: #5652d8 !important;
+  background-color: rgb(86, 82, 216) !important;
+  border-color: rgb(86, 82, 216) !important;
 }
 
 :deep(.el-button--info) {

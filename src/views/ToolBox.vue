@@ -1,21 +1,23 @@
 <template>
   <div class="toolbox-module">
     <div class="feature-grid">
+
+       <el-card class="feature-card" shadow="hover" @click="generatePreviewCode">
+          <div class="feature-icon release-check">
+            <el-icon><Grid /></el-icon>
+          </div>
+          <div class="feature-title">生成预览码</div>
+          <div class="feature-desc">一键生成指定path小程序预览码</div>
+        </el-card>
         <el-card class="feature-card" shadow="hover" @click="goToReleaseCheck">
           <div class="feature-icon release-check">
             <el-icon><Check /></el-icon>
           </div>
-          <div class="feature-title">发版前检查</div>
-          <div class="feature-desc">自动化检查发版前的各项配置和依赖</div>
+          <div class="feature-title">发版前防呆检查</div>
+          <div class="feature-desc">自动化检查发版前的各项配置和依赖，检查测试代码遗留等</div>
         </el-card>
 
-        <el-card class="feature-card" shadow="hover" @click="goToReleaseCheck">
-          <div class="feature-icon release-check">
-            <el-icon><Check /></el-icon>
-          </div>
-          <div class="feature-title">更多工具箱</div>
-          <div class="feature-desc">即将开放</div>
-        </el-card>
+       
       </div>
   </div>
 </template>
@@ -36,7 +38,15 @@ const goToReleaseCheck = () => {
     return
   }
   // 这里暂时只是一个示例，实际的路由可能需要根据具体情况调整
-  ElMessage.error('暂未开放')
+  ElMessage.error('努力开发中，敬请期待')
+}
+
+const generatePreviewCode = () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
+  router.push('/generate-preview-qrcode')
 }
 </script>
 
@@ -70,7 +80,7 @@ const goToReleaseCheck = () => {
   overflow: hidden;
 }
 .feature-card:hover {
-  box-shadow: 0 6px 24px 0 rgba(64,158,255,0.12);
+  box-shadow: 0 6px 24px 0 rgba(97, 93, 229,0.12);
   transform: translateY(-4px) scale(1.03);
 }
 .feature-card::after {
@@ -80,7 +90,7 @@ const goToReleaseCheck = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(103, 194, 58, 0.1) 0%, rgba(103, 194, 58, 0) 100%);
+  background: linear-gradient(135deg, rgba(97, 93, 229, 0.1) 0%, rgba(103, 194, 58, 0) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }

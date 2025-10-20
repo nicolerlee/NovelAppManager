@@ -10,9 +10,6 @@
             </el-button>
             <h3>智能构建小程序</h3>
           </div>
-          <div class="header-right">
-            <el-tag type="success" effect="dark">专家级</el-tag>
-          </div>
         </div>
       </template>
 

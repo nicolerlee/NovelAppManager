@@ -110,6 +110,14 @@
                 placeholder="请输入用户名"
               />
             </div>
+            <div class="form-group">
+              <label>邮箱</label>
+              <input
+                type="email"
+                v-model="registerEmail"
+                placeholder="请输入邮箱"
+              />
+            </div>
             <div class="form-group password-group">
               <label>密码</label>
               <div class="password-input-wrapper">
@@ -230,6 +238,7 @@ const registerUsername = ref("");
 const registerPassword = ref("");
 const confirmPassword = ref("");
 const userType = ref("0"); // 默认研发
+const registerEmail = ref(""); // 新增email字段
 const passwordMatch = ref(true);
 const showRegisterPassword = ref(false); // 控制注册密码显示
 const showConfirmPassword = ref(false); // 控制确认密码显示
@@ -282,6 +291,16 @@ const handleRegister = async () => {
     ElMessage.error("请输入用户名");
     return;
   }
+  if (!registerEmail.value) {
+    ElMessage.error("请输入邮箱");
+    return;
+  }
+  // 简单的邮箱格式验证
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(registerEmail.value)) {
+    ElMessage.error("请输入有效的邮箱地址");
+    return;
+  }
   if (!registerPassword.value) {
     ElMessage.error("请输入密码");
     return;
@@ -299,6 +318,7 @@ const handleRegister = async () => {
     userName: registerUsername.value,
     password: registerPassword.value,
     type: parseInt(userType.value),
+    email: registerEmail.value
   });
 
   // 检查是否返回了Promise
@@ -311,8 +331,8 @@ const handleRegister = async () => {
     registerUsername.value = "";
     registerPassword.value = "";
     confirmPassword.value = "";
-
-  } 
+    registerEmail.value = "";
+  }
 };
 
 // ESC键关闭登录框

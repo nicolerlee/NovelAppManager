@@ -10,9 +10,6 @@
             </el-button>
             <h3>全平台自动发布中心</h3>
           </div>
-          <div class="header-right">
-            <el-tag type="warning" effect="dark">工程师级</el-tag>
-          </div>
         </div>
       </template>
 

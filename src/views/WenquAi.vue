@@ -96,7 +96,7 @@ const navigateToWenquAgent = () => {
   display: block;
 }
 .feature-card:hover {
-  box-shadow: 0 6px 24px 0 rgba(64,158,255,0.12);
+  box-shadow: 0 6px 24px 0 rgba(97, 93, 229,0.12);
   transform: translateY(-4px) scale(1.03);
 }
 .feature-card::after {
@@ -106,7 +106,7 @@ const navigateToWenquAgent = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(103, 194, 58, 0.1) 0%, rgba(103, 194, 58, 0) 100%);
+  background: linear-gradient(135deg, rgba(97, 93, 229, 0.1) 0%, rgba(103, 194, 58, 0) 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }

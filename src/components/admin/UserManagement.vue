@@ -23,6 +23,7 @@
         <el-table-column prop="id" label="用户ID" width="200" />
         <el-table-column prop="userName" label="用户名" width="200" />
         <el-table-column prop="phone" label="电话" width="150" />
+        <el-table-column prop="email" label="邮箱" width="250" />
         <el-table-column prop="type" label="用户类型" width="120">
           <template #default="scope">
             <span :class="getUserTypeClass(scope.row.type)">{{
