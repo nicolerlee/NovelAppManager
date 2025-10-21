@@ -167,54 +167,13 @@ const handleLogoClick = () => {
 
 
 
+//导入文曲智能体配置
+import WenquAgentConfig from './config/WenquAgentConfig.js';
+
 //智能体终端
 const agentClient = ref(null);
-//智能体配置项
-const agentOption = ref({
-  config: {
-    bot_id: "7532714420175847487",
-  },
-  componentProps: {
-    title: "文曲智能对话",
-  },
-  //鉴权配置
-  auth: {
-    type: "token",
-    token:
-      "pat_ogyAtCdul52maU0rzqGWhwHnkHTDzMlIoP46jzLvTOKXAKjdv6PJ4TYq9hS7Ps3L",
-    onRefreshToken: function () {
-      return "pat_ogyAtCdul52maU0rzqGWhwHnkHTDzMlIoP46jzLvTOKXAKjdv6PJ4TYq9hS7Ps3L";
-    },
-  },
-  //整体UI效果配置
-  ui: {
-    base: {
-      icon: "/images/logo/wenqu_logo.png",
-      layout: "pc",
-      zIndex: 1000,
-    },
-    asstBtn: {
-      isNeed: false,
-    },
-    footer: {
-      isShow: true,
-      expressionText: "Powered by Wenqu AI",
-    },
-  },
-  //聊天框的 UI 和基础能力
-  chatBot: {
-    title: "文曲智能对话",
-    uploadable: true,
-    width: 800,
-    //设置是否支持对智能体或应用回复的消息进行追问。
-    isNeedQuote: true,
-    //当聊天框隐藏的时候，会回调该方法
-    onHide: () => {},
-    //当聊天框 显示的时候，会回调该方法
-    onShow: () => {},
-    el: null,
-  },
-});
+//智能体配置项 - 使用外部配置文件
+const agentOption = ref(WenquAgentConfig);
 
 onMounted(() => {
   console.log(TAG,"onMounted");

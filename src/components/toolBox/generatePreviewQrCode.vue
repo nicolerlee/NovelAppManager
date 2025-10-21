@@ -446,83 +446,115 @@ const publishing = ref(false)
 
 // 连接发布日志 WebSocket
 const connectPublishLogSocket = (taskId) => {
-  if (previewStompClient.value) {
-    try { previewStompClient.value.disconnect() } catch {}
-    previewStompClient.value = null
-  }
-  const socket = new SockJS(`${window.location.protocol}//${window.location.hostname}:8080/ws`)
-  const client = Stomp.over(socket)
-  client.heartbeat.outgoing = 0
-  client.heartbeat.incoming = 0
-  client.debug = () => {}
-  client.connect({}, () => {
-    client.subscribe(`/topic/publish-logs/${taskId}`, async (message) => {
-      if (message.body) {
-        previewLogs.value.push(message.body)
-        previewLogsText.value = previewLogs.value.join('\n')
-        nextTick(() => {
-          if (logContentRef.value) {
-            logContentRef.value.scrollTop = logContentRef.value.scrollHeight
-          }
-        })
-        console.log("message.body:", message.body)
-        if (message.body.startsWith('Preview QrCode success')) {
-            // 检查是否包含二维码链接
-            if (message.body.includes('[抖音] 二维码生成成功:')) {
-              const qrCodeUrl = message.body.substring(message.body.indexOf('[抖音] 二维码生成成功:') + '[抖音] 二维码生成成功:'.length).trim()
-              console.log('提取的二维码URL:', qrCodeUrl)
-              
-              // 设置二维码图片
-              try {
-                // 使用QRCode.toDataURL生成二维码图片
-                const QRCode = (await import('qrcode')).default
-                const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
-                  width: 180,
-                  margin: 1,
-                  color: {
-                    dark: '#000000',
-                    light: '#ffffff'
-                  }
-                })
-                qrCodeImage.value = qrCodeDataUrl
-                console.log('二维码图片生成成功')
-              } catch (error) {
-                console.error('生成二维码图片失败:', error)
-                ElMessage.error('生成二维码图片失败')
-                // 如果生成失败，直接使用原始URL（备用方案）
-                qrCodeImage.value = qrCodeUrl
-              }
-            }else if(message.body.includes('[微信] 二维码生成成功:')){
-                await fetchWeixinQRCode(taskId)
-
-            }
-            
-            setTimeout(async () => {
-              if (previewStompClient.value) previewStompClient.value.disconnect()
-              previewStompClient.value = null
-              publishing.value = false
-              previewTaskId.value = null              
-              showDialog.value = false // 直接隐藏弹窗
-              ElMessage.success('预览二维码生成成功')
-            }, 1000)
-        } else if (message.body.startsWith('Preview QrCode error')) {
-            setTimeout(() => {
-              if (previewStompClient.value) previewStompClient.value.disconnect()
-              previewStompClient.value = null
-              publishing.value = false
-              previewTaskId.value = null
-              publishFailed.value = true
-              ElMessage.error('预览二维码生成失败，请检查日志并重试')
-            }, 1000)
-        } else if(message.body.startsWith('[抖音] 二维码生成成功:')) {
-          const qrCodeUrl = message.body.substring('[抖音] 二维码生成成功:'.length).trim()
-          console.log("douyin qrCodeUrl:", qrCodeUrl)
-          // 这里可以添加生成抖音二维码的逻辑
-        }
-      }
+  return new Promise((resolve, reject) => {
+    if (previewStompClient.value) {
+      try { previewStompClient.value.disconnect() } catch {}
+      previewStompClient.value = null
+    }
+    console.log("connectPublishLogSocket:", taskId)
+    
+    // 使用WebSocket工厂函数创建连接，以支持自动重连
+    const client = Stomp.over(() => {
+      return new SockJS(`${window.location.protocol}//${window.location.hostname}:8080/ws`)
     })
+    
+    // 启用自动重连
+    client.reconnect_delay = 5000 // 5秒后自动重连
+    client.heartbeat.outgoing = 20000 // 20秒发送一次心跳
+    client.heartbeat.incoming = 20000 // 20秒接收一次心跳
+    client.debug = (str) => {
+      console.log('STOMP debug:', str) // 启用调试日志以便排查问题
+    }
+    
+    // 连接成功回调
+    const onConnect = () => {
+      console.log('WebSocket连接成功')
+      client.subscribe(`/topic/publish-logs/${taskId}`, async (message) => {
+        if (message.body) {
+          previewLogs.value.push(message.body)
+          previewLogsText.value = previewLogs.value.join('\n')
+          nextTick(() => {
+            if (logContentRef.value) {
+              logContentRef.value.scrollTop = logContentRef.value.scrollHeight
+            }
+          })
+          console.log("message.body:", message.body)
+          if (message.body.startsWith('Preview QrCode success')) {
+              // 检查是否包含二维码链接
+              if (message.body.includes('[抖音] 二维码生成成功:')) {
+                const qrCodeUrl = message.body.substring(message.body.indexOf('[抖音] 二维码生成成功:') + '[抖音] 二维码生成成功:'.length).trim()
+                console.log('提取的二维码URL:', qrCodeUrl)
+                
+                // 设置二维码图片
+                try {
+                  // 使用QRCode.toDataURL生成二维码图片
+                  const QRCode = (await import('qrcode')).default
+                  const qrCodeDataUrl = await QRCode.toDataURL(qrCodeUrl, {
+                    width: 180,
+                    margin: 1,
+                    color: {
+                      dark: '#000000',
+                      light: '#ffffff'
+                    }
+                  })
+                  qrCodeImage.value = qrCodeDataUrl
+                  console.log('二维码图片生成成功')
+                } catch (error) {
+                  console.error('生成二维码图片失败:', error)
+                  ElMessage.error('生成二维码图片失败')
+                  // 如果生成失败，直接使用原始URL（备用方案）
+                  qrCodeImage.value = qrCodeUrl
+                }
+              }else if(message.body.includes('[微信] 二维码生成成功:')){
+                  await fetchWeixinQRCode(taskId)
+              }
+              
+              setTimeout(async () => {
+                if (previewStompClient.value) previewStompClient.value.disconnect()
+                previewStompClient.value = null
+                publishing.value = false
+                previewTaskId.value = null              
+                showDialog.value = false // 直接隐藏弹窗
+                ElMessage.success('预览二维码生成成功')
+              }, 1000)
+          } else if (message.body.startsWith('Preview QrCode error')) {
+              setTimeout(() => {
+                if (previewStompClient.value) previewStompClient.value.disconnect()
+                previewStompClient.value = null
+                publishing.value = false
+                previewTaskId.value = null
+                publishFailed.value = true
+                ElMessage.error('预览二维码生成失败，请检查日志并重试')
+              }, 1000)
+          } else if(message.body.startsWith('[抖音] 二维码生成成功:')) {
+            const qrCodeUrl = message.body.substring('[抖音] 二维码生成成功:'.length).trim()
+            console.log("douyin qrCodeUrl:", qrCodeUrl)
+            // 这里可以添加生成抖音二维码的逻辑
+          }
+          // 检查是否收到TASK_COMPLETED命令
+          if (message.body === 'TASK_COMPLETED') {
+            console.log('收到任务完成命令，断开连接')
+            if (previewStompClient.value) previewStompClient.value.disconnect()
+            previewStompClient.value = null
+            publishing.value = false
+            previewTaskId.value = null
+            ElMessage.success('任务已完成')
+          }
+        }
+      })
+      resolve(client) // 连接成功，返回client
+    }
+    
+    // 连接错误回调
+    const onError = (error) => {
+      console.error('WebSocket连接失败:', error)
+      reject(error) // 连接失败，拒绝Promise
+    }
+    
+    client.connect({}, onConnect, onError)
+    previewStompClient.value = client
   })
-  previewStompClient.value = client
+
 }
 
 
@@ -618,6 +650,16 @@ const generateQRCode = async () => {
         if (res.code === 200 && res.data && res.data.taskId) {
           previewTaskId.value = res.data.taskId
           connectPublishLogSocket(previewTaskId.value)
+        .then(client => {
+          console.log('WebSocket连接已建立成功')
+          // 连接成功后的处理逻辑
+        })
+        .catch(error => {
+          console.error('WebSocket连接失败，错误:', error)
+          ElMessage.error('WebSocket连接失败，请检查网络或稍后重试')
+          publishing.value = false
+          previewTaskId.value = null
+        })
           ElMessage.success('预览二维码任务已启动，任务ID: ' + previewTaskId.value)
         } else {
           ElMessage.error('启动预览二维码生成失败: ' + (res.message || '未知错误'))

@@ -17,7 +17,13 @@
           <div class="feature-desc">自动化检查发版前的各项配置和依赖，检查测试代码遗留等</div>
         </el-card>
 
-       
+       <el-card class="feature-card" shadow="hover">
+          <div class="feature-icon release-check">
+            <el-icon><More /></el-icon>
+          </div>
+          <div class="feature-title">更多创新工具</div>
+          <div class="feature-desc">正在开发中，敬请期待</div>
+        </el-card>
       </div>
   </div>
 </template>

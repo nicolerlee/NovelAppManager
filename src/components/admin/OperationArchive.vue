@@ -119,6 +119,28 @@ const loading = ref(false);
 // 日期快捷选项
 const dateShortcuts = [
   {
+    text: "今天",
+    value: () => {
+      const today = new Date();
+      const start = new Date(today);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(today);
+      end.setHours(23, 59, 59, 999);
+      return [start, end];
+    },
+  },
+  {
+    text: "最新三天",
+    value: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 3);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      return [start, end];
+    },
+  },
+  {
     text: "最近一周",
     value: () => {
       const end = new Date();

@@ -58,6 +58,7 @@
             <div class="form-group">
               <label>用户名</label>
               <input
+                ref="loginUsernameInput"
                 type="text"
                 v-model="username"
                 placeholder="请输入用户名"
@@ -105,6 +106,7 @@
             <div class="form-group">
               <label>用户名</label>
               <input
+                ref="registerUsernameInput"
                 type="text"
                 v-model="registerUsername"
                 placeholder="请输入用户名"
@@ -215,7 +217,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits, watch, onUnmounted, onMounted, inject } from "vue";
+import { ref, defineProps, defineEmits, watch, onUnmounted, onMounted, inject, nextTick } from "vue";
 import { ElMessage } from "element-plus";
 import {
   View,
@@ -228,6 +230,9 @@ import {
 
 // 当前标签页，login或register
 const currentTab = ref("login");
+// 输入框ref
+const loginUsernameInput = ref(null);
+const registerUsernameInput = ref(null);
 // 登录表单数据
 const username = ref("");
 const password = ref("");
@@ -342,9 +347,27 @@ const handleKeydown = (e) => {
   }
 };
 
-// 组件挂载时添加键盘事件监听器
+// 聚焦到当前tab的用户名输入框
+const focusUsernameInput = () => {
+  nextTick(() => {
+    if (currentTab.value === 'login' && loginUsernameInput.value) {
+      loginUsernameInput.value.focus();
+    } else if (currentTab.value === 'register' && registerUsernameInput.value) {
+      registerUsernameInput.value.focus();
+    }
+  });
+};
+
+// 监听tab切换，自动聚焦
+watch(currentTab, () => {
+  focusUsernameInput();
+});
+
+// 组件挂载时添加键盘事件监听器并聚焦
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown);
+  // 组件挂载后立即聚焦到用户名输入框
+  focusUsernameInput();
 });
 
 // 组件卸载时移除键盘事件监听器
