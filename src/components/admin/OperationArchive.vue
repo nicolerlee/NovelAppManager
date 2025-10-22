@@ -9,9 +9,6 @@
             :prefix-icon="Search"
             clearable
           >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
           </el-input>
         </el-col>
         <el-col :span="14">

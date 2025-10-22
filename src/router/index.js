@@ -112,6 +112,14 @@ const routes = [
     meta: {
       title: '生成预览二维码'
     }
+  },
+  {
+    path: '/app-upload-check',
+    name: 'AppUploadCheck',
+    component: () => import('../components/toolBox/appUploadCheck.vue'),
+    meta: {
+      title: '发版前防呆检查'
+    }
   }
 ]
 

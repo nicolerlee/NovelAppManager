@@ -9,7 +9,7 @@
           <div class="feature-title">生成预览码</div>
           <div class="feature-desc">一键生成指定path小程序预览码</div>
         </el-card>
-        <el-card class="feature-card" shadow="hover" @click="goToReleaseCheck">
+        <el-card class="feature-card" shadow="hover" @click="appUploadCheck">
           <div class="feature-icon release-check">
             <el-icon><Check /></el-icon>
           </div>
@@ -38,13 +38,13 @@ const auth = inject('auth')
 
 const router = useRouter()
 
-const goToReleaseCheck = () => {
+const appUploadCheck = () => {
   if (!auth.isLogin.value) {
     auth.showLogin()
     return
   }
-  // 这里暂时只是一个示例，实际的路由可能需要根据具体情况调整
-  ElMessage.error('努力开发中，敬请期待')
+  // 跳转到appUploadCheck组件
+  router.push('/app-upload-check')
 }
 
 const generatePreviewCode = () => {

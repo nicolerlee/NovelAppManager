@@ -179,6 +179,16 @@
                 />
               </el-form-item>
             </el-form>
+            <!-- 发布前提示 -->
+            <div class="publish-tip">
+              <el-alert
+                title='强烈建议在发布前先前往"百宝箱"进行小程序发布前检测，排除隐患'
+                type="warning"
+                :closable="false"
+                show-icon
+              />
+            </div>
+            
             <div class="step-actions">
               <el-button @click="currentStep = 1">上一步</el-button>
               <el-button type="primary" @click="handleStartPublish" :disabled="!publishConfig.description">发布</el-button>
@@ -873,11 +883,28 @@ const generateDouyinQRCode = async (qrCodeUrl) => {
   margin-bottom: 16px;
 }
 
-.step-actions {
+.publish-tip {
   margin-top: 24px;
+  margin-bottom: 24px;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
+
+.publish-tip :deep(.el-alert) {
+  width: 100%;
+  max-width: 800px;
+  text-align: center;
+}
+
+.step-actions {
+  margin-top: 0;
   display: flex;
   justify-content: center;
   gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 :deep(.el-descriptions__label) {
@@ -1041,4 +1068,4 @@ const generateDouyinQRCode = async (qrCodeUrl) => {
 .douyin-tip a:hover {
   text-decoration: underline;
 }
-</style> 
+</style>
