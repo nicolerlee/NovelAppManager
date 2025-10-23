@@ -344,7 +344,8 @@ const performCheck = async () => {
     // 调用真实的后端API，使用GET请求，传递appId参数
     const response = await request.get('/api/novel-toolbox/app-upload-check', {
       params: {
-        appId: selectedApp.value.appid
+        appId: selectedApp.value.appid,
+        projectPath: selectedApp.value.projectPath,
       }
     })
 
@@ -375,34 +376,44 @@ const performCheck = async () => {
     if (checkOptions.versionComparisonCheck && data.versionInfo) {
       const { onlineVersion, currentVersion } = data.versionInfo
       let status = 'success'
-      let description = `当前版本号(${currentVersion})与线上版本(${onlineVersion})一致`
-      let suggestions = ['版本号检查通过']
+      let description = ''
+      let suggestions = []
       
-      // 简单的版本号比较逻辑
-      if (currentVersion !== onlineVersion) {
-        const currentParts = currentVersion.split('.').map(Number)
-        const onlineParts = onlineVersion.split('.').map(Number)
+      // 处理线上版本号为null的情况
+      if (onlineVersion === null) {
+        status = 'danger' // 修改为danger状态，确保无法获取线上版本号时不允许通过检查
+        description = `无法获取线上版本号，当前版本号为${currentVersion}`
+        suggestions = ['后台获取线上版本失败，无法验证版本号是否正确递增', '请先解决版本号获取问题后再提交']
+      } else {
+        // 正常的版本号比较逻辑
+        description = `当前版本号(${currentVersion})与线上版本(${onlineVersion})一致`
+        suggestions = ['版本号检查通过']
         
-        // 比较版本号
-        let isHigher = false
-        for (let i = 0; i < Math.max(currentParts.length, onlineParts.length); i++) {
-          const current = currentParts[i] || 0
-          const online = onlineParts[i] || 0
-          if (current > online) {
-            isHigher = true
-            break
-          } else if (current < online) {
-            break
+        if (currentVersion !== onlineVersion) {
+          const currentParts = currentVersion.split('.').map(Number)
+          const onlineParts = onlineVersion.split('.').map(Number)
+          
+          // 比较版本号
+          let isHigher = false
+          for (let i = 0; i < Math.max(currentParts.length, onlineParts.length); i++) {
+            const current = currentParts[i] || 0
+            const online = onlineParts[i] || 0
+            if (current > online) {
+              isHigher = true
+              break
+            } else if (current < online) {
+              break
+            }
           }
-        }
-        
-        if (isHigher) {
-          description = `当前版本号(${currentVersion})高于线上版本(${onlineVersion})`
-          suggestions = ['版本号递增正确']
-        } else {
-          status = 'warning'
-          description = `当前版本号(${currentVersion})低于或等于线上版本(${onlineVersion})`
-          suggestions = ['建议版本号递增更新']
+          
+          if (isHigher) {
+            description = `当前版本号(${currentVersion})高于线上版本(${onlineVersion})`
+            suggestions = ['版本号递增正确']
+          } else {
+            status = 'danger' // 修改为danger状态，确保不允许通过检查
+            description = `当前版本号(${currentVersion})低于或等于线上版本(${onlineVersion})`
+            suggestions = ['版本号必须递增更新，不允许低于或等于线上版本']
+          }
         }
       }
       
@@ -594,12 +605,11 @@ const performCheck = async () => {
       } else {
         description = `已启用${enabledAds.length}种广告`
         
-        // 详细展示每种广告的配置信息
+        // 详细展示每种广告的配置信息（一行显示）
         enabledAds.forEach(ad => {
-          suggestions.push(`${ad.name}: ${ad.status}`)
-          ad.details.forEach(detail => {
-            suggestions.push(`  ${detail}`)
-          })
+          // 将所有详细信息合并到一行
+          const detailsStr = ad.details.join('，')
+          suggestions.push(`${ad.name}: ${ad.status}，${detailsStr}`)
         })
         
         // 检查是否有已配置但未启用的激励广告

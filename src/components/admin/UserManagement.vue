@@ -20,7 +20,13 @@
     </div>
     <div class="user-management-content">
       <el-table :data="userList" style="width: 100%">
-        <el-table-column prop="id" label="用户ID" width="200" />
+        <el-table-column prop="id" label="用户ID" width="200">
+          <template #default="scope">
+            <span :class="{ 'highlight-id': searchKey && String(scope.row.id).includes(searchKey) }">
+              {{ scope.row.id }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="userName" label="用户名" width="200" />
         <el-table-column prop="phone" label="电话" width="150" />
         <el-table-column prop="email" label="邮箱" width="250" />
@@ -297,6 +303,13 @@ onMounted(() => {
 .status-pending {
   color: #ffc107; /* 黄色 */
   font-weight: bold;
+}
+
+/* 高亮用户ID样式 */
+.highlight-id {
+  color: #f56c6c;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 .status-rejected {

@@ -17,7 +17,7 @@
           <div class="feature-desc">自动化检查发版前的各项配置和依赖，检查测试代码遗留等</div>
         </el-card>
 
-       <el-card class="feature-card" shadow="hover">
+       <el-card class="feature-card" shadow="hover"  @click="moreToolBox">
           <div class="feature-icon release-check">
             <el-icon><More /></el-icon>
           </div>
@@ -53,6 +53,10 @@ const generatePreviewCode = () => {
     return
   }
   router.push('/generate-preview-qrcode')
+}
+
+const moreToolBox = () => {
+  ElMessage.error('正在开发中，敬请期待')
 }
 </script>
 

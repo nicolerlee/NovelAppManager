@@ -3,8 +3,8 @@
     <div class="card-header">
       <div class="search-container">
         <el-input
-          v-model="userId"
-          placeholder="输入用户ID搜索..."
+          v-model="searchKeyword"
+          placeholder="输入任意关键字搜索..."
           prefix-icon="Search"
           :style="{ width: '200px' }"
         />
@@ -22,7 +22,13 @@
     <div class="log-content">
       <el-table :data="logList" style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="userId" label="用户ID" width="100" />
+        <el-table-column prop="userId" label="用户ID" width="100">
+          <template #default="scope">
+            <span :class="{ 'highlight-id': searchKeyword && String(scope.row.userId).includes(searchKeyword) }">
+              {{ scope.row.userId }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="userName" label="用户名" width="100" />
         <el-table-column prop="opType" label="操作类型" width="100">
           <template #default="{ row }">
@@ -98,7 +104,7 @@ const logList = ref([]);
 const total = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(10);
-const userId = ref("");
+const searchKeyword = ref("");
 const dialogVisible = ref(false);
 const selectedRow = ref(null);
 
@@ -152,20 +158,16 @@ const formatOpStatus = (row) => {
 };
 
 // 获取日志数据
-const fetchLogData = async () => {
+const fetchLogData = async (query = searchKeyword.value) => {
   try {
-    // 根据是否有userId决定调用哪个接口
-    const url = userId.value
-      ? "/api/op-log/queryUserAllOp"
-      : "/api/op-log/queryAllOp";
-
+    // 使用新接口并传入query参数
     const response = await request({
-      url,
+      url: "/api/op-log/queryAllOpByQuery",
       method: "GET",
       params: {
         page: currentPage.value,
         size: pageSize.value,
-        ...(userId.value && { userId: userId.value }),
+        query: query
       },
     });
 
@@ -412,5 +414,12 @@ onMounted(() => {
 :deep(.el-input__prefix .el-icon),
 :deep(.el-input__suffix .el-icon) {
   color: #605ce5 !important;
+}
+
+/* 高亮用户ID样式 */
+.highlight-id {
+  color: #f56c6c;
+  font-weight: bold;
+  font-size: 16px;
 }
 </style>

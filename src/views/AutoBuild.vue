@@ -37,7 +37,7 @@
               <el-table
                 :data="filteredApps"
                 style="width: 100%"
-                @row-click="handleAppSelect"
+                @row-click="handleSelect"
                 :highlight-current-row="true"
               >
                 <el-table-column prop="platform" label="平台" width="100">
@@ -49,7 +49,7 @@
                 </el-table-column>
                 <el-table-column prop="appName" label="小程序名称" />
                 <el-table-column prop="appid" label="AppID" width="220" />
-                <el-table-column label="操作" width="120" fixed="right">
+                <!-- <el-table-column label="操作" width="120" fixed="right">
                   <template #default="scope">
                     <el-button
                       type="primary"
@@ -59,7 +59,7 @@
                       选择
                     </el-button>
                   </template>
-                </el-table-column>
+                </el-table-column> -->
               </el-table>
             </div>
           </div>

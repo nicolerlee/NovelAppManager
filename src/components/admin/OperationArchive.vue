@@ -5,7 +5,7 @@
         <el-col :span="6">
           <el-input
             v-model="searchKeyword"
-            placeholder="请输入用户ID"
+            placeholder="输入任意关键字搜索"
             :prefix-icon="Search"
             clearable
           >
@@ -47,7 +47,13 @@
         empty-text="暂无操作记录数据"
         empty-image=""
       >
-        <el-table-column prop="userId" label="用户ID" width="120" />
+        <el-table-column prop="userId" label="用户ID" width="120">
+          <template #default="scope">
+            <span :class="{ 'highlight-id': searchKeyword && String(scope.row.userId).includes(searchKeyword) }">
+              {{ scope.row.userId }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="username" label="用户名" width="120" />
         <el-table-column prop="operationTime" label="时间" width="220">
           <template #default="scope">
@@ -205,7 +211,7 @@ const fetchArchiveData = async (params) => {
   try {
     const response = await request.get("/api/op-log/queryUserArchive", {
       params: {
-        userId: params.userId,
+        query: params.query,
         startTime: params.startTime,
         endTime: params.endTime,
       },
@@ -263,7 +269,7 @@ const handleSearch = async () => {
   loading.value = true;
   try {
     const params = {
-      userId: searchKeyword.value || null, // 使用searchKeyword作为userId
+      query: searchKeyword.value, // 使用searchKeyword作为query参数
       startTime:
         dateRange.value && dateRange.value.length === 2
           ? dateRange.value[0]
@@ -311,6 +317,13 @@ onMounted(() => {
   padding-bottom: 80px; /* 大幅增加底部padding */
   scrollbar-width: thin; /* Firefox */
   position: relative;
+}
+
+/* 高亮用户ID样式 */
+.highlight-id {
+  color: #f56c6c;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 /* 强制表格高度适应容器 */

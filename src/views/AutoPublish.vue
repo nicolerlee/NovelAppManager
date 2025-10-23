@@ -40,6 +40,7 @@
                 style="width: 100%"
                 :highlight-current-row="true"
                 v-loading="loading"
+                @row-click="handleSelectBuild"
               >
                 <el-table-column prop="appName" label="小程序名称" min-width="200" />
                 <el-table-column label="已构建平台" min-width="300">
@@ -57,7 +58,7 @@
                     </div>
                   </template>
                 </el-table-column>
-                <el-table-column label="操作" width="120" fixed="right">
+                <!-- <el-table-column label="操作" width="120" fixed="right">
                   <template #default="scope">
                     <el-button
                       type="primary"
@@ -67,7 +68,7 @@
                       选择
                     </el-button>
                   </template>
-                </el-table-column>
+                </el-table-column> -->
               </el-table>
             </div>
           </div>
