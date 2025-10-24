@@ -21,12 +21,6 @@ const routes = [
         meta: { title: '小程序管理中心' }
       },
       {
-        path: 'config',
-        name: 'Config',
-        component: () => import('../components/appManager/WeijuConfig.vue'),
-        meta: { title: '微距配置' }
-      },
-      {
         path: 'ads',
         name: 'AdManagement',
         component: () => import('../components/appManager/AdManagement.vue')
@@ -47,6 +41,12 @@ const routes = [
         component: () => import('../components/appManager/GeneralConfig.vue')
       }
     ]
+  },
+  {
+    path: '/config',
+    name: 'Config',
+    component: () => import('../components/appManager/WeijuConfig.vue'),
+    meta: { title: '微距配置' }
   },
   { path: '/toolbox',
     name: 'ToolBox',
