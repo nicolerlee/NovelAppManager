@@ -2,12 +2,12 @@
   <el-card class="app-list-card">
     <template #header>
       <div class="header">
-        <h3>{{ title || '小程序列表' }}</h3>
+        <!-- <h3>{{ title || '小程序列表' }}</h3> -->
         <div class="header-content">
           <el-input
             v-model="searchQuery"
             placeholder="搜索小程序"
-            style="width: 200px; margin-right: 15px"
+            style="flex:1; margin-right: 15px;height: 32px;"
           >
             <template #prefix>
               <el-icon><Search /></el-icon>
@@ -212,7 +212,7 @@ defineExpose({
 
 <style scoped>
 .app-list-card {
-  flex: 0 0 500px;
+  flex: 0 0 530px;
   max-height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
@@ -242,14 +242,19 @@ defineExpose({
 }
 
 .header {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .header-content{
+  width: 100%;
+  height: 40px;
   display: flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: center;
 
 }
 .empty-description {

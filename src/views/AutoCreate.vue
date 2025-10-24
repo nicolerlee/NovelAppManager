@@ -514,6 +514,7 @@ const startGeneration = async () => {
     // 跳转到生成模块，并带上taskId
     router.push({
       name: 'generate-app',
+      path: '/wenqu-auto/generate-app',
       query: { taskId: res.data.taskId }
     });
   } catch (e) {

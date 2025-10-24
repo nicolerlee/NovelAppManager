@@ -13,7 +13,7 @@
         </div>
       </template>
 
-      <div class="check-content">
+      <div class="check-content" ref="checkContentRef">
         <!-- 小程序列表页面 -->
         <div v-if="!selectedApp || !showCheckResult">
           <div class="search-bar">
@@ -149,7 +149,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { ArrowLeft, Search } from '@element-plus/icons-vue'
@@ -168,6 +168,7 @@ const apps = ref([])
 const selectedApp = ref(null)
 const showCheckResult = ref(false)
 const checkResults = ref([])
+const checkContentRef = ref(null)
 
 // 检查选项 - 全部勾选且不可取消
 const checkOptions = reactive({
@@ -653,8 +654,73 @@ const performCheck = async () => {
     ElMessage.error('执行检查失败，请稍后重试')
   } finally {
     checkLoading.value = false
+    // 使用新方法滚动到底部
+    scrollToBottom()
   }
 }
+
+// 滚动到底部的独立函数
+const scrollToBottom = async () => {
+  try {
+    console.log('开始执行滚动操作')
+    
+    // 使用更长的延迟确保DOM完全更新
+    await nextTick()
+    await new Promise(resolve => setTimeout(resolve, 300)) // 增加延迟时间
+    await nextTick()
+    
+    // 1. 尝试滚动到检查结果容器
+    const resultsCard = document.querySelector('.results-card')
+    if (resultsCard) {
+      resultsCard.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      console.log('滚动成功: 滚动到结果卡片')
+      return
+    }
+    
+    // 2. 尝试使用ref引用滚动整个内容区
+    if (checkContentRef.value) {
+      checkContentRef.value.scrollTo({
+        top: checkContentRef.value.scrollHeight,
+        behavior: 'smooth'
+      })
+      console.log('滚动成功: 使用ref引用')
+      return
+    }
+    
+    // 3. 备用方案：使用document查询
+    const checkContent = document.querySelector('.check-content')
+    if (checkContent) {
+      checkContent.scrollTo({
+        top: checkContent.scrollHeight,
+        behavior: 'smooth'
+      })
+      console.log('滚动成功: 使用document查询')
+      return
+    }
+    
+    // 4. 最后尝试滚动整个页面
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    })
+    console.log('滚动成功: 滚动到页面底部')
+    
+  } catch (error) {
+    console.error('滚动操作失败:', error)
+  }
+}
+
+// 监听检查结果变化，确保在结果显示后滚动
+watch(checkResults, (newResults, oldResults) => {
+  // 只有当结果从无到有时才触发滚动
+  if (oldResults.length === 0 && newResults.length > 0) {
+    console.log('检测到检查结果变化，准备滚动')
+    // 延迟执行以确保Element Plus的动画完成
+    setTimeout(() => {
+      scrollToBottom()
+    }, 500)
+  }
+}, { immediate: false })
 
 // 初始化时获取小程序列表
 fetchApps()

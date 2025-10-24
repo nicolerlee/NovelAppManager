@@ -40,12 +40,12 @@ const router = useRouter();
 
 // 向导式创建 - 跳转到现有创建流程
 const handleWizardCreate = () => {
-  router.push('/auto-create');
+  router.push('/wenqu-auto/auto-create');
 };
 
 // 自由编排 - 跳转到自由编排主界面
 const handleFreeLayout = () => {
-  router.push('/free-layout');
+  router.push('/wenqu-auto/free-layout');
 };
 </script>
 

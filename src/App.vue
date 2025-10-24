@@ -6,7 +6,7 @@
         <div class="logo-text">WENQU 2.0</div>
 
       </div>
-       <router-link to="/home" class="menu-item" active-class="menu-item-active">
+       <router-link to="/home" class="menu-item" active-class="menu-item-active" exact>
           <svg width="20px" height="20px" viewBox="0 0 20 20"><defs><rect id="path-bitl8fdbrr-1" x="0" y="0" width="20" height="20"></rect></defs><g stroke="none" stroke-width="1" fill="currentColor" fill-rule="evenodd"><g id="home"><g id="path-1"></g><path d="M17.5,6.6368772 L17.5,17.5 L11.5,17.5 L11.5,12.2874897 L8.5,12.2874897 L8.5,17.5 L4.74999658,17.5 L4.73392336,17.5 C3.50016156,17.5 2.5,16.4998384 2.5,15.2660766 L2.5,15.2660766 L2.5,15.2660766 L2.5,6.6368772 L10,2.5 L17.5,6.6368772 Z" id="vector" fill="currentColor" fill-rule="nonzero" mask="url(#mask-bitl8fdbrr-2)"></path></g></g></svg>
           <span style="margin-left: 8px;">首页</span>
         </router-link>
@@ -21,22 +21,22 @@
           <span style="margin-left: 8px;">微距(for测试同学)</span>
         </router-link>
 
-        <!-- <router-link to="/ads" class="menu-item" active-class="menu-item-active">
+        <!-- <router-link to="/home/ads" class="menu-item" active-class="menu-item-active">
           <el-icon><Picture /></el-icon>
           <span style="margin-left: 8px;">广告</span>
         </router-link>
 
-        <router-link to="/payment" class="menu-item" active-class="menu-item-active">
+        <router-link to="/home/payment" class="menu-item" active-class="menu-item-active">
           <el-icon><Money /></el-icon>
           <span style="margin-left: 8px;">支付</span>
         </router-link>
 
-        <router-link to="/ui-config" class="menu-item" active-class="menu-item-active">
+        <router-link to="/home/ui-config" class="menu-item" active-class="menu-item-active">
           <el-icon><PictureRounded /></el-icon>
           <span style="margin-left: 8px;">UI配置</span>
         </router-link>
 
-        <router-link to="/general-config" class="menu-item" active-class="menu-item-active">
+        <router-link to="/home/general-config" class="menu-item" active-class="menu-item-active">
           <el-icon><Tools /></el-icon>
           <span style="margin-left: 8px;">通用配置</span>
         </router-link> -->

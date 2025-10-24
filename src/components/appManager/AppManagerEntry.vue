@@ -67,7 +67,7 @@ const navigateToGeneralConfig = () => {
     auth.showLogin()
     return
   }
-  router.push('/general-config')
+  router.push('/home/general-config')
 }
 
 // 导航到UI配置
@@ -76,7 +76,7 @@ const navigateToUIConfig = () => {
     auth.showLogin()
     return
   }
-  router.push('/ui-config')
+  router.push('/home/ui-config')
 }
 
 // 导航到广告管理
@@ -85,7 +85,7 @@ const navigateToAdManagement = () => {
     auth.showLogin()
     return
   }
-  router.push('/ads')
+  router.push('/home/ads')
 }
 
 // 导航到支付管理
@@ -94,7 +94,7 @@ const navigateToPayment = () => {
     auth.showLogin()
     return
   }
-  router.push('/payment')
+  router.push('/home/payment')
 }
 </script>
 

@@ -660,6 +660,7 @@ onMounted(() => {
 
 .card-container {
   display: flex;
+  flex-direction: row;
   width: auto;
   padding-right: 20px;
   margin-bottom: 20px;

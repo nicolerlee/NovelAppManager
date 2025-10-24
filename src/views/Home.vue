@@ -1,15 +1,17 @@
 <template>
   <div class="home-container">
-    <img class="home-bg" src="/images/home/home_bg.png" />
-    <video
-      class="home-bg-video"
-      src="/videos/home_bg.webm"
-      autoplay="true"
-      muted="true"
-      loop="true"
-    ></video>
+    <!-- 仅在首页根路径时显示背景和内容 -->
+    <template v-if="$route.path === '/home'">
+      <img class="home-bg" src="/images/home/home_bg.png" />
+      <video
+        class="home-bg-video"
+        src="/videos/home_bg.webm"
+        autoplay="true"
+        muted="true"
+        loop="true"
+      ></video>
 
-    <div class="home-content">
+      <div class="home-content">
       <div class="home-title">
         <div class="home-title-left">文曲一下，</div>
         <div class="home-title-right">
@@ -183,7 +185,10 @@
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </template>
+    <!-- 渲染子路由组件 -->
+    <router-view v-else></router-view>
   </div>
 </template>
 
@@ -236,7 +241,7 @@ onUnmounted(() => {
 
 const navigateToAppManager = () => {
   console.log("navigateToAppManager");
-  router.push("/app-manager");
+  router.push("/home/app-manager");
 };
 
 const navigateToWenquAuto = () => {

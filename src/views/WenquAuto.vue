@@ -1,6 +1,9 @@
 <template>
   <div class="wenqu-auto-module">
-     <div class="feature-grid">
+     <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" v-if="$route.path.includes('/wenqu-auto/')" />
+        <div v-else class="feature-grid">
         <el-card class="feature-card" shadow="hover" @click="goToCreate">
           <div class="feature-icon gen-app">
             <el-icon><DocumentAdd /></el-icon>
@@ -23,7 +26,9 @@
           <div class="feature-title">发布小程序</div>
           <div class="feature-desc">集成自动发布/预览生成二维码，覆盖主流小程序平台</div>
         </el-card>
-      </div>
+        </div>
+      </transition>
+    </router-view>
   </div>
 </template>
 
@@ -41,7 +46,7 @@ const goToBuild = () => {
     auth.showLogin()
     return
   }
-  router.push('/auto-build')
+  router.push('/wenqu-auto/auto-build')
 }
 
 const goToPublish = () => {
@@ -49,7 +54,7 @@ const goToPublish = () => {
     auth.showLogin()
     return
   }
-  router.push('/auto-publish')
+  router.push('/wenqu-auto/auto-publish')
 }
 
 const goToCreate = () => {
@@ -57,11 +62,21 @@ const goToCreate = () => {
     auth.showLogin()
     return
   }
-  router.push('/create-mode-selection')
+  router.push('/wenqu-auto/create-mode-selection')
 }
 </script>
 
 <style scoped>
+/* 添加过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 .wenqu-auto-module {
   padding: 20px;
 }

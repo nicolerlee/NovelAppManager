@@ -1,6 +1,9 @@
 <template>
   <div class="toolbox-module">
-    <div class="feature-grid">
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" v-if="$route.path.includes('/toolbox/')" />
+        <div v-else class="feature-grid">
 
        <el-card class="feature-card" shadow="hover" @click="generatePreviewCode">
           <div class="feature-icon release-check">
@@ -24,7 +27,9 @@
           <div class="feature-title">更多创新工具</div>
           <div class="feature-desc">正在开发中，敬请期待</div>
         </el-card>
-      </div>
+        </div>
+      </transition>
+    </router-view>
   </div>
 </template>
 
@@ -44,7 +49,7 @@ const appUploadCheck = () => {
     return
   }
   // 跳转到appUploadCheck组件
-  router.push('/app-upload-check')
+  router.push('/toolbox/app-upload-check')
 }
 
 const generatePreviewCode = () => {
@@ -52,7 +57,7 @@ const generatePreviewCode = () => {
     auth.showLogin()
     return
   }
-  router.push('/generate-preview-qrcode')
+  router.push('/toolbox/generate-preview-qrcode')
 }
 
 const moreToolBox = () => {
@@ -61,6 +66,16 @@ const moreToolBox = () => {
 </script>
 
 <style scoped>
+/* 添加过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 .toolbox-module {
   padding: 20px;
 }

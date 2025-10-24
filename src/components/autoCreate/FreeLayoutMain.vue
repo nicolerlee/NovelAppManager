@@ -1687,6 +1687,7 @@ const navigateToAutoCreateStep6 = () => {
   // 跳转到AutoCreate页面并设置为第6步
   router.push({
     name: 'AutoCreate',
+    path: '/wenqu-auto/auto-create',
     query: { step: 5 }
   });
 }
