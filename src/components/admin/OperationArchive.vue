@@ -54,7 +54,13 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="username" label="用户名" width="120" />
+        <el-table-column prop="username" label="用户名" width="120">
+          <template #default="scope">
+            <span :class="{ 'h-keyword': searchKeyword && String(scope.row.username).toLowerCase().includes(String(searchKeyword).toLowerCase()) }">
+              {{ scope.row.username }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="operationTime" label="时间" width="220">
           <template #default="scope">
             {{ formatDate(scope.row.operationTime) }}
@@ -69,8 +75,20 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="operationContent" label="操作" min-width="80" />
-        <el-table-column prop="requestUrl" label="请求地址" min-width="200" />
+        <el-table-column prop="operationContent" label="操作" min-width="80">
+          <template #default="scope">
+            <span :class="{ 'h-keyword': searchKeyword && String(scope.row.operationContent).toLowerCase().includes(String(searchKeyword).toLowerCase()) }">
+              {{ scope.row.operationContent }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="requestUrl" label="请求地址" min-width="200">
+          <template #default="scope">
+            <span :class="{ 'h-keyword': searchKeyword && String(scope.row.requestUrl).toLowerCase().includes(String(searchKeyword).toLowerCase()) }">
+              {{ scope.row.requestUrl }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column label="内容" width="100" fixed="right">
           <template #default="scope">
             <el-button
@@ -264,6 +282,29 @@ const formatDate = (dateStr) => {
   }
 };
 
+// 高亮显示搜索关键字
+const highlightKeyword = (text, keyword) => {
+  if (!text || !keyword) {
+    return text;
+  }
+  
+  const textStr = String(text);
+  const keywordStr = String(keyword);
+  
+  // 完全简化的高亮实现，只检查是否包含关键字
+  // 这里不使用复杂的正则表达式，直接返回带有内联样式的整个文本
+  // 确保HTML格式正确，避免Vue模板解析问题
+  const lowerText = textStr.toLowerCase();
+  const lowerKeyword = keywordStr.toLowerCase();
+  
+  if (lowerText.includes(lowerKeyword)) {
+    // 为了确保v-html正确渲染，我们使用简单的HTML格式
+    return `<span class="h-keyword">${textStr}</span>`;
+  }
+  
+  return textStr;
+};
+
 // 搜索操作
 const handleSearch = async () => {
   loading.value = true;
@@ -324,6 +365,18 @@ onMounted(() => {
   color: #f56c6c;
   font-weight: bold;
   font-size: 16px;
+}
+
+/* 高亮搜索关键字样式 */
+/* 确保样式定义在最外层 */
+.operation-archive {
+  :deep(.h-keyword) {
+    color: #f56c6c;
+    font-weight: bold;
+    background-color: #fff2f0;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
 }
 
 /* 强制表格高度适应容器 */
