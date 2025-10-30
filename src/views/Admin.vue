@@ -4,13 +4,19 @@
 
       <el-tabs v-model="activeTab" type="card">
         <el-tab-pane label="用户管理" name="userManagement">
-          <UserManagement />
+          <template v-if="activeTab === 'userManagement'">
+            <UserManagement />
+          </template>
         </el-tab-pane>
         <el-tab-pane label="日志查看" name="logs">
-          <LogViewer />
+          <template v-if="activeTab === 'logs'">
+            <LogViewer />
+          </template>
         </el-tab-pane>
         <el-tab-pane label="重要操作数据归档" name="archive">
-          <OperationArchive />
+          <template v-if="activeTab === 'archive'">
+            <OperationArchive />
+          </template>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -18,11 +24,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-// 导入子组件
-import UserManagement from '../components/admin/UserManagement.vue';
-import LogViewer from '../components/admin/LogViewer.vue';
-import OperationArchive from '../components/admin/OperationArchive.vue';
+import { ref, defineAsyncComponent } from 'vue';
+// 使用defineAsyncComponent定义异步组件，实现按需加载
+const UserManagement = defineAsyncComponent(() => import('../components/admin/UserManagement.vue'));
+const LogViewer = defineAsyncComponent(() => import('../components/admin/LogViewer.vue'));
+const OperationArchive = defineAsyncComponent(() => import('../components/admin/OperationArchive.vue'));
 
 // 当前激活的标签页
 const activeTab = ref('userManagement');

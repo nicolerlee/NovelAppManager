@@ -91,7 +91,15 @@
                   </el-form-item>
             
                   <el-form-item label="构建命令" prop="buildCode">
-                    <el-input v-model="configForm.buildCode" placeholder="请输入构建命令（如 npm run build:xxx）" />
+                    <div class="readonly-field-container">
+                      <el-input 
+                        v-model="configForm.buildCode" 
+                        placeholder="请输入构建命令（如 npm run build:xxx）" 
+                        readonly 
+                        class="readonly-field"
+                      />
+                    </div>
+                    <div class="form-tip">构建命令，不可二次修改</div>
                   </el-form-item>
                   
                   <el-form-item label="IAA模式">
@@ -596,6 +604,22 @@ watch(() => configForm.value.iaaMode, (val) => {
 .layout-container {
   display: flex;
   gap: 20px;
+}
+
+.readonly-field-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.readonly-field {
+  background-color: #f5f7fa;
+  cursor: not-allowed;
+  border-color: #ebeef5;
+}
+
+.readonly-tag {
+  flex-shrink: 0;
 }
 
 .header {
