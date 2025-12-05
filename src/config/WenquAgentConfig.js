@@ -17,9 +17,9 @@ const WenquAgentConfig = {
   // 鉴权配置 - 经常需要修改的部分
   auth: {
     type: "token",
-    token: "pat_Jw1y9xbDOUCajc8xIEq2bWn0YFV1epZa4V8PUbTxRbvBdDEmWhgvpfPb2O4ZJQEf",
+    token: "pat_9ijomGiq9KtbZX9Uxtr2AIoP71YCTU1v3G3LAvoCBC3OPugsM0LGiyqw5qOynmpd",
     onRefreshToken: function () {
-      return "pat_Jw1y9xbDOUCajc8xIEq2bWn0YFV1epZa4V8PUbTxRbvBdDEmWhgvpfPb2O4ZJQEf";
+      return "pat_9ijomGiq9KtbZX9Uxtr2AIoP71YCTU1v3G3LAvoCBC3OPugsM0LGiyqw5qOynmpd";
     },
   },
   

@@ -513,6 +513,7 @@ const connectPublishLogSocket = (taskId) => {
                 if (previewStompClient.value) previewStompClient.value.disconnect()
                 previewStompClient.value = null
                 publishing.value = false
+                loading.value = false
                 previewTaskId.value = null              
                 showDialog.value = false // 直接隐藏弹窗
                 ElMessage.success('预览二维码生成成功')
@@ -522,6 +523,7 @@ const connectPublishLogSocket = (taskId) => {
                 if (previewStompClient.value) previewStompClient.value.disconnect()
                 previewStompClient.value = null
                 publishing.value = false
+                loading.value = false
                 previewTaskId.value = null
                 publishFailed.value = true
                 ElMessage.error('预览二维码生成失败，请检查日志并重试')
@@ -537,6 +539,7 @@ const connectPublishLogSocket = (taskId) => {
             if (previewStompClient.value) previewStompClient.value.disconnect()
             previewStompClient.value = null
             publishing.value = false
+            loading.value = false
             previewTaskId.value = null
             ElMessage.success('任务已完成')
           }
@@ -553,7 +556,7 @@ const connectPublishLogSocket = (taskId) => {
     
     client.connect({}, onConnect, onError)
     previewStompClient.value = client
-  })
+  })  
 
 }
 
@@ -593,9 +596,11 @@ const fetchWeixinQRCode = async (taskId) => {
 
 // 处理对话框关闭
 const handleDialogClose = (done) => {
-  if (publishing.value) {
+  if (publishing.value || loading.value) {
     ElMessageBox.confirm('生成二维码中，确定要关闭吗？')
       .then(() => {
+        loading.value = false
+        publishing.value = false
         if (done) {
           done()
         } else {
@@ -610,6 +615,11 @@ const handleDialogClose = (done) => {
   }
   return true
 }
+
+import { useAuth } from '../../composables/useAuth'
+
+// 使用useAuth获取用户信息
+const { userInfo } = useAuth()
 
 // 生成二维码
 const generateQRCode = async () => {
@@ -636,6 +646,8 @@ const generateQRCode = async () => {
           path: qrCodeParams.path,
           query: qrCodeParams.query,
           scene: qrCodeParams.scene,
+          // 添加userId参数
+          userId: userInfo.value?.id || '',
           // 添加可选的token参数
           douyinAppToken: appCommonConfig.value?.douyinAppToken || '',
           kuaishouAppToken: appCommonConfig.value?.kuaishouAppToken || '',
@@ -649,22 +661,24 @@ const generateQRCode = async () => {
         
         if (res.code === 200 && res.data && res.data.taskId) {
           previewTaskId.value = res.data.taskId
-          connectPublishLogSocket(previewTaskId.value)
-        .then(client => {
-          console.log('WebSocket连接已建立成功')
-          // 连接成功后的处理逻辑
-        })
-        .catch(error => {
-          console.error('WebSocket连接失败，错误:', error)
-          ElMessage.error('WebSocket连接失败，请检查网络或稍后重试')
-          publishing.value = false
-          previewTaskId.value = null
-        })
+          await connectPublishLogSocket(previewTaskId.value)
+            .then(client => {
+              console.log('WebSocket连接已建立成功')
+              // 连接成功后的处理逻辑
+            })
+            .catch(error => {
+              console.error('WebSocket连接失败，错误:', error)
+              ElMessage.error('WebSocket连接失败，请检查网络或稍后重试')
+              publishing.value = false
+              previewTaskId.value = null
+              loading.value = false
+            })
           ElMessage.success('预览二维码任务已启动，任务ID: ' + previewTaskId.value)
         } else {
           ElMessage.error('启动预览二维码生成失败: ' + (res.message || '未知错误'))
           publishing.value = false
           publishFailed.value = true
+          loading.value = false
         }
       } catch (error) {
         console.error('生成预览二维码失败:', error)
@@ -676,9 +690,8 @@ const generateQRCode = async () => {
         if (showDialog.value) {
           showDialog.value = false
         }
-      } finally {
-        loading.value = false
       }
+      // 移除finally中的loading设置，让loading状态保持到WebSocket任务完成
     }
   })
 }
