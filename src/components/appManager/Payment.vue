@@ -355,6 +355,63 @@
                   </div>
                 </el-card>
               </template>
+
+              <!--微信虚拟连包支付-->
+              <template v-if="selectedApp && selectedApp.platform === '微信'">
+                <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+                  <div class="payment-card-wrapper">
+                    <div class="payment-card-header" :class="{ 'configured': paymentConfig?.wxVirtualRenewPay }">
+                      <div class="payment-type-info">
+                        <el-icon><Wallet /></el-icon>
+                        <div class="payment-type-title">
+                          <h4>{{ getPaymentTypeName('wxVirtualRenewPay') }}</h4>
+                        </div>
+                      </div>
+                      <el-tag size="small" :type="paymentConfig?.wxVirtualRenewPay ? 'success' : 'info'" effect="plain">
+                        {{ paymentConfig?.wxVirtualPay ? '已配置' : '未配置' }}
+                      </el-tag>
+                    </div>
+
+                    <div class="payment-card-content" v-loading="loadingPaymentConfig">
+                      <template v-if="paymentConfig?.wxVirtualRenewPay">
+                        <div class="payment-info-list">
+                          <div class="payment-info-item">
+                            <span class="label">状态</span>
+                            <el-tag size="small" :type="paymentConfig.wxVirtualRenewPay.enabled ? 'success' : 'danger'" effect="light">
+                              {{ paymentConfig.wxVirtualRenewPay.enabled ? '已启用' : '未启用' }}
+                            </el-tag>
+                          </div>
+                          <div class="payment-info-item">
+                            <span class="label">网关 (Android)</span>
+                            <span class="value">{{ paymentConfig.wxVirtualRenewPay.gatewayAndroid }}</span>
+                          </div>
+                          <div class="payment-info-item">
+                            <span class="label">网关 (iOS)</span>
+                            <span class="value">{{ paymentConfig.wxVirtualRenewPay.gatewayIos }}</span>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <el-empty description="暂未配置微信虚拟连包支付" :image-size="60" />
+                        <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+                          <el-button type="primary" @click="handleCreatePayment('wxVirtualRenewPay')">
+                            <el-icon><Plus /></el-icon>新建配置
+                          </el-button>
+                        </div>
+                      </template>
+                    </div>
+
+                    <div class="payment-card-footer" v-if="paymentConfig?.wxVirtualRenewPay">
+                      <el-button type="primary" link @click="handleEditPayment('wxVirtualRenewPay')">
+                        <el-icon><Edit /></el-icon>编辑
+                      </el-button>
+                      <el-button type="danger" link @click="handleDeletePayment('wxVirtualRenewPay')">
+                        <el-icon><Delete /></el-icon>删除
+                      </el-button>
+                    </div>
+                  </div>
+                </el-card>
+              </template>
             </div>
           </template>
           <template v-else>
@@ -583,7 +640,8 @@ const getPaymentTypeName = (type) => {
     renewPay: '连包支付',
     douzuanPay: '抖钻支付',
     imPay: 'IM支付',
-    wxVirtualPay: '微信虚拟支付'
+    wxVirtualPay: '微信虚拟支付',
+    wxVirtualRenewPay: '微信虚拟连包支付',
   }
   return names[type] || type
 }
