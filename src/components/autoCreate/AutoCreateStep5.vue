@@ -123,6 +123,17 @@
             />
           </el-form-item>
         </template>
+
+        <template v-if="getCurrentPlatform() === 'baidu'">
+          <el-form-item label="百度AppToken" prop="baiduAppToken">
+            <el-input
+              v-model="generalConfigForm.baiduAppToken"
+              type="textarea"
+              :rows="6"
+              placeholder="请输入百度AppToken（私钥内容）"
+            />
+          </el-form-item>
+        </template>
       </div>
     </el-form>
     </div>
@@ -301,7 +312,7 @@ const getPlatformLabel = () => {
     'douyin': '抖音',
     'weixin': '微信',
     'kuaishou': '快手',
-    'xiaohongshu': '小红书'
+    'baidu': '百度'
   };
   return platformMap[props.platform] || props.platform;
 };

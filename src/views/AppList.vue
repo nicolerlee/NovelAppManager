@@ -38,6 +38,18 @@
       </el-card>
 
       <el-card
+        class="data-card baidu-card"  
+        :class="{ 'is-active': selectedPlatform === '百度' }"
+        @click="handlePlatformSelect('百度')"
+      >
+        <img src="/images/logo/baidu_logo.png" class="card-logo" />
+        <div class="card-value">{{ statistics.baidu }}</div>
+        <div class="card-trend">
+          小程序总数 <span class="count">{{ statistics.baiduCount }}</span>
+        </div>
+      </el-card>
+      
+      <el-card
         class="data-card bilibili-card"
         :class="{ 'is-active': selectedPlatform === 'B站' }"
         @click="handlePlatformSelect('B站')"
@@ -49,17 +61,7 @@
         </div>
       </el-card>
 
-      <el-card
-        class="data-card baidu-card"  
-        :class="{ 'is-active': selectedPlatform === '百度' }"
-        @click="handlePlatformSelect('百度')"
-      >
-        <img src="/images/logo/baidu_logo.png" class="card-logo" />
-        <div class="card-value">{{ statistics.baidu }}</div>
-        <div class="card-trend">
-          小程序总数 <span class="count">{{ statistics.baiduCount }}</span>
-        </div>
-      </el-card>
+      
     </div>
 
     <el-card class="app-table">

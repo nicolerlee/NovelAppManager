@@ -5,7 +5,7 @@
       <!-- 添加key属性以强制在平台变化时重新渲染广告配置卡片 -->
       <div class="payment-config-grid" :key="`grid-${getCurrentPlatform()}-${renderKey}`">
         <!-- 激励广告配置 - 抖音、快手平台 -->
-        <el-card v-if="getCurrentPlatform() === 'douyin' || getCurrentPlatform() === 'kuaishou'" class="payment-type-card" :body-style="{ padding: '0' }" :key="`rewardAd-${getCurrentPlatform()}-${renderKey}`">
+        <el-card v-if="getCurrentPlatform() === 'douyin' || getCurrentPlatform() === 'kuaishou' || getCurrentPlatform() === 'baidu'" class="payment-type-card" :body-style="{ padding: '0' }" :key="`rewardAd-${getCurrentPlatform()}-${renderKey}`">
           <div class="payment-card-wrapper">
             <div class="payment-card-header" :class="{ 'configured': adConfig.rewardAd.enabled && adConfig.rewardAd.rewardAdId && adConfig.rewardAd.rewardCount > 0 }">
               <div class="payment-type-info">
@@ -374,6 +374,9 @@ const validate = async () => {
       if (getCurrentPlatform() === 'kuaishou') {
         adsToCheck.push(adConfig.bannerAd);
         adsToCheck.push(adConfig.feedAd);
+      }
+      if(getCurrentPlatform() === 'baidu'){
+        adsToCheck.push(adConfig.rewardAd);
       }
       
       // 检查是否有启用的广告类型

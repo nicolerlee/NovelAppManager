@@ -212,7 +212,22 @@ const qrCodeRules = reactive({
     { required: true, message: '请输入跳转路径', trigger: 'blur' }
   ],
   query: [
-    { required: true, message: '请输入参数', trigger: 'blur' }
+    {
+      validator: (rule, value, callback) => {
+        // 如果选择的是首页路径，则不需要验证query
+        if (qrCodeParams.path === 'pages/homePage/homePage') {
+          callback();
+        } else {
+          // 其他路径需要验证query
+          if (!value) {
+            callback(new Error('请输入参数'));
+          } else {
+            callback();
+          }
+        }
+      },
+      trigger: 'blur'
+    }
   ],
   scene: [
     { required: true, message: '请选择场景值', trigger: 'change' }
@@ -222,7 +237,8 @@ const qrCodeRules = reactive({
 // 页面路径选项
 const pathOptions = [
   { label: 'pages/readerPage/readerPage', value: 'pages/readerPage/readerPage' },
-  { label: 'pages/novel_plugin/index', value: 'pages/novel_plugin/index' }
+  { label: 'pages/novel_plugin/index', value: 'pages/novel_plugin/index' },
+  { label: 'pages/homePage/homePage', value: 'pages/homePage/homePage' }
 ]
 
 // 从配置文件导入平台场景值

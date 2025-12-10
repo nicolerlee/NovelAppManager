@@ -3,7 +3,7 @@
      <el-form :model="adConfig" :rules="adConfigFormRules" ref="adConfigFormRef" style="width: 100%;">
         <div class="payment-config-grid">
           <!-- 激励广告配置 - 抖音、快手平台 -->
-          <el-card v-if="currentPlatform === 'douyin' || currentPlatform === 'kuaishou'" class="payment-type-card" :body-style="{ padding: '0' }">
+          <el-card v-if="currentPlatform === 'douyin' || currentPlatform === 'kuaishou'|| currentPlatform === 'baidu'" class="payment-type-card" :body-style="{ padding: '0' }">
             <div class="payment-card-wrapper">
               <div class="payment-card-header" :class="{ 'configured': adConfig.rewardAd.enabled && adConfig.rewardAd.rewardAdId && adConfig.rewardAd.rewardCount > 0 }">
                 <div class="payment-type-info">
@@ -30,7 +30,13 @@
                   </el-form-item>
                   <el-form-item label="激励次数" prop="rewardAd.rewardCount" class="gateway-form-item">
                     <div v-if="adConfig.rewardAd.enabled">
-                      <el-input-number v-model="adConfig.rewardAd.rewardCount" :min="1" />
+                      <el-input 
+                        v-model="adConfig.rewardAd.rewardCount" 
+                        placeholder="请输入激励次数" 
+                        type="number" 
+                        :min="1"
+                        @input="(val) => adConfig.rewardAd.rewardCount = Math.max(1, parseInt(val) || 1)"
+                      />
                     </div>
                   </el-form-item>
                 </div>
@@ -66,7 +72,13 @@
                   </el-form-item>
                   <el-form-item label="展示次数" prop="interstitialAd.interstitialCount" class="gateway-form-item">
                     <div v-if="adConfig.interstitialAd.enabled">
-                      <el-input-number v-model="adConfig.interstitialAd.interstitialCount" :min="1" style="width: 100%;" />
+                      <el-input 
+                        v-model="adConfig.interstitialAd.interstitialCount" 
+                        placeholder="请输入展示次数" 
+                        type="number" 
+                        :min="1"
+                        @input="(val) => adConfig.interstitialAd.interstitialCount = Math.max(1, parseInt(val) || 1)"
+                      />
                     </div>
                   </el-form-item>
                 </div>
@@ -327,6 +339,10 @@ const validateForm = async () => {
         adsToCheck.push(adConfig.bannerAd);
         adsToCheck.push(adConfig.feedAd);
       }
+      if (currentPlatform.value === 'baidu') {
+        adsToCheck.push(adConfig.rewardAd);
+        
+      }
       
       // 检查是否有启用的广告类型
       return adsToCheck.some(ad => 
@@ -475,39 +491,11 @@ defineExpose({
   font-size: 12px;
   color: #606266;
 }
-
 .gateway-form-item {
-  margin-bottom: 10px;
   display: flex !important;
-  align-items: center !important;
   justify-content: space-between !important;
-  gap: 8px !important;
 }
 
-/* 确保标签与输入框保持水平并适当减少输入框宽度 */
-.gateway-form-item :deep(.el-form-item__content) {
-  flex: 1 !important;
-  margin-left: 0 !important;
-}
-
-.gateway-form-item :deep(.el-input),
-.gateway-form-item :deep(.el-input-number) {
-  width: 100% !important;
-  min-width: 100px;
-  max-width: 140px;
-}
-
-/* 调整标签样式 */
-.gateway-form-item :deep(.el-form-item__label) {
-  font-size: 12px !important;
-  padding-right: 0 !important;
-  min-width: 60px !important;
-  text-align: left !important;
-}
-
-.gateway-form-item:last-child {
-  margin-bottom: 0;
-}
 
 /* 优化滚动条样式 */
 .payment-config-grid::-webkit-scrollbar {

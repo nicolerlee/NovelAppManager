@@ -537,6 +537,9 @@ const checkAdConfigCompleted = (component) => {
     if (config.bannerAd) adsToCheck.push(config.bannerAd);
     if (config.feedAd) adsToCheck.push(config.feedAd);
   }
+  if (currentPlatform === 'baidu') {
+    if (config.rewardAd) adsToCheck.push(config.rewardAd);
+  }
   
   // 检查是否至少有一种广告类型已启用并配置了必要信息
   const hasCompletedAd = adsToCheck.some(ad => {
