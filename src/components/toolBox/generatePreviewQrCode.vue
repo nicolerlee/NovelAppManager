@@ -95,8 +95,8 @@
             <h4>请输入二维码参数</h4>
             <el-form :model="qrCodeParams" :rules="qrCodeRules" ref="qrCodeFormRef" label-width="80px" class="form-container">
               <el-form-item label="path" prop="path">
-                <el-select v-model="qrCodeParams.path" placeholder="请选择小程序页面路径" style="width: 100%">
-                  <el-option v-for="item in pathOptions" :key="item.value" :label="item.label" :value="item.value" />
+                <el-select v-model="qrCodeParams.path" placeholder="请选择或搜索页面路径" style="width: 100%" filterable>
+                  <el-option v-for="item in currentPathOptions" :key="item.value" :label="item.label" :value="item.value" />
                 </el-select>
               </el-form-item>
               <el-form-item label="query" prop="query">
@@ -181,6 +181,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, Search, Share, Platform, ChatDotRound, Connection, Check, Loading } from '@element-plus/icons-vue'
 import request from '../../utils/request'
 import { pinyin } from 'pinyin-pro'
+import { pathOptions } from './config/pathConfig.js'
+import { platformSceneOptions } from './config/platformScenesConfig.js'
 
 const router = useRouter()
 
@@ -234,19 +236,16 @@ const qrCodeRules = reactive({
   ]
 })
 
-// 页面路径选项
-const pathOptions = [
-  { label: 'pages/readerPage/readerPage', value: 'pages/readerPage/readerPage' },
-  { label: 'pages/novel_plugin/index', value: 'pages/novel_plugin/index' },
-  { label: 'pages/homePage/homePage', value: 'pages/homePage/homePage' }
-]
 
-// 从配置文件导入平台场景值
-import { platformSceneOptions } from './config/platformScenesConfig.js'
 
 // 根据当前选择的平台获取对应的场景值选项
 const sceneOptions = computed(() => {
   return platformSceneOptions[selectedPlatform.value] || platformSceneOptions.default
+})
+
+// 根据当前选择的平台获取对应的页面路径选项
+const currentPathOptions = computed(() => {
+  return pathOptions[selectedPlatform.value] || []
 })
 
 // 获取可用的平台列表
@@ -446,7 +445,8 @@ const getAppTokenByPlatform = (platformCode) => {
   const tokenMap = {
     'mp-toutiao': appCommonConfig.value.douyinAppToken,
     'mp-kuaishou': appCommonConfig.value.kuaishouAppToken,
-    'mp-weixin': appCommonConfig.value.weixinAppToken
+    'mp-weixin': appCommonConfig.value.weixinAppToken,
+    'mp-baidu': appCommonConfig.value.baiduAppToken,
   }
   
   return tokenMap[platformCode] || ''
@@ -523,6 +523,31 @@ const connectPublishLogSocket = (taskId) => {
                 }
               }else if(message.body.includes('[微信] 二维码生成成功:')){
                   await fetchWeixinQRCode(taskId)
+              }else if(message.body.includes('[百度] 二维码生成成功:')){
+                const baiduCodeUrl = message.body.substring(message.body.indexOf('[百度] 二维码生成成功:') + '[百度] 二维码生成成功:'.length).trim()    
+                //提取的百度二维码url格式是：url": "https://mbd.baidu.com/ma/s/q7SExEEC",我需要正确提取url中的q7SExEEC
+                const finalUrl = baiduCodeUrl.substring(baiduCodeUrl.indexOf('url": "') + 'url": "'.length,baiduCodeUrl.length-2).trim()
+                console.log('提取的百度二维码URL:', finalUrl)
+                 // 设置二维码图片
+                try {
+                  // 使用QRCode.toDataURL生成二维码图片
+                  const QRCode = (await import('qrcode')).default
+                  const qrCodeDataUrl = await QRCode.toDataURL(finalUrl, {
+                    width: 180,
+                    margin: 1,
+                    color: {
+                      dark: '#000000',
+                      light: '#ffffff'
+                    }
+                  })
+                  qrCodeImage.value = qrCodeDataUrl
+                  console.log('二维码图片生成成功')
+                } catch (error) {
+                  console.error('生成二维码图片失败:', error)
+                  ElMessage.error('生成二维码图片失败')
+                  // 如果生成失败，直接使用原始URL（备用方案）
+                  qrCodeImage.value = qrCodeUrl
+                }
               }
               
               setTimeout(async () => {
@@ -667,7 +692,8 @@ const generateQRCode = async () => {
           // 添加可选的token参数
           douyinAppToken: appCommonConfig.value?.douyinAppToken || '',
           kuaishouAppToken: appCommonConfig.value?.kuaishouAppToken || '',
-          weixinAppToken: appCommonConfig.value?.weixinAppToken || ''
+          weixinAppToken: appCommonConfig.value?.weixinAppToken || '',
+          baiduAppToken: appCommonConfig.value?.baiduAppToken || '',
         }
         
         publishing.value = true

@@ -193,8 +193,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted,inject } from "vue";
+import { ref, onMounted, onUnmounted, inject } from "vue";
 import { NavigationFailureType, useRouter } from "vue-router";
+import { agentManager } from '../utils/agentManager';
+
 const auth = inject('auth')
 const agentClient = inject("agentClient", null);
 
@@ -255,11 +257,9 @@ const navigateToWenquAI = () => {
 };
 
 const navigateToWenquAgent = () => {
-    if (!auth.isLogin.value) {
-      auth.showLogin();
-      return;
-    }
-    agentClient.value.showChatBot();
+  // 使用agentManager控制智能体显示
+  console.log('navigateToWenquAgent called');
+  agentManager.show();
 };
 </script>
 

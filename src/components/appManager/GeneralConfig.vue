@@ -67,6 +67,16 @@
                       />
                     </el-form-item>
                   </template>
+                  <template v-if="selectedApp.platform === '百度'">
+                    <el-form-item label="百度AppToken">
+                      <el-input
+                        v-model="configForm.baiduAppToken"
+                        type="textarea"
+                        :rows="6"
+                        placeholder="请输入百度AppToken（登录秘钥）"
+                      />
+                    </el-form-item>
+                  </template>
 
                   <!-- Conditionally show Kuaishou fields -->
                   <template v-if="selectedApp.platform === '快手'">
@@ -220,6 +230,7 @@ const configForm = ref({
   kuaishouAppToken: '',
   douyinAppToken: '',
   weixinAppToken: '',
+  baiduAppToken: '',
   mineLoginType: 'anonymousLogin',
   readerLoginType: 'anonymousLogin',
   iaaMode: false,
@@ -269,6 +280,7 @@ const fetchConfig = async (appId) => {
         kuaishouAppToken: res.data.kuaishouAppToken || '',
         douyinAppToken: res.data.douyinAppToken || '',
         weixinAppToken: res.data.weixinAppToken || '',
+        baiduAppToken: res.data.baiduAppToken || '',
         mineLoginType: res.data.mineLoginType || 'anonymousLogin',
         readerLoginType: res.data.readerLoginType || 'anonymousLogin',
         iaaMode: res.data.iaaMode ?? false,
@@ -289,6 +301,7 @@ const fetchConfig = async (appId) => {
         kuaishouAppToken: '',
         douyinAppToken: '',
         weixinAppToken: '',
+        baiduAppToken: '',
         mineLoginType: 'anonymousLogin',
         readerLoginType: 'anonymousLogin',
         iaaMode: false,
@@ -310,6 +323,7 @@ const fetchConfig = async (appId) => {
       kuaishouAppToken: '',
       douyinAppToken: '',
       weixinAppToken: '',
+      baiduAppToken: '',
       mineLoginType: 'anonymousLogin',
       readerLoginType: 'anonymousLogin',
       iaaMode: false,
@@ -385,6 +399,7 @@ const handleSaveConfig = async () => {
       kuaishouAppToken: configForm.value.kuaishouAppToken,
       douyinAppToken: configForm.value.douyinAppToken,
       weixinAppToken: configForm.value.weixinAppToken,
+      baiduAppToken: configForm.value.baiduAppToken,
       mineLoginType: configForm.value.mineLoginType,
       readerLoginType: configForm.value.readerLoginType,
       iaaMode: configForm.value.iaaMode,
@@ -436,6 +451,7 @@ const handleCreateConfig = async () => {
       kuaishouAppToken: configForm.value.kuaishouAppToken,
       douyinAppToken: configForm.value.douyinAppToken,
       weixinAppToken: configForm.value.weixinAppToken,
+      baiduAppToken: configForm.value.baiduAppToken,
       mineLoginType: configForm.value.mineLoginType,
       readerLoginType: configForm.value.readerLoginType,
       iaaMode: configForm.value.iaaMode,
@@ -460,6 +476,7 @@ const handleCreateConfig = async () => {
         kuaishouAppToken: res.data.kuaishouAppToken || '',
         douyinAppToken: res.data.douyinAppToken || '',
         weixinAppToken: res.data.weixinAppToken || '',
+        baiduAppToken: res.data.baiduAppToken || '',
         mineLoginType: res.data.mineLoginType || 'anonymousLogin',
         readerLoginType: res.data.readerLoginType || 'anonymousLogin',
         iaaMode: res.data.iaaMode ?? false,

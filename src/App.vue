@@ -71,41 +71,44 @@
     </div>
 
     <div class="main-content">
-      <!-- 登录相关UI只在首页显示 -->
-      <div v-if="router.currentRoute.value.path === '/home'" class="login-content">
-        <div v-if="auth.isLogin.value">
-          <el-dropdown>              
-            <div class="admin-info">
-              <div class="user-avatar">
-                <img src="/images/icon/user_icon.png" alt="用户头像" class="avatar-image" />
+        <!-- 登录相关UI只在首页显示 -->
+        <div v-if="router.currentRoute.value.path === '/home'" class="login-content">
+          <div v-if="auth.isLogin.value">
+            <el-dropdown>              
+              <div class="admin-info">
+                <div class="user-avatar">
+                  <img src="/images/icon/user_icon.png" alt="用户头像" class="avatar-image" />
+                </div>
+                <span>
+                  {{ auth.userInfo.value?.userName }}（{{ getUserTypeDesc(auth.userInfo.value?.type) }}同学） <el-icon><ArrowDown /></el-icon>
+                </span>
               </div>
-              <span>
-                {{ auth.userInfo.value?.userName }}（{{ getUserTypeDesc(auth.userInfo.value?.type) }}同学） <el-icon><ArrowDown /></el-icon>
-              </span>
-            </div>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item v-if="auth.userInfo.value?.type === 0" @click="handleNavigateToAdmin">后台管理</el-dropdown-item>
-                <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item v-if="auth.userInfo.value?.type === 0" @click="handleNavigateToAdmin">后台管理</el-dropdown-item>
+                  <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+          
+          <div v-else class="login-btn" @click="auth.showLogin">
+            立即登录
+          </div>
         </div>
-        
-        <div v-else class="login-btn" @click="auth.showLogin">
-          立即登录
-        </div>
-      </div>
        
-      <router-view></router-view>
-    </div>
-  </div>
+        <router-view></router-view>
+      </div>
 <!-- 登录弹窗组件 -->
    <LoginModal v-if="auth.showLoginModal.value"/>
- </template>
+   
+   <!-- 文曲智能体组件 -->
+   <WenquAgent />
+  </div>
+</template>
 
 <script setup>
-import { onMounted, onUnmounted, provide, ref, watchEffect } from "vue";
+import { onMounted, onUnmounted, provide, ref, watchEffect, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
 // 导入登录相关的组合式函数
@@ -113,7 +116,11 @@ import { provideAuth } from "./composables/useAuth";
 // 导入设置认证token的函数
 import { setAuthToken } from "./utils/request";
 // 导入登录弹窗组件
- import LoginModal from "./components/common/LoginModal.vue";
+import LoginModal from "./components/common/LoginModal.vue";
+// 导入文曲智能体组件
+import WenquAgent from "./components/wenquAi/WenquAgent.vue";
+// 导入智能体管理器
+import { agentManager } from './utils/agentManager';
 // 提供登录状态
 const auth = provideAuth();
 const TAG="App->";
@@ -147,6 +154,8 @@ const getUserTypeDesc = (type) => {
 // 处理退出登录
 const handleLogout = () => {
   auth.logout();
+  // 退出登录时关闭文曲智能体
+  agentManager.hide();
   ElMessage.success('退出登录成功');
   
   // 如果当前在后台管理页面，重定向到小程序列表首页
@@ -164,6 +173,9 @@ const handleNavigateToAdmin = () => {
 const handleLogoClick = () => {
   router.push('/home');
 };
+
+// 文曲智能体相关 - 简化版本，直接显示
+console.log('App.vue - WenquAgent component is directly rendered');
 
 
 
