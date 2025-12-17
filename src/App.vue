@@ -77,7 +77,7 @@
             <el-dropdown>              
               <div class="admin-info">
                 <div class="user-avatar">
-                  <img src="/images/icon/user_icon.png" alt="用户头像" class="avatar-image" />
+                  <img :src="auth.userInfo.value?.avatar || '/images/icon/user_icon.png'" alt="用户头像" class="avatar-image" />
                 </div>
                 <span>
                   {{ auth.userInfo.value?.userName }}（{{ getUserTypeDesc(auth.userInfo.value?.type) }}同学） <el-icon><ArrowDown /></el-icon>

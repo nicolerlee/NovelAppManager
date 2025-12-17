@@ -21,7 +21,7 @@
         <div class="message assistant-message" v-if="messages.length === 0">
           <div class="message-content">
             <div class="assistant-avatar">
-              <el-icon><ChatDotRound /></el-icon>
+              <img src="/images/logo/wenqu_logo.png" alt="文曲智能体" class="avatar-img" />
             </div>
             <div class="message-text">
               <p>你好！我是文曲下凡智能体，有什么可以帮助你的吗？</p>
@@ -37,13 +37,13 @@
         >
           <div class="message-content">
             <div v-if="message.role === 'assistant'" class="assistant-avatar">
-              <el-icon><ChatDotRound /></el-icon>
+              <img src="/images/logo/wenqu_logo.png" alt="文曲智能体" class="avatar-img" />
             </div>
             <div v-if="message.role === 'user'" class="user-avatar">
-              <el-icon><User /></el-icon>
+              <img :src="auth.userInfo.value?.avatar || '/images/icon/user_icon.png'" alt="用户" class="avatar-img" />
             </div>
             <div class="message-text">
-              {{ message.content }}
+              <div v-html="formatMessage(message.content)"></div>
             </div>
           </div>
         </div>
@@ -52,7 +52,7 @@
         <div class="message assistant-message" v-if="isLoading">
           <div class="message-content">
             <div class="assistant-avatar">
-              <el-icon><ChatDotRound /></el-icon>
+              <img src="/images/logo/wenqu_logo.png" alt="文曲智能体" class="avatar-img" />
             </div>
             <div class="message-text">
               <div class="typing-indicator">
@@ -314,6 +314,13 @@ const showChat = () => {
   agentManager.show()
 }
 
+// 格式化消息文本，将换行符转换为<br>标签
+const formatMessage = (text) => {
+  if (!text) return ''
+  // 将换行符转换为<br>标签
+  return text.replace(/\n/g, '<br>')
+}
+
 // 关闭聊天
 const closeChat = () => {
   localVisible.value = false
@@ -410,6 +417,15 @@ const closeChat = () => {
   justify-content: center;
   margin-right: 12px;
   flex-shrink: 0;
+  overflow: hidden;
+  background-color: #e9ecef;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .assistant-avatar {

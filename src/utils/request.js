@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 // 创建axios实例
 const request = axios.create({
   baseURL: '/api',
-  timeout: 10000
+  timeout: 60000 // 延长超时时间到1分钟
 })
 
 // 创建一个函数用于设置认证token
