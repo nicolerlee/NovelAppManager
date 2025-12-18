@@ -38,16 +38,21 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   response => {
     // 检查是否为流式响应
-    const isStreamResponse = response.config.responseType === 'stream';
+    const isStreamResponse = response.config.responseType === 'stream' || 
+                           (response.headers['content-type'] && 
+                            (response.headers['content-type'].includes('text/event-stream') || 
+                             response.headers['content-type'].includes('application/x-ndjson')));
     // 检查是否为二维码接口响应或图片响应
     const isQrCodeRequest = response.config.url.includes('/api/novel-publish/qrcode/');
     const contentType = response.headers['content-type'];
     const isImageResponse = contentType && contentType.startsWith('image/');
     // 检查是否为登录请求
     const isLoginRequest = response.config.url.includes('/api/novel-auth/login');
+    // 检查是否为AI聊天接口
+    const isAIChatRequest = response.config.url.includes('/api/ai/chat');
 
-    // 如果是流式响应、二维码请求、图片响应或登录请求，直接返回原始响应
-    if (isStreamResponse || isQrCodeRequest || isImageResponse || isLoginRequest) {
+    // 如果是流式响应、二维码请求、图片响应、登录请求或AI聊天请求，直接返回原始响应
+    if (isStreamResponse || isQrCodeRequest || isImageResponse || isLoginRequest || isAIChatRequest) {
         return response; // 返回完整的response对象
     }
 

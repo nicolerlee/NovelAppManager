@@ -97,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { ChatDotRound, User, Minus, Close } from '@element-plus/icons-vue'
 import { agentManager } from '../../utils/agentManager'
 import { injectAuth } from '../../composables/useAuth'
@@ -188,99 +188,145 @@ watch(
   { deep: true }
 )
 
-// 发送消息
+// 发送消息 
 const handleSendMessage = async () => {
   if (!inputMessage.value.trim() || isLoading.value) return
   
-  // 检查登录状态
+  // 检查登录状态 
   if (!auth.isLogin.value) {
     auth.showLogin()
     return
   }
   
-  // 立即设置加载状态，防止重复发送
+  // 立即设置加载状态，防止重复发送 
   isLoading.value = true
   
-  // 添加用户消息
+  // 添加用户消息 
   const userMessage = {
     role: 'user',
     content: inputMessage.value.trim()
   }
   messages.value.push(userMessage)
   
-  // 清空输入框
+  // 清空输入框 
   inputMessage.value = ''
   
   try {
-    // 生成chatId
+    // 生成chatId 
     const userId = auth.userInfo.value?.userId || 'anonymous'
     const timestamp = new Date().getTime()
     const chatId = `${userId}_${timestamp}`
     
-    // 使用项目中的request工具发送请求
-    const response = await request.post('/api/ai/chat', userMessage.content, {
+    // 使用原生fetch API替代axios，以更好地支持流式响应
+    // 从localStorage获取token，添加鉴权信息
+    const token = localStorage.getItem('token') || '';
+    
+    const response = await fetch('/api/api/ai/chat', {
+      method: 'POST',
       headers: {
         'Content-Type': 'text/plain',
         'model': 'qwen-plus',
-        'chatId': chatId
+        'chatId': chatId,
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       },
-      // 支持流式响应
-      responseType: 'stream'
+      body: userMessage.content
     })
     
-    // 添加一个空的助手消息
-    const assistantMessage = {
+    // 添加一个空的助手消息 
+    const assistantMessage = reactive({
       role: 'assistant',
       content: ''
-    }
+    })
     messages.value.push(assistantMessage)
     
-    // 处理响应数据
-    const responseData = response.data;
-    const responseDataType = typeof responseData;
+    // 检查响应状态
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     
-    if (responseDataType === 'string') {
-      // 非流式响应：直接使用完整的字符串
-      assistantMessage.content = responseData;
-      await nextTick();
-      scrollToBottom();
-    } else {
-      // 尝试不同的方式获取ReadableStream进行流式处理
-      let reader;
-      if (responseData instanceof Blob) {
-        // 如果是Blob对象，使用stream()方法（现代浏览器支持）
-        reader = responseData.stream().getReader();
-      } else if (responseData instanceof ReadableStream) {
-        // 如果已经是ReadableStream，直接获取reader
-        reader = responseData.getReader();
-      } else if (response.body instanceof ReadableStream) {
-        // 如果response.body是ReadableStream，使用它
-        reader = response.body.getReader();
-      } else {
-        console.error('Unsupported response type:', responseData);
-        throw new Error('Unsupported response type');
-      }
+    // 检查是否为流式响应
+    if (!response.body) {
+      throw new Error('Response body is not available');
+    }
+    
+    // 流式响应处理
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let done = false;
+    let buffer = '';
+    
+    console.log('开始处理流式响应...');
+    
+    while (!done) {
+      const { value, done: doneReading } = await reader.read();
+      done = doneReading;
       
-      const decoder = new TextDecoder('utf-8');
-      let done = false;
-      
-      while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
+      if (value) {
+        // 解码收到的数据并添加到缓冲区
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+        console.log('收到数据块:', chunk);
+        console.log('当前缓冲区:', buffer);
         
-        if (value) {
-          // 将新接收到的文本追加到助手消息中
-          assistantMessage.content += decoder.decode(value, { stream: true });
-          // 使用nextTick确保DOM更新
-          await nextTick();
-          // 滚动到最新消息
-          scrollToBottom();
+        // 处理SSE格式的消息，SSE格式：data: 内容\n\n
+        let lineEndIndex;
+        // 循环处理缓冲区中的所有完整消息
+        while ((lineEndIndex = buffer.indexOf('\n\n')) !== -1) {
+          // 提取完整的消息行
+          const line = buffer.substring(0, lineEndIndex).trim();
+          // 从缓冲区中移除已处理的消息
+          buffer = buffer.substring(lineEndIndex + 2);
+          console.log('处理完整消息:', line);
+          
+          // 检查是否是SSE格式的data字段（适配冒号后有无空格的情况）
+          if (line.startsWith('data:')) {
+            // 提取data:后面的内容（移除data:前缀，然后修剪空白字符）
+            const content = line.substring(5).trim();
+            console.log('提取的消息内容:', content);
+            
+            // 检查是否是结束标记
+            if (content === '[DONE]') {
+              console.log('收到结束标记，终止流式处理');
+              done = true; // 设置done为true，终止外层循环
+              break;
+            }
+            
+            // 只有非空内容才添加到助手消息中
+            if (content) {
+              // 将内容添加到助手消息中
+              assistantMessage.content += content + '\n';
+              console.log('更新助手消息内容:', assistantMessage.content);
+              await nextTick();
+              scrollToBottom();
+            }
+          }
         }
       }
-      
-      // 完成后关闭reader
-      await reader.closed;
     }
+    
+    // 处理缓冲区中剩余的内容
+    if (buffer.trim()) {
+        console.log('处理缓冲区剩余内容:', buffer);
+        if (buffer.startsWith('data:')) {
+          const content = buffer.substring(5).trim();
+          if (content !== '[DONE]' && content) {
+            assistantMessage.content += content + '\n';
+            await nextTick();
+            scrollToBottom();
+          }
+        }
+      }
+    
+    // 移除最后的换行符
+    if (assistantMessage.content.endsWith('\n')) {
+      assistantMessage.content = assistantMessage.content.slice(0, -1);
+    }
+    
+    console.log('完整消息内容:', assistantMessage.content);
+    
+    // 完成后关闭reader
+    await reader.closed;
+    
   } catch (error) {
     console.error('Chat API error:', error)
     // 添加错误消息
