@@ -278,26 +278,36 @@ const handleSendMessage = async () => {
           buffer = buffer.substring(lineEndIndex + 2);
           console.log('处理完整消息:', line);
           
-          // 检查是否是SSE格式的data字段（适配冒号后有无空格的情况）
-          if (line.startsWith('data:')) {
-            // 提取data:后面的内容（移除data:前缀，然后修剪空白字符）
-            const content = line.substring(5).trim();
-            console.log('提取的消息内容:', content);
+          // 将完整消息按换行符分割，处理每个可能的SSE消息行
+          const messageLines = line.split('\n');
+          
+          for (const messageLine of messageLines) {
+            const trimmedLine = messageLine.trim();
             
-            // 检查是否是结束标记
-            if (content === '[DONE]') {
-              console.log('收到结束标记，终止流式处理');
-              done = true; // 设置done为true，终止外层循环
-              break;
-            }
+            // 跳过空行
+            if (!trimmedLine) continue;
             
-            // 只有非空内容才添加到助手消息中
-            if (content) {
-              // 将内容添加到助手消息中
-              assistantMessage.content += content + '\n';
-              console.log('更新助手消息内容:', assistantMessage.content);
-              await nextTick();
-              scrollToBottom();
+            // 检查是否是SSE格式的data字段（适配冒号后有无空格的情况）
+            if (trimmedLine.startsWith('data:')) {
+              // 提取data:后面的内容（移除data:前缀，然后修剪空白字符）
+              const content = trimmedLine.substring(5).trim();
+              console.log('提取的消息内容:', content);
+              
+              // 检查是否是结束标记
+              if (content === '[DONE]') {
+                console.log('收到结束标记，终止流式处理');
+                done = true; // 设置done为true，终止外层循环
+                break;
+              }
+              
+              // 只有非空内容才添加到助手消息中
+              if (content) {
+                // 将内容添加到助手消息中
+                assistantMessage.content += content + '\n';
+                console.log('更新助手消息内容:', assistantMessage.content);
+                await nextTick();
+                scrollToBottom();
+              }
             }
           }
         }
@@ -307,12 +317,23 @@ const handleSendMessage = async () => {
     // 处理缓冲区中剩余的内容
     if (buffer.trim()) {
         console.log('处理缓冲区剩余内容:', buffer);
-        if (buffer.startsWith('data:')) {
-          const content = buffer.substring(5).trim();
-          if (content !== '[DONE]' && content) {
-            assistantMessage.content += content + '\n';
-            await nextTick();
-            scrollToBottom();
+        
+        // 将剩余内容按换行符分割，处理每个可能的SSE消息行
+        const messageLines = buffer.split('\n');
+        
+        for (const messageLine of messageLines) {
+          const trimmedLine = messageLine.trim();
+          
+          // 跳过空行
+          if (!trimmedLine) continue;
+          
+          if (trimmedLine.startsWith('data:')) {
+            const content = trimmedLine.substring(5).trim();
+            if (content !== '[DONE]' && content) {
+              assistantMessage.content += content + '\n';
+              await nextTick();
+              scrollToBottom();
+            }
           }
         }
       }
