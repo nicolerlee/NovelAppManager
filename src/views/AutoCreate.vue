@@ -96,14 +96,12 @@ import AutoCreateStep4 from '../components/autoCreate/AutoCreateStep4.vue'
 import AutoCreateStep5 from '../components/autoCreate/AutoCreateStep5.vue'
 import AutoCreateStep6 from '../components/autoCreate/AutoCreateStep6.vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useAppGenerationStore } from '../stores/appGenerationStore'
 import request from '../utils/request'
 
 const router = useRouter()
 const route = useRoute()
 const currentStep = ref(0)
 const currentSubStep = ref(0)
-const appGenerationStore = useAppGenerationStore()
 // 新增：标识是否从FreelayoutMain跳转过来
 const isFromFreelayoutMain = ref(false)
 
@@ -503,9 +501,6 @@ const startGeneration = async () => {
       ElMessage.error(res.message || '创建任务失败');
       return;
     }
-    // 将配置数据存储到 Pinia store（如后续页面还需用到）
-    // appGenerationStore.setConfigData(configData);
-    
     // 清除内存中存储的数据，防止下次进入自由编排时数据依然存在
     if (window.autoCreateFormData) {
       delete window.autoCreateFormData;

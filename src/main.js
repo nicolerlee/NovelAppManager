@@ -9,6 +9,7 @@ import { createPinia } from 'pinia'
 import axios from 'axios'
 // 导入全局主题样式，覆盖Element Plus默认主题
 import './assets/global-theme.css'
+import automationUtils from './services/automationUtils'
 
 window.global = window
 
@@ -27,5 +28,8 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 // 设置默认配置
 axios.defaults.baseURL = `${window.location.protocol}//${window.location.hostname}:8080`
 axios.defaults.timeout = 10000
+
+// 初始化AutomationUtils
+automationUtils.init({ router })
 
 app.mount('#app')

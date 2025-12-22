@@ -103,6 +103,10 @@ import { agentManager } from '../../utils/agentManager'
 import { injectAuth } from '../../composables/useAuth'
 import request from '../../utils/request'
 import useJsonStreamProcessor from '../../utils/jsonStreamProcessor'
+import automationUtils from '../../services/automationUtils'
+
+import { useAppStore } from '../../stores/appStore'
+const appStore = useAppStore()
 
 // 使用本地状态，初始值与agentManager.isVisible保持一致
 const localVisible = ref(agentManager.isVisible)
@@ -307,6 +311,7 @@ const handleSendMessage = async () => {
               if (content === '[DONE]-CreateNovelApp') {
                 console.error('收到创建订单结束的标记，终止流式处理，最终生成的配置：', conversationConfig.value);
                 done = true; // 设置done为true，终止外层循环
+                automationUtils.createNovelApp(conversationConfig.value)
                 break;
               }
               

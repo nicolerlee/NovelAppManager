@@ -53,12 +53,12 @@ const routes = [
     component: () => import('../views/ToolBox.vue'),
     meta: { title: '工具箱' },
     children: [
-      {
+      { 
         path: 'generate-preview-qrcode',
         name: 'GeneratePreviewQrCode',
         component: () => import('../components/toolBox/generatePreviewQrCode.vue'),
-        meta: {
-          title: '生成预览二维码'
+        meta: { 
+          title: '生成预览二维码' 
         }
       },
       {
