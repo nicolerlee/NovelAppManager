@@ -368,7 +368,7 @@
                         </div>
                       </div>
                       <el-tag size="small" :type="paymentConfig?.wxVirtualRenewPay ? 'success' : 'info'" effect="plain">
-                        {{ paymentConfig?.wxVirtualPay ? '已配置' : '未配置' }}
+                        {{ paymentConfig?.wxVirtualRenewPay ? '已配置' : '未配置' }}
                       </el-tag>
                     </div>
 

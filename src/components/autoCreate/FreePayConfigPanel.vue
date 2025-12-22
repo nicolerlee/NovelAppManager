@@ -219,6 +219,40 @@
               </div>
             </div>
           </el-card>
+          <el-card class="payment-type-card" :body-style="{ padding: '0' }">
+            <div class="payment-card-wrapper">
+              <div class="payment-card-header" :class="{ 'configured': paymentConfig.wxVirtualPay.enabled && paymentConfig.wxVirtualPay.gatewayAndroid && paymentConfig.wxVirtualPay.gatewayIos }">
+                <div class="payment-type-info">
+                  <el-icon><Wallet /></el-icon>
+                  <div class="payment-type-title">
+                    <h4>微信虚拟支付</h4>
+                  </div>
+                </div>
+                <el-tag size="small" :type="paymentConfig.wxVirtualRenewPay.enabled ? 'success' : 'info'" effect="plain">
+                  {{ paymentConfig.wxVirtualRenewPay.enabled ? '已启用' : '未启用' }}
+                </el-tag>
+              </div>
+
+              <div class="payment-card-content">
+                <div class="payment-info-list">
+                  <div class="payment-info-item">
+                    <span class="label">状态</span>
+                    <el-switch v-model="paymentConfig.wxVirtualRenewPay.enabled" @change="handlePaymentChange" />
+                  </div>
+                  <el-form-item label="网关(A)" prop="wxVirtualRenewPay.gatewayAndroid" class="gateway-form-item">
+                    <div v-if="paymentConfig.wxVirtualRenewPay.enabled">
+                      <el-input v-model="paymentConfig.wxVirtualRenewPay.gatewayAndroid" placeholder="请输入网关 (Android)" @input="handleConfigChange" />
+                    </div>
+                  </el-form-item>
+                  <el-form-item label="网关(I)" prop="wxVirtualRenewPay.gatewayIos" class="gateway-form-item">
+                    <div v-if="paymentConfig.wxVirtualRenewPay.enabled">
+                      <el-input v-model="paymentConfig.wxVirtualRenewPay.gatewayIos" placeholder="请输入网关 (iOS)" @input="handleConfigChange" />
+                    </div>
+                  </el-form-item>
+                </div>
+              </div>
+            </div>
+          </el-card>
         </template>
       </div>
     </el-form>
@@ -241,6 +275,7 @@ const props = defineProps({
       douzuanPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
       imPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
       wxVirtualPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+      wxVirtualRenewPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
     })
   },
   platform: {
@@ -379,6 +414,26 @@ const paymentConfigRules = reactive({
     },
     trigger: 'blur'
   }],
+  'wxVirtualRenewPay.gatewayAndroid': [{
+    validator: (rule, value, callback) => {
+      if (paymentConfig.wxVirtualRenewPay.enabled && !value) {
+        callback(new Error('请输入网关 (Android)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
+  'wxVirtualRenewPay.gatewayIos': [{
+    validator: (rule, value, callback) => {
+      if (paymentConfig.wxVirtualRenewPay.enabled && !value) {
+        callback(new Error('请输入网关 (iOS)'));
+      } else {
+        callback();
+      }
+    },
+    trigger: 'blur'
+  }],
 })
 
 // 监听外部modelValue变化，同步到内部状态
@@ -427,6 +482,7 @@ const resetFields = () => {
     douzuanPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
     imPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
     wxVirtualPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
+    wxVirtualRenewPay: { enabled: false, gatewayAndroid: '', gatewayIos: '' },
   })
   emitConfigChange()
 }

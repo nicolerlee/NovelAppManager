@@ -102,6 +102,7 @@ import { ChatDotRound, User, Minus, Close } from '@element-plus/icons-vue'
 import { agentManager } from '../../utils/agentManager'
 import { injectAuth } from '../../composables/useAuth'
 import request from '../../utils/request'
+import useJsonStreamProcessor from '../../utils/jsonStreamProcessor'
 
 // 使用本地状态，初始值与agentManager.isVisible保持一致
 const localVisible = ref(agentManager.isVisible)
@@ -117,6 +118,12 @@ const auth = injectAuth()
 const inputMessage = ref('')
 const messages = ref([])
 const isLoading = ref(false)
+
+// 使用JSON流处理器工具
+const {
+  config: conversationConfig,
+  processContent: processJsonStream
+} = useJsonStreamProcessor()
 
 // 检查DOM元素可见性的函数
 const checkElementVisibility = () => {
@@ -173,7 +180,10 @@ onUnmounted(() => {
 // 滚动到最新消息
 const scrollToBottom = () => {
   if (messagesContainerRef.value) {
-    messagesContainerRef.value.scrollTop = messagesContainerRef.value.scrollHeight
+    // 使用requestAnimationFrame优化滚动性能
+    requestAnimationFrame(() => {
+      messagesContainerRef.value.scrollTop = messagesContainerRef.value.scrollHeight
+    })
   }
 }
 
@@ -265,8 +275,8 @@ const handleSendMessage = async () => {
         // 解码收到的数据并添加到缓冲区
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
-        console.log('收到数据块:', chunk);
-        console.log('当前缓冲区:', buffer);
+        // console.log('收到数据块:', chunk);
+        // console.log('当前缓冲区:', buffer);
         
         // 处理SSE格式的消息，SSE格式：data: 内容\n\n
         let lineEndIndex;
@@ -276,7 +286,7 @@ const handleSendMessage = async () => {
           const line = buffer.substring(0, lineEndIndex).trim();
           // 从缓冲区中移除已处理的消息
           buffer = buffer.substring(lineEndIndex + 2);
-          console.log('处理完整消息:', line);
+          // console.log('处理完整消息:', line);
           
           // 将完整消息按换行符分割，处理每个可能的SSE消息行
           const messageLines = line.split('\n');
@@ -294,17 +304,21 @@ const handleSendMessage = async () => {
               console.log('提取的消息内容:', content);
               
               // 检查是否是结束标记
-              if (content === '[DONE]') {
-                console.log('收到结束标记，终止流式处理');
+              if (content === '[DONE]-CreateNovelApp') {
+                console.error('收到创建订单结束的标记，终止流式处理，最终生成的配置：', conversationConfig.value);
                 done = true; // 设置done为true，终止外层循环
                 break;
               }
               
               // 只有非空内容才添加到助手消息中
               if (content) {
+                // 处理可能的JSON流内容
+                processJsonStream(content)
+                
                 // 将内容添加到助手消息中
                 assistantMessage.content += content + '\n';
-                console.log('更新助手消息内容:', assistantMessage.content);
+                // console.log('更新助手消息内容:', assistantMessage.content);
+                // 只在有实质性内容更新时调用一次nextTick和scrollToBottom
                 await nextTick();
                 scrollToBottom();
               }
@@ -329,7 +343,10 @@ const handleSendMessage = async () => {
           
           if (trimmedLine.startsWith('data:')) {
             const content = trimmedLine.substring(5).trim();
-            if (content !== '[DONE]' && content) {
+            if (content !== '[DONE]-CreateNovelApp' && content) {
+              // 处理可能的JSON流内容
+              processJsonStream(content)
+              
               assistantMessage.content += content + '\n';
               await nextTick();
               scrollToBottom();
@@ -343,7 +360,7 @@ const handleSendMessage = async () => {
       assistantMessage.content = assistantMessage.content.slice(0, -1);
     }
     
-    console.log('完整消息内容:', assistantMessage.content);
+    // console.log('完整消息内容:', assistantMessage.content);
     
     // 完成后关闭reader
     await reader.closed;
@@ -416,7 +433,9 @@ const closeChat = () => {
 
 .wenqu-agent-chatbox {
   width: 400px;
-  height: 800px; /* 增加对话框高度 */
+  min-height: 800px; /* 增加最小高度，进一步提高初始对话框的尺寸 */
+  max-height: 80vh; /* 使用视口高度的百分比，避免内容过长时超出屏幕 */
+  height: auto; /* 自适应内容高度 */
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -464,6 +483,7 @@ const closeChat = () => {
   padding: 16px;
   overflow-y: auto;
   background-color: #f8f9fa;
+  max-height: calc(100% - 180px); /* 确保消息区域不会占用过多空间，为头部和输入区域留出足够空间 */
 }
 
 .message {
@@ -516,6 +536,8 @@ const closeChat = () => {
   max-width: 75%;
   line-height: 1.5;
   font-size: 14px; /* 调小字体大小 */
+  word-break: break-word; /* 确保长单词或URL能够换行显示 */
+  overflow-wrap: break-word;
 }
 
 .user-message .message-content {

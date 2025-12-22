@@ -444,7 +444,13 @@ const initPaymentConfig = (component) => {
       enabled: component.config?.wxVirtualPay?.enabled || false,
       gatewayAndroid: component.config?.wxVirtualPay?.gatewayAndroid || '',
       gatewayIos: component.config?.wxVirtualPay?.gatewayIos || ''
+    },
+    wxVirtualRenewPay: {
+      enabled: component.config?.wxVirtualRenewPay?.enabled || false,
+      gatewayAndroid: component.config?.wxVirtualRenewPay?.gatewayAndroid || '',
+      gatewayIos: component.config?.wxVirtualRenewPay?.gatewayIos || ''
     }
+
   }
 }
 
@@ -476,6 +482,10 @@ const checkPaymentConfigCompleted = (component) => {
     
     // 特殊处理：微信平台的微信虚拟支付只需启用即可
     if (currentPlatform === 'weixin' && config.wxVirtualPay && payment === config.wxVirtualPay) {
+      return true;
+    }
+    // 特殊处理：微信平台的微信虚拟续费支付只需启用即可
+    if (currentPlatform === 'weixin' && config.wxVirtualRenewPay && payment === config.wxVirtualRenewPay) {
       return true;
     }
     
@@ -1378,6 +1388,7 @@ const startDrag = (component, e) => {
 
 // 完成编排
 const handleSaveLayout = () => {
+  console.log("xxxxxx:",{ ...basicConfig.value })
   if (!currentLayout.value) {
     ElMessage.error('请先创建布局')
     return
