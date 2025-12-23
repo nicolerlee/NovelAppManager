@@ -36,23 +36,41 @@ export class AutomationUtils {
     }
   }
 
-  createNovelApp(createConfigData) { 
+  async createNovelApp(createConfigData) { 
     console.log(TAG,'createNovelApp', createConfigData)
     this._checkInitialized()
-    this.appStore.startAutoTask('创建小程序任务', {
+    this.appStore.startAutoTask('自动创建小程序', {
         maskConfig: {
             loadingText: '正在创建小程序...',
             showProgress: true
         }
     })
-    //先统一跳转至/wenqu-auto
+    
+    // 保存数据到appStore
+    
+    this.appStore.setRouteTempData(createConfigData)
+    
+    // 跳转至自由编排页面
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    this.appStore.updateTaskProgress(10)
     if (this.router && typeof this.router.push === 'function') {
       this.router.push('/wenqu-auto')
     } else {
       console.error(TAG, 'Router not available or push method not found')
     }
+
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    this.appStore.updateTaskProgress(20)
+    if (this.router && typeof this.router.push === 'function') {
+      this.router.push('/wenqu-auto/free-layout')
+    } else {
+      console.error(TAG, 'Router not available or push method not found')
+    }
+
+
+   
   }
-    
+
 }
 
 
@@ -61,5 +79,8 @@ export class AutomationUtils {
 const automationUtils = new AutomationUtils()
 
 export default automationUtils
+
+
+
 
 

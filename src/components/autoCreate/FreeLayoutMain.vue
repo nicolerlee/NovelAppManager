@@ -192,6 +192,9 @@ import FreePayConfigPanel from './FreePayConfigPanel.vue'
 import FreeAdConfigPanel from './FreeAdConfigPanel.vue'
 import request from '../../utils/request';
 
+import { useAppStore } from '../../stores/appStore'
+const appStore = useAppStore()
+
 // 表单校验规则
 const generalConfigRules = ref({
   buildCode: [
@@ -233,8 +236,8 @@ const currentLayout = ref([])
 const nextComponentId = ref(1)
 const draggedComponent = ref(null)
 const isDragging = ref(false)
-  const usedComponentTypes = ref(new Set())
-  const selectedComponent = ref(null)
+const usedComponentTypes = ref(new Set())
+const selectedComponent = ref(null)
 const basicConfig = ref({})
 const uiConfig = ref({})
 const generalConfig = ref({})
@@ -846,174 +849,175 @@ const checkWeijuConfigCompleted = (component) => {
 
   // 初始化画布边界
   onMounted(() => {
-  updateCanvasBounds();
-  window.addEventListener('resize', updateCanvasBounds);
-  
-  // 尝试从全局变量中恢复数据（从AutoCreateStep6返回时）
-  try {
-    const savedData = window.autoCreateFormData;
-    console.log(TAG,'onMounted savedData:',savedData);
-    if (savedData) {
-      const formData = savedData;  // 不需要解析，已经是对象了
-      console.log(TAG,'onMounted formData:',formData);
+    console.log(TAG,'onMounted appStore:',appStore.getAutoTaskConfig);
+    updateCanvasBounds();
+    window.addEventListener('resize', updateCanvasBounds);
+    
+    // 尝试从全局变量中恢复数据（从AutoCreateStep6返回时）
+    try {
+      const savedData = window.autoCreateFormData;
+      console.log(TAG,'onMounted savedData:',savedData);
+      if (savedData) {
+        const formData = savedData;  // 不需要解析，已经是对象了
+        console.log(TAG,'onMounted formData:',formData);
 
-      // 首先检查是否有布局状态可以恢复
-      if (formData.layoutState && formData.layoutState.currentLayout && formData.layoutState.currentLayout.length > 0) {
-        console.log('检测到存在布局状态数据，准备恢复...');
-        
-        // 恢复组件布局状态
-        currentLayout.value = JSON.parse(JSON.stringify(formData.layoutState.currentLayout));
-        
-        // 确保usedComponentTypes集合被正确初始化
-        usedComponentTypes.value = new Set();
-        
-        // 从恢复的布局中更新usedComponentTypes集合
-        currentLayout.value.forEach(component => {
-          usedComponentTypes.value.add(component.type);
-        });
-        
-        console.log('已更新usedComponentTypes集合:', Array.from(usedComponentTypes.value));
-        
-        // 根据恢复的组件状态更新占位区域
-        currentLayout.value.forEach(component => {
-          const modulePlaceholder = document.querySelector(`.module-placeholder[data-module-type="${component.type}"]`);
-          if (modulePlaceholder) {
-            modulePlaceholder.classList.add('occupied');
-            modulePlaceholder.style.opacity = '0.3';
-          }
-        });
-        
-        console.log('已从localStorage恢复组件布局状态', currentLayout.value);
-        
-        // 恢复配置数据，确保与布局状态同步
-        if (currentLayout.value.length > 0) {
-          // 从恢复的布局中提取各个配置项
+        // 首先检查是否有布局状态可以恢复
+        if (formData.layoutState && formData.layoutState.currentLayout && formData.layoutState.currentLayout.length > 0) {
+          console.log('检测到存在布局状态数据，准备恢复...');
+          
+          // 恢复组件布局状态
+          currentLayout.value = JSON.parse(JSON.stringify(formData.layoutState.currentLayout));
+          
+          // 确保usedComponentTypes集合被正确初始化
+          usedComponentTypes.value = new Set();
+          
+          // 从恢复的布局中更新usedComponentTypes集合
           currentLayout.value.forEach(component => {
-            if (component.type === 'basic-config' && component.config) {
-              basicConfig.value = { ...component.config };
-              appName.value = component.config.appName || '小程序名称';
-            } else if (component.type === 'ui-config' && component.config) {
-              uiConfig.value = { ...component.config };
-            } else if (component.type === 'general-config' && component.config) {
-              generalConfig.value = { ...component.config };
-            } else if (component.type === 'weiju-config' && component.config) {
-              weijuConfig.value = { ...component.config };
-            } else if (component.type === 'payment' && component.config) {
-              paymentConfig.value = { ...component.config };
-            } else if (component.type === 'advertisement' && component.config) {
-              adConfig.value = { ...component.config };
+            usedComponentTypes.value.add(component.type);
+          });
+          
+          console.log('已更新usedComponentTypes集合:', Array.from(usedComponentTypes.value));
+          
+          // 根据恢复的组件状态更新占位区域
+          currentLayout.value.forEach(component => {
+            const modulePlaceholder = document.querySelector(`.module-placeholder[data-module-type="${component.type}"]`);
+            if (modulePlaceholder) {
+              modulePlaceholder.classList.add('occupied');
+              modulePlaceholder.style.opacity = '0.3';
             }
           });
           
-          console.log('已从恢复的布局中同步配置数据');
-          return; // 如果成功恢复了布局状态，就不再执行后续的配置恢复逻辑
-        }
-      } 
-      
-      // 如果没有成功恢复布局状态，再尝试恢复单个配置项
-      console.log('未检测到完整布局状态，尝试恢复单个配置项');
-      
-      // 恢复基础配置
-        if (formData.basicInfoForm) {
-          basicConfig.value = {
-            appName: formData.basicInfoForm.appName || '',
-            platform: formData.basicInfoForm.platform || '',
-            version: formData.basicInfoForm.version || '',
-            appCode: formData.basicInfoForm.appCode || '',
-            product: formData.basicInfoForm.product || '',
-            customer: formData.basicInfoForm.customer || '',
-            appid: formData.basicInfoForm.appid || '',
-            tokenId: formData.basicInfoForm.token_id || '',
-            cl: formData.basicInfoForm.cl || '',
-            deliverId: formData.microConfigForm?.deliverId || '',
-            bannerId: formData.microConfigForm?.bannerId || ''
-          };
+          console.log('已从localStorage恢复组件布局状态', currentLayout.value);
           
-          // 更新手机模拟器的应用名称
-          appName.value = basicConfig.value.appName || '小程序名称';
-        }
+          // 恢复配置数据，确保与布局状态同步
+          if (currentLayout.value.length > 0) {
+            // 从恢复的布局中提取各个配置项
+            currentLayout.value.forEach(component => {
+              if (component.type === 'basic-config' && component.config) {
+                basicConfig.value = { ...component.config };
+                appName.value = component.config.appName || '小程序名称';
+              } else if (component.type === 'ui-config' && component.config) {
+                uiConfig.value = { ...component.config };
+              } else if (component.type === 'general-config' && component.config) {
+                generalConfig.value = { ...component.config };
+              } else if (component.type === 'weiju-config' && component.config) {
+                weijuConfig.value = { ...component.config };
+              } else if (component.type === 'payment' && component.config) {
+                paymentConfig.value = { ...component.config };
+              } else if (component.type === 'advertisement' && component.config) {
+                adConfig.value = { ...component.config };
+              }
+            });
+            
+            console.log('已从恢复的布局中同步配置数据');
+            return; // 如果成功恢复了布局状态，就不再执行后续的配置恢复逻辑
+          }
+        } 
         
-        // 恢复UI配置
-        if (formData.uiConfigForm) {
-          uiConfig.value = {
-            mainTheme: formData.uiConfigForm.mainTheme || '#2552F5FF',
-            secondTheme: formData.uiConfigForm.secondTheme || '#DCE7FFFF',
-            payCardStyle: formData.uiConfigForm.payCardStyle || 1,
-            homeCardStyle: formData.uiConfigForm.homeCardStyle || 1,
-            selectedPayCardImage: `/images/payStyle/pay_style${formData.uiConfigForm.payCardStyle || 1}.png`
-          };
-        }
+        // 如果没有成功恢复布局状态，再尝试恢复单个配置项
+        console.log('未检测到完整布局状态，尝试恢复单个配置项');
         
-        // 恢复支付配置
-        if (formData.paymentConfigForm) {
-          paymentConfig.value = { ...formData.paymentConfigForm };
-        }
-        
-        // 恢复广告配置
-        if (formData.adConfigForm) {
-          adConfig.value = {
-            rewardAd: {
-              enabled: formData.adConfigForm.rewardAd?.enabled || false,
-              rewardAdId: formData.adConfigForm.rewardAd?.rewardAdId || '',
-              rewardCount: formData.adConfigForm.rewardAd?.rewardCount || null
-            },
-            interstitialAd: {
-              enabled: formData.adConfigForm.interstitialAd?.enabled || false,
-              interstitialAdId: formData.adConfigForm.interstitialAd?.interstitialAdId || '',
-              interstitialCount: formData.adConfigForm.interstitialAd?.interstitialCount || null
-            },
-            bannerAd: {
-              enabled: formData.adConfigForm.bannerAd?.enabled || false,
-              bannerAdId: formData.adConfigForm.bannerAd?.bannerAdId || ''
-            },
-            feedAd: {
-              enabled: formData.adConfigForm.feedAd?.enabled || false,
-              feedAdId: formData.adConfigForm.feedAd?.feedAdId || ''
-            }
-          };
+        // 恢复基础配置
+          if (formData.basicInfoForm) {
+            basicConfig.value = {
+              appName: formData.basicInfoForm.appName || '',
+              platform: formData.basicInfoForm.platform || '',
+              version: formData.basicInfoForm.version || '',
+              appCode: formData.basicInfoForm.appCode || '',
+              product: formData.basicInfoForm.product || '',
+              customer: formData.basicInfoForm.customer || '',
+              appid: formData.basicInfoForm.appid || '',
+              tokenId: formData.basicInfoForm.token_id || '',
+              cl: formData.basicInfoForm.cl || '',
+              deliverId: formData.microConfigForm?.deliverId || '',
+              bannerId: formData.microConfigForm?.bannerId || ''
+            };
+            
+            // 更新手机模拟器的应用名称
+            appName.value = basicConfig.value.appName || '小程序名称';
+          }
+          
+          // 恢复UI配置
+          if (formData.uiConfigForm) {
+            uiConfig.value = {
+              mainTheme: formData.uiConfigForm.mainTheme || '#2552F5FF',
+              secondTheme: formData.uiConfigForm.secondTheme || '#DCE7FFFF',
+              payCardStyle: formData.uiConfigForm.payCardStyle || 1,
+              homeCardStyle: formData.uiConfigForm.homeCardStyle || 1,
+              selectedPayCardImage: `/images/payStyle/pay_style${formData.uiConfigForm.payCardStyle || 1}.png`
+            };
+          }
+          
+          // 恢复支付配置
+          if (formData.paymentConfigForm) {
+            paymentConfig.value = { ...formData.paymentConfigForm };
+          }
+          
+          // 恢复广告配置
+          if (formData.adConfigForm) {
+            adConfig.value = {
+              rewardAd: {
+                enabled: formData.adConfigForm.rewardAd?.enabled || false,
+                rewardAdId: formData.adConfigForm.rewardAd?.rewardAdId || '',
+                rewardCount: formData.adConfigForm.rewardAd?.rewardCount || null
+              },
+              interstitialAd: {
+                enabled: formData.adConfigForm.interstitialAd?.enabled || false,
+                interstitialAdId: formData.adConfigForm.interstitialAd?.interstitialAdId || '',
+                interstitialCount: formData.adConfigForm.interstitialAd?.interstitialCount || null
+              },
+              bannerAd: {
+                enabled: formData.adConfigForm.bannerAd?.enabled || false,
+                bannerAdId: formData.adConfigForm.bannerAd?.bannerAdId || ''
+              },
+              feedAd: {
+                enabled: formData.adConfigForm.feedAd?.enabled || false,
+                feedAdId: formData.adConfigForm.feedAd?.feedAdId || ''
+              }
+            };
 
 
-        }
-        
-        // 恢复通用配置
-        if (formData.generalConfigForm) {
-          generalConfig.value = {
-            contact: formData.generalConfigForm.contact || '',
-            buildCode: formData.generalConfigForm.buildCode || '',
-            iaaMode: formData.generalConfigForm.iaaMode || false,
-            iaaDialogStyle: formData.generalConfigForm.iaaDialogStyle || null,
-            hidePayEntry: formData.generalConfigForm.hidePayEntry || false,
-            hideScoreExchange: formData.generalConfigForm.hideScoreExchange || false,
-            mineLoginType: formData.generalConfigForm.mineLoginType || 'anonymousLogin',
-            readerLoginType: formData.generalConfigForm.readerLoginType || 'anonymousLogin',
-            douyinImId: formData.generalConfigForm.douyinImId || '',
-            douyinAppToken: formData.generalConfigForm.douyinAppToken || '',
-            weixinAppToken: formData.generalConfigForm.weixinAppToken || '',
-            kuaishouClientId: formData.generalConfigForm.kuaishouClientId || '',
-            kuaishouClientSecret: formData.generalConfigForm.kuaishouClientSecret || '',
-            kuaishouAppToken: formData.generalConfigForm.kuaishouAppToken || ''
-          };
-        }
-        
-        // 恢复微距配置
-        if (formData.microConfigForm) {
-          weijuConfig.value = {
-            deliverId: formData.microConfigForm.deliverId || '',
-            bannerId: formData.microConfigForm.bannerId || ''
-          };
-        }
-        
-        // 标记数据已成功恢复
-        console.log('已从localStorage恢复数据');
-        
-        // 数据恢复成功后删除全局变量，避免下次打开时重复使用同一份数据
-        delete window.autoCreateFormData;
-    } else {
-      console.log('localStorage中没有找到可恢复的数据');
+          }
+          
+          // 恢复通用配置
+          if (formData.generalConfigForm) {
+            generalConfig.value = {
+              contact: formData.generalConfigForm.contact || '',
+              buildCode: formData.generalConfigForm.buildCode || '',
+              iaaMode: formData.generalConfigForm.iaaMode || false,
+              iaaDialogStyle: formData.generalConfigForm.iaaDialogStyle || null,
+              hidePayEntry: formData.generalConfigForm.hidePayEntry || false,
+              hideScoreExchange: formData.generalConfigForm.hideScoreExchange || false,
+              mineLoginType: formData.generalConfigForm.mineLoginType || 'anonymousLogin',
+              readerLoginType: formData.generalConfigForm.readerLoginType || 'anonymousLogin',
+              douyinImId: formData.generalConfigForm.douyinImId || '',
+              douyinAppToken: formData.generalConfigForm.douyinAppToken || '',
+              weixinAppToken: formData.generalConfigForm.weixinAppToken || '',
+              kuaishouClientId: formData.generalConfigForm.kuaishouClientId || '',
+              kuaishouClientSecret: formData.generalConfigForm.kuaishouClientSecret || '',
+              kuaishouAppToken: formData.generalConfigForm.kuaishouAppToken || ''
+            };
+          }
+          
+          // 恢复微距配置
+          if (formData.microConfigForm) {
+            weijuConfig.value = {
+              deliverId: formData.microConfigForm.deliverId || '',
+              bannerId: formData.microConfigForm.bannerId || ''
+            };
+          }
+          
+          // 标记数据已成功恢复
+          console.log('已从localStorage恢复数据');
+          
+          // 数据恢复成功后删除全局变量，避免下次打开时重复使用同一份数据
+          delete window.autoCreateFormData;
+      } else {
+        console.log('localStorage中没有找到可恢复的数据');
+      }
+    } catch (error) {
+      console.error('从localStorage恢复数据失败:', error);
     }
-  } catch (error) {
-    console.error('从localStorage恢复数据失败:', error);
-  }
 })
 
   // 更新画布边界
@@ -1388,7 +1392,6 @@ const startDrag = (component, e) => {
 
 // 完成编排
 const handleSaveLayout = () => {
-  console.log("xxxxxx:",{ ...basicConfig.value })
   if (!currentLayout.value) {
     ElMessage.error('请先创建布局')
     return

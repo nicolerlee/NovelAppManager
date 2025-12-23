@@ -24,7 +24,10 @@ export const useAppStore = defineStore('app', {
       taskStatus: 'idle',
       // 任务进度
       taskProgress: 0,
-    }
+    },
+    // 路由跳转临时数据存储
+    routeTempData: null,
+    
   }),
   
   getters: {
@@ -35,7 +38,9 @@ export const useAppStore = defineStore('app', {
     // 获取当前任务状态
     getTaskStatus: (state) => state.autoTaskConfig.taskStatus,
     // 获取任务进度
-    getTaskProgress: (state) => state.autoTaskConfig.taskProgress
+    getTaskProgress: (state) => state.autoTaskConfig.taskProgress,
+    // 获取路由临时数据
+    getRouteTempData: (state) => state.routeTempData
   },
   
   actions: {
@@ -79,6 +84,7 @@ export const useAppStore = defineStore('app', {
       this.autoTaskConfig.taskProgress = 100
       // 可选择自动隐藏蒙版
       this.hideMask()
+      this.resetTask()
     },
     
     // 任务失败
@@ -94,6 +100,17 @@ export const useAppStore = defineStore('app', {
         taskProgress: 0,
       }
       this.hideMask()
+    },
+    
+    // 设置路由临时数据
+    setRouteTempData(data) {
+      this.routeTempData = data
+    },
+    
+    // 清除路由临时数据
+    clearRouteTempData() {
+      this.routeTempData = null
     }
   }
 })
+
