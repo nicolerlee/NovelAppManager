@@ -54,9 +54,13 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
+import { ElMessage } from "element-plus";
+import { useRoute,useRouter } from 'vue-router';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+import { useAppStore } from '../../stores/appStore';
+import { agentManager } from '../../utils/agentManager';
+
 import {
   CircleCheckFilled,
   CircleCloseFilled,
@@ -72,6 +76,8 @@ hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('json', json);
 
 const route = useRoute();
+const router = useRouter();
+const appStore=useAppStore();
 
 const logs = ref([]);
 const loading = ref(true); // Start with loading true
@@ -117,7 +123,7 @@ function tryFormatJson(msg) {
   return { isJson: false, prettyJson: '', raw: msg };
 }
 
-const subscribeCreateLog = (taskId) => {
+const subscribeCreateLog = async (taskId) => {
   const socket = new SockJS(`${window.location.protocol}//${window.location.hostname}:8080/ws`);
   stompClient = new Client({
     webSocketFactory: () => socket,
@@ -125,9 +131,9 @@ const subscribeCreateLog = (taskId) => {
     heartbeatIncoming: 0,
     heartbeatOutgoing: 0,
     debug: () => {},
-    onConnect: () => {
+    onConnect: async () => {
       loading.value = false;
-      stompClient.subscribe(`/topic/novel-create-log/${taskId}`, (msg) => {
+      stompClient.subscribe(`/topic/novel-create-log/${taskId}`, async (msg) => {
         if (msg.body) {
           const logData = JSON.parse(msg.body);
           const jsonInfo = tryFormatJson(logData.message);
@@ -155,7 +161,22 @@ const subscribeCreateLog = (taskId) => {
           });
           
           if (logData.type === 'finish') {
-            setTimeout(disconnectLog, 2000);
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+             if(appStore.getAutoTaskConfig.taskStatus === 'running' && appStore.getAutoTaskConfig.currentTask!=null){
+                //自动创建的项目
+                appStore.updateTaskProgress(100)
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                appStore.completeTask()
+                ElMessage.warning("自动创建任务完成");
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                agentManager.show()
+                //跳转至小程序列表页
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                router.push('/apps');
+
+             }
+            disconnectLog()
+            
           }
         }
       });

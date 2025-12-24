@@ -40,7 +40,7 @@ export const useAppStore = defineStore('app', {
     // 获取任务进度
     getTaskProgress: (state) => state.autoTaskConfig.taskProgress,
     // 获取路由临时数据
-    getRouteTempData: (state) => state.routeTempData
+    getRouteTemp: (state) => state.routeTempData
   },
   
   actions: {
@@ -70,7 +70,7 @@ export const useAppStore = defineStore('app', {
         ...config
       }
       // 自动显示蒙版
-      this.showMask({ showLoading: true, loadingText: `执行${taskName}中...` })
+      this.showMask({ showLoading: true, loadingText: `执行${taskName}任务中...` })
     },
     
     // 更新任务进度
@@ -105,6 +105,9 @@ export const useAppStore = defineStore('app', {
     // 设置路由临时数据
     setRouteTempData(data) {
       this.routeTempData = data
+    },
+    getRouteTempData() {
+      return this.routeTempData
     },
     
     // 清除路由临时数据

@@ -86,7 +86,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted ,nextTick} from 'vue'
 import { ElMessage } from 'element-plus'
 import CustomSteps from '../components/common/CustomSteps.vue'
 import AutoCreateStep1 from '../components/autoCreate/AutoCreateStep1.vue'
@@ -96,8 +96,11 @@ import AutoCreateStep4 from '../components/autoCreate/AutoCreateStep4.vue'
 import AutoCreateStep5 from '../components/autoCreate/AutoCreateStep5.vue'
 import AutoCreateStep6 from '../components/autoCreate/AutoCreateStep6.vue'
 import { useRouter, useRoute } from 'vue-router'
+import {useAppStore} from '../stores/appStore'
+
 import request from '../utils/request'
 
+const appStore = useAppStore()
 const router = useRouter()
 const route = useRoute()
 const currentStep = ref(0)
@@ -105,6 +108,7 @@ const currentSubStep = ref(0)
 // 新增：标识是否从FreelayoutMain跳转过来
 const isFromFreelayoutMain = ref(false)
 
+const autoCreateModel = ref(false)
 // 表单引用
 const basicInfoStepRef = ref(null)
 const uiConfigFormRef = ref(null)
@@ -298,8 +302,14 @@ const loadFormDataFromLocalStorage = () => {
 
 // 组件挂载时检查URL参数和localStorage
 onMounted(() => {
+  if(appStore.getAutoTaskConfig.taskStatus === 'running' && appStore.getAutoTaskConfig.currentTask!=null){
+    autoCreateModel.value=true
+  }else{
+    autoCreateModel.value=false
+  }
   // 检查URL参数中是否指定了步骤
   const stepParam = route.query.step;
+  console.log('stepParam:',stepParam)
   if (stepParam) {
     const stepNum = parseInt(stepParam);
     if (!isNaN(stepNum) && stepNum >= 0 && stepNum < stepsData.value.length) {
@@ -317,6 +327,19 @@ onMounted(() => {
         } else {
           ElMessage.success('已加载配置数据');
           // 加载成功后不需要额外清除数据，因为loadFormDataFromLocalStorage函数内部已经处理了清除逻辑
+        }
+        if(autoCreateModel.value){ 
+          setTimeout(async () => {
+            if(autoCreateStep6Ref.value) {
+              autoCreateStep6Ref.value.scrollToBottom();
+            }          
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            nextTick(async () => {
+              await startGeneration() 
+
+            });  
+          }, 1000);         
+          
         }
       }
     }

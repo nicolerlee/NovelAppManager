@@ -309,7 +309,7 @@ const handleSendMessage = async () => {
               
               // 检查是否是结束标记
               if (content === '[DONE]-CreateNovelApp') {
-                console.error('收到创建订单结束的标记，终止流式处理，最终生成的配置：', conversationConfig.value);
+                console.error('收到创建小程序结束的标记，终止流式处理，最终生成的配置：', conversationConfig.value);
                 done = true; // 设置done为true，终止外层循环
                 automationUtils.createNovelApp(conversationConfig.value)
                 break;

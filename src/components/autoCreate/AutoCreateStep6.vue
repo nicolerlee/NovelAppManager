@@ -1,7 +1,7 @@
 <template>
   <div class="final-config-container">
     <h4>步骤6: 核对所有配置数据</h4>
-    <div class="config-display-area">
+    <div class="config-display-area" ref="configDisplayAreaRef">
       <div v-for="(block, name) in formattedConfigData" :key="name" class="config-block">
         <h5>{{ blockTitles[name] || name }}</h5>
         <div class="json-highlight-wrapper">
@@ -13,8 +13,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, defineExpose } from 'vue';
 import { ElMessage } from 'element-plus';
+
+// 给可滚动的容器添加ref
+const configDisplayAreaRef = ref(null);
 
 const props = defineProps({
   basicInfoForm: { type: Object, required: true },
@@ -171,6 +174,21 @@ const highlightJson = (jsonStr) => {
   
   return html;
 };
+
+// 暴露scrollToBottom方法，供父组件调用
+const scrollToBottom = () => {
+  if (configDisplayAreaRef.value) {
+    configDisplayAreaRef.value.scrollTo({
+      top: configDisplayAreaRef.value.scrollHeight,
+      behavior: 'smooth'
+    });
+    console.log('AutoCreateStep6滚动到底部');
+  }
+};
+
+defineExpose({
+  scrollToBottom
+});
 </script>
 
 <style scoped>
@@ -186,6 +204,8 @@ const highlightJson = (jsonStr) => {
   padding: 20px;
   background-color: #f9f9f9;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .config-block {

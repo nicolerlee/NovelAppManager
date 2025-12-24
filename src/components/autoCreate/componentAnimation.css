@@ -1,0 +1,71 @@
+/* 自动创建模式下的组件飞入动画样式 */
+.temp-animated-component {
+  position: absolute;
+  width: 200px;
+  height: 100px;
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 自动创建模式下的组件飞入动画 */
+@keyframes componentFlyIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-100px) translateY(0);
+    width: 200px;
+    height: 100px;
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+    width: 90px;
+    height: 50px;
+  }
+}
+
+/* 自动创建模式下的占位区域动画 */
+.module-placeholder.auto-create-animation {
+  animation: placeholderFadeIn 0.5s ease-in-out;
+}
+
+@keyframes placeholderFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+/* 自动创建模式下的组件列表项 */
+.component-item.auto-create-ready {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.component-item.auto-create-ready:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 自动创建模式下的画布容器 */
+.canvas-container.auto-create-mode {
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 自动创建模式下的手机框架 */
+.phone-frame.auto-create-mode {
+  border-color: #409eff;
+  box-shadow: 0 0 30px rgba(64, 158, 255, 0.3);
+}

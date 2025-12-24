@@ -3,6 +3,7 @@
  * 提供各种自动化任务所需的通用功能，与全屏蒙版组件集成
  */
 import { useAppStore } from '../stores/appStore'
+import { agentManager } from '../utils/agentManager'
 const TAG = 'AutomationUtils'
 
 /**
@@ -66,6 +67,7 @@ export class AutomationUtils {
     } else {
       console.error(TAG, 'Router not available or push method not found')
     }
+    agentManager.hide()
 
 
    

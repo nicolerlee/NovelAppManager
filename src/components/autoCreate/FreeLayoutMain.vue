@@ -255,6 +255,9 @@ const lastQueriedAppName = ref('')
 // 表单引用
 const formRef = ref(null);
 
+//是否是智能体自动创建模式
+const autoCreateModel = ref(false)
+
 // 请求查询同名小程序主体配置
 const fetchUiThemeConfig = async () => {
   // 查找基础配置组件
@@ -357,6 +360,7 @@ const fetchAppCommonConfigByAppName = async () => {
 
 // 初始化基础配置数据
 const initBasicConfig = (component) => {
+    
   basicConfig.value = {
     appName: component.config?.appName || '',
     appCode: component.config?.appCode || '',
@@ -370,6 +374,7 @@ const initBasicConfig = (component) => {
     deliverId: component.config?.deliverId || '',
     bannerId: component.config?.bannerId || ''
   }
+  console.log('初始化基础配置数据结束:', basicConfig.value);
 }
 
 // 初始化通用配置数据
@@ -491,7 +496,7 @@ const checkPaymentConfigCompleted = (component) => {
     if (currentPlatform === 'weixin' && config.wxVirtualRenewPay && payment === config.wxVirtualRenewPay) {
       return true;
     }
-    
+
     return hasGateway;
   });
   
@@ -830,29 +835,275 @@ const checkWeijuConfigCompleted = (component) => {
   component.isCompleted = allRequiredCompleted;
   return component.isCompleted;
 }
-  // 获取组件样式
-  const getComponentStyle = (item) => {
-    return {
-      background: item.gradient,
-      borderRadius: '8px',
-      padding: '20px',
-      width: '100%',
-      height: '80px',
-      'box-sizing': 'border-box',
-      display: 'flex',
-      'align-items': 'center',
-      'justify-content': 'center',
-      'box-shadow': '0 4px 12px rgba(0, 0, 0, 0.1)',
-      cursor: 'grab'
-    };
-  }
+
+// 获取组件样式
+const getComponentStyle = (item) => {
+  return {
+    background: item.gradient,
+    borderRadius: '8px',
+    padding: '20px',
+    width: '100%',
+    height: '80px',
+    'box-sizing': 'border-box',
+    display: 'flex',
+    'align-items': 'center',
+    'justify-content': 'center',
+    'box-shadow': '0 4px 12px rgba(0, 0, 0, 0.1)',
+    cursor: 'grab'
+  };
+}
 
   // 初始化画布边界
-  onMounted(() => {
-    console.log(TAG,'onMounted appStore:',appStore.getAutoTaskConfig);
+  onMounted(async () => {
+    console.log(TAG,'onMounted appStore autoTaskConfig:',appStore.getAutoTaskConfig,",getRouteTempData:",appStore.getRouteTempData());
+    if(appStore.getAutoTaskConfig.taskStatus === 'running' && appStore.getAutoTaskConfig.currentTask!=null){
+      autoCreateModel.value=true
+    }else{
+      autoCreateModel.value=false
+    }
+    console.log(TAG,'onMounted autoCreateModel:',autoCreateModel.value);
     updateCanvasBounds();
     window.addEventListener('resize', updateCanvasBounds);
     
+
+
+    if (autoCreateModel.value) {
+        console.log('开始执行修复后的组件飞入动画...');
+        
+        // 延迟执行，确保DOM已渲染完成
+        setTimeout(async () => {
+            // 逐个动画组件
+            availableComponents.value.forEach((component, index) => {
+            // 为每个组件设置不同的延迟时间
+            setTimeout(async () => {
+                const componentType = component.type;
+                
+                // 获取占位区域元素
+                const modulePlaceholder = document.querySelector(`.module-placeholder[data-module-type="${componentType}"]`);
+                if (modulePlaceholder && !usedComponentTypes.value.has(componentType)) {
+                // 获取占位区域的实际尺寸和位置
+                const placeholderRect = modulePlaceholder.getBoundingClientRect();
+                const appArea = document.querySelector('.phone-app-area');
+                
+                if (appArea) {
+                    const appRect = appArea.getBoundingClientRect();
+                    
+                    // 计算实际组件尺寸和位置 - 不减去边距
+                    const componentWidth = placeholderRect.width; // 直接使用占位区域宽度
+                    const componentHeight = placeholderRect.height; // 直接使用占位区域高度
+                    const targetX = placeholderRect.left - appRect.left;
+                    const targetY = placeholderRect.top - appRect.top;
+                    
+                    // 创建临时动画元素
+                    const tempElement = document.createElement('div');
+                    tempElement.className = 'temp-animated-component';
+                    tempElement.style.position = 'absolute';
+                    tempElement.style.width = '200px';
+                    tempElement.style.height = '100px';
+                    tempElement.style.background = component.gradient;
+                    tempElement.style.color = 'white';
+                    tempElement.style.borderRadius = '8px';
+                    tempElement.style.display = 'flex';
+                    tempElement.style.alignItems = 'center';
+                    tempElement.style.justifyContent = 'center';
+                    tempElement.style.fontWeight = 'bold';
+                    tempElement.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                    tempElement.style.zIndex = '1000';
+                    tempElement.style.transition = 'all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1)';
+                    tempElement.textContent = component.name;
+                    
+                    // 获取左侧组件位置（源位置）
+                    const sourceElement = document.querySelector(`[data-type="${componentType}"]`);
+                    if (sourceElement) {
+                        const sourceRect = sourceElement.getBoundingClientRect();
+                        tempElement.style.left = `${sourceRect.left}px`;
+                        tempElement.style.top = `${sourceRect.top}px`;
+                        document.body.appendChild(tempElement);
+                        
+                        // 强制重排以确保动画正常触发
+                        void tempElement.offsetWidth;
+                        
+                        // 计算动画目标位置（相对于页面）
+                        const targetLeft = appRect.left + targetX;
+                        const targetTop = appRect.top + targetY;
+                        
+                        // 执行动画
+                        setTimeout(() => {
+                            tempElement.style.left = `${targetLeft}px`;
+                            tempElement.style.top = `${targetTop}px`;
+                            tempElement.style.width = `${componentWidth}px`;
+                            tempElement.style.height = `${componentHeight}px`;
+                        }, 50);
+                        
+                        // 动画完成后处理
+                        setTimeout(async () => {
+                            // 移除临时动画元素
+                            document.body.removeChild(tempElement);
+                            
+                            // 标记组件为已使用
+                            usedComponentTypes.value.add(componentType);
+                            
+                            // 更新占位区域状态
+                            modulePlaceholder.classList.add('occupied');
+                            modulePlaceholder.style.borderStyle = 'solid';
+                            modulePlaceholder.style.opacity = '0.3';
+                            
+                            // 创建实际组件并添加到布局
+                            const newComponent = {
+                                id: nextComponentId.value++,
+                                type: componentType,
+                                position: { x: targetX, y: targetY },
+                                width: componentWidth,
+                                height: componentHeight,
+                                props: {},
+                                isCompleted: false,
+                                config: {}
+                            };
+                            
+                            // 确保组件属性有效
+                            // 确保组件属性有效
+                            if (typeof targetX === 'number' && typeof targetY === 'number' && componentWidth > 0 && componentHeight > 0) {
+                                // 添加到布局中
+                                currentLayout.value.push(newComponent);
+                                
+                                // 触发响应式更新
+                                currentLayout.value = [...currentLayout.value];
+                                
+                                console.log(`组件 ${componentType} 动画完成并添加到布局`);
+                                
+                                // 使用nextTick确保DOM已经更新后再设置数据
+                                nextTick(async () => {
+                                    if(componentType === 'basic-config'){
+                                        // 从currentLayout中找到刚添加的组件
+                                        const baseComponent = currentLayout.value.find(item => item.type === 'basic-config');
+                                        if (baseComponent) {
+                                            const baseConfig = {
+                                                config: appStore.getRouteTempData().createNovelApp.baseConfig
+                                            };
+                                            
+                                            // 更新组件配置
+                                            baseComponent.config = { ...baseConfig.config };
+                                            
+                                            // 选中该组件
+                                            selectedComponent.value = baseComponent;
+                                            
+                                            // 初始化基础配置
+                                            initBasicConfig(selectedComponent.value);
+                                            
+                                            // 再次使用nextTick确保所有数据更新后UI完全刷新
+                                            nextTick(() => {
+                                                appStore.updateTaskProgress(30)
+                                                console.log('基础配置数据设置完成，UI已刷新');
+                                            });
+                                        }
+                                    } else if(componentType === 'ui-config'){ 
+                                        // UI配置组件处理
+                                        const uiComponent = currentLayout.value.find(item => item.type === 'ui-config');
+                                        if (uiComponent) {                                        
+                                            uiComponent.config = appStore.getRouteTempData().createNovelApp.uiConfig || {};
+                                             // 选中该组件
+                                            selectedComponent.value = uiComponent;
+                                            
+                                            // 初始化UI配置
+                                            initUIConfig(selectedComponent.value);
+                                            
+                                            // 再次使用nextTick确保所有数据更新后UI完全刷新
+                                            nextTick(() => {
+                                                appStore.updateTaskProgress(70)
+                                                console.log('UI配置数据设置完成，UI已刷新');
+                                            });
+                                        }
+                                    } else if(componentType === 'general-config'){
+                                        // 通用配置组件处理
+                                        const generalComponent = currentLayout.value.find(item => item.type === 'general-config');
+                                        if (generalComponent) {
+                                            generalComponent.config = appStore.getRouteTempData().createNovelApp.commonConfig || {};
+                                              // 选中该组件
+                                            selectedComponent.value = generalComponent;
+                                            
+                                            // 初始化通用配置
+                                            initGeneralConfig(selectedComponent.value);
+                                            
+                                            // 再次使用nextTick确保所有数据更新后UI完全刷新
+                                            nextTick(() => {
+                                                appStore.updateTaskProgress(40)
+                                                console.log('通用配置数据设置完成，UI已刷新');
+                                            });
+                                        }
+                                    } else if(componentType === 'payment'){
+                                        // 支付配置组件处理
+                                        const paymentComponent = currentLayout.value.find(item => item.type === 'payment');
+                                        if (paymentComponent) {
+                                            paymentComponent.config = appStore.getRouteTempData().createNovelApp.paymentConfig || {};
+                                              // 选中该组件
+                                            selectedComponent.value = paymentComponent;;
+                                            
+                                            // 初始化支付配置
+                                            initPaymentConfig(selectedComponent.value);
+                                            
+                                            // 再次使用nextTick确保所有数据更新后UI完全刷新
+                                            nextTick(() => {
+                                                appStore.updateTaskProgress(50)
+                                                console.log('支付配置数据设置完成，UI已刷新');
+                                            });
+                                        }
+                                    } else if(componentType === 'advertisement'){
+                                        // 广告配置组件处理
+                                        const adComponent = currentLayout.value.find(item => item.type === 'advertisement');
+                                        if (adComponent) {
+                                            adComponent.config = appStore.getRouteTempData().createNovelApp.adConfig || {};
+                                              // 选中该组件
+                                            selectedComponent.value = adComponent;
+                                            
+                                            // 初始化广告配置
+                                            initAdConfig(selectedComponent.value);
+                                            
+                                            // 再次使用nextTick确保所有数据更新后UI完全刷新
+                                            nextTick(() => {
+                                                appStore.updateTaskProgress(60)
+                                                console.log('广告配置数据设置完成，UI已刷新');
+                                            });
+                                        }
+                                    } else if(componentType === 'weiju-config'){
+                                        // 微距配置组件处理
+                                        const weijuComponent = currentLayout.value.find(item => item.type === 'weiju-config');
+                                        if (weijuComponent) {
+                                            weijuComponent.config =  {
+                                                deliverId: appStore.getRouteTempData().createNovelApp.baseConfig.deliverId,
+                                                bannerId: appStore.getRouteTempData().createNovelApp.baseConfig.bannerId
+                                            };
+                                              // 选中该组件
+                                            selectedComponent.value = weijuComponent;
+                                            
+                                            // 初始化微距配置
+                                            initWeijuConfig(selectedComponent.value);
+                                            
+                                            // 再次使用nextTick确保所有数据更新后UI完全刷新
+                                            nextTick(() => {
+                                                appStore.updateTaskProgress(80)
+                                                console.log('微距配置数据设置完成，UI已刷新');
+                                            });
+                                            await new Promise(resolve => setTimeout(resolve, 1500))
+                                            //滚动到页面底部
+                                            handleSaveLayout()
+                                        }
+                                    }
+                                });
+                            } else {
+                                console.error('无效的组件属性:', {targetX, targetY, componentWidth, componentHeight});
+                                // 如果有ElMessage可用，显示错误信息
+                                if (typeof ElMessage !== 'undefined') {
+                                    ElMessage.error(`组件 ${componentType} 创建失败: 无效的位置或尺寸`);
+                                }
+                            }
+                        }, 850); // 略大于动画持续时间
+                    }
+                }
+                }
+            }, index * 500); // 每个组件间隔500ms开始动画
+            });
+        }, 1000);
+        }
     // 尝试从全局变量中恢复数据（从AutoCreateStep6返回时）
     try {
       const savedData = window.autoCreateFormData;
@@ -1018,7 +1269,7 @@ const checkWeijuConfigCompleted = (component) => {
     } catch (error) {
       console.error('从localStorage恢复数据失败:', error);
     }
-})
+  })
 
   // 更新画布边界
   const updateCanvasBounds = () => {
@@ -1033,8 +1284,6 @@ const checkWeijuConfigCompleted = (component) => {
     }
   }
 
-
-  // 可用组件列表
   const availableComponents = ref([
       { type: 'basic-config', name: '基础配置', color: '#409eff', gradient: 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)' },
       { type: 'general-config', name: '通用配置', color: '#67c23a', gradient: 'linear-gradient(135deg, #66bb6a 0%, #2e7d32 100%)' },
