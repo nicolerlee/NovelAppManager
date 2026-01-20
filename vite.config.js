@@ -15,6 +15,15 @@ export default defineConfig({
       'Sec-WebSocket-Extensions': 'permessage-deflate; client_max_window_bits'
     },
     proxy: {
+      // 微距接口保留 /api 前缀，因为后端 Controller 和白名单都包含 /api
+      '/api/novel-weiju': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        // 不重写路径，保留 /api 前缀
+        ws: true,
+        secure: false
+      },
+      // 其他接口去掉 /api 前缀
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
