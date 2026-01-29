@@ -97,10 +97,15 @@
                       <img :src="payCardStyleImage" alt="支付卡片样式预览" class="preview-image" />
                     </div>
                   <el-form-item label="首页卡片样式" class="platform-radio-group">
-                    <el-radio-group v-model="configForm.homeCardStyle" class="platform-radio-group">
+                    <el-radio-group v-model="configForm.homeCardStyle" @change="handleHomeCardStyleChange" class="platform-radio-group">
                       <el-radio-button :value="1">样式1</el-radio-button>
+                      <el-radio-button :value="2">样式2</el-radio-button>
                     </el-radio-group>
                   </el-form-item>
+                  <!-- 首页卡片样式预览图 -->
+                  <div class="home-card-preview">
+                    <img :src="homeCardStyleImage" alt="首页卡片样式预览" class="preview-image" />
+                  </div>
                   
                 <!-- 操作按钮 -->
                 <div style="margin-top: 20px; text-align: center;">
@@ -160,6 +165,8 @@ const predefinedThemes = ref([
 const selectedThemeImage = ref('');
 // 支付卡片预览图
 const payCardStyleImage = ref('/images/payStyle/pay_style1.png');
+// 首页卡片预览图
+const homeCardStyleImage = ref('/images/homeStyle/homeCardStyle1.jpg');
 const formRef = ref(null)
 
 // 表单验证规则
@@ -208,6 +215,12 @@ const handlePayCardStyleChange = (value) => {
   payCardStyleImage.value = `/images/payStyle/pay_style${value}.png`;
 };
 
+// 处理首页卡片样式变化
+const handleHomeCardStyleChange = (value) => {
+  // 根据不同值使用不同图片格式
+  homeCardStyleImage.value = `/images/homeStyle/homeCardStyle${value}.png`;
+};
+
 // 加载UI配置
 const loadConfig = async (appId) => {
   if (!appId) return
@@ -230,6 +243,7 @@ const loadConfig = async (appId) => {
       }
       // 初始化预览图
       payCardStyleImage.value = `/images/payStyle/pay_style${configForm.value.payCardStyle}.png`;
+      homeCardStyleImage.value = `/images/homeStyle/homeCardStyle${configForm.value.homeCardStyle}.png`;
       // 检查是否匹配预设主题
       const matchedTheme = predefinedThemes.value.find(theme => 
         theme.mainTheme === configForm.value.mainTheme && 
@@ -617,7 +631,8 @@ if (selectedApp.value?.appId) {
 
 /* 预览图样式 */
 .theme-image-preview,
-.pay-card-preview {
+.pay-card-preview,
+.home-card-preview {
   margin-top: 15px;
   padding: 10px;
   background-color: #fafafa;
