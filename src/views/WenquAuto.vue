@@ -26,6 +26,22 @@
           <div class="feature-title">发布小程序</div>
           <div class="feature-desc">集成自动发布/预览生成二维码，覆盖主流小程序平台</div>
         </el-card>
+        
+        <el-card class="feature-card" shadow="hover" @click="goToBatchBuild">
+          <div class="feature-icon batch-build">
+            <el-icon><FolderOpened /></el-icon>
+          </div>
+          <div class="feature-title">批量编译</div>
+          <div class="feature-desc">一键批量编译多个小程序，提升编译效率</div>
+        </el-card>
+        
+        <el-card class="feature-card" shadow="hover" @click="goToBatchPublish">
+          <div class="feature-icon batch-publish">
+            <el-icon><Upload /></el-icon>
+          </div>
+          <div class="feature-title">批量发布</div>
+          <div class="feature-desc">批量发布多个小程序到各平台，快速上线</div>
+        </el-card>
         </div>
       </transition>
     </router-view>
@@ -33,7 +49,7 @@
 </template>
 
 <script setup>
-import { DocumentAdd, Share, Tools, Star } from '@element-plus/icons-vue'
+import { DocumentAdd, Share, Tools, Star, FolderOpened, Upload } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { inject } from 'vue'
 
@@ -64,6 +80,22 @@ const goToCreate = () => {
   }
   router.push('/wenqu-auto/create-mode-selection')
 }
+
+const goToBatchBuild = () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
+  router.push('/wenqu-auto/batch-build')
+}
+
+const goToBatchPublish = () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin()
+    return
+  }
+  router.push('/wenqu-auto/batch-publish')
+}
 </script>
 
 <style scoped>
@@ -86,9 +118,10 @@ const goToCreate = () => {
 }
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 32px;
   margin-top: 32px;
+  max-width: 1400px;
 }
 .feature-card {
   display: flex;
@@ -139,6 +172,12 @@ const goToCreate = () => {
 }
 .feature-icon.publish-center {
   color: #e6a23c;
+}
+.feature-icon.batch-build {
+  color: #409eff;
+}
+.feature-icon.batch-publish {
+  color: #9c27b0;
 }
 .feature-icon.not-open {
   color: #909399;

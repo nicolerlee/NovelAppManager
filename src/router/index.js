@@ -114,6 +114,18 @@ const routes = [
         name: 'AutoPublish',
         component: () => import('../views/AutoPublish.vue'),
         meta: { title: '全平台自动发布中心' }
+      },
+      {
+        path: 'batch-build',
+        name: 'BatchBuild',
+        component: () => import('../components/batch/BatchBuild.vue'),
+        meta: { title: '批量构建小程序' }
+      },
+      {
+        path: 'batch-publish',
+        name: 'BatchPublish',
+        component: () => import('../components/batch/BatchPublish.vue'),
+        meta: { title: '批量发布小程序' }
       }
     ]
   },
