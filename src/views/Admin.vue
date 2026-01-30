@@ -18,6 +18,11 @@
             <OperationArchive />
           </template>
         </el-tab-pane>
+        <el-tab-pane label="数据库导出" name="databaseExport">
+          <template v-if="activeTab === 'databaseExport'">
+            <DatabaseExport />
+          </template>
+        </el-tab-pane>
       </el-tabs>
     </el-card>
   </div>
@@ -29,6 +34,7 @@ import { ref, defineAsyncComponent } from 'vue';
 const UserManagement = defineAsyncComponent(() => import('../components/admin/UserManagement.vue'));
 const LogViewer = defineAsyncComponent(() => import('../components/admin/LogViewer.vue'));
 const OperationArchive = defineAsyncComponent(() => import('../components/admin/OperationArchive.vue'));
+const DatabaseExport = defineAsyncComponent(() => import('../components/admin/DatabaseExport.vue'));
 
 // 当前激活的标签页
 const activeTab = ref('userManagement');

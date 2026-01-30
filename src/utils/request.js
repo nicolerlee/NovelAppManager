@@ -50,9 +50,11 @@ request.interceptors.response.use(
     const isLoginRequest = response.config.url.includes('/api/novel-auth/login');
     // 检查是否为AI聊天接口
     const isAIChatRequest = response.config.url.includes('/api/ai/chat');
+    // 检查是否为blob响应（文件下载）
+    const isBlobResponse = response.config.responseType === 'blob';
 
-    // 如果是流式响应、二维码请求、图片响应、登录请求或AI聊天请求，直接返回原始响应
-    if (isStreamResponse || isQrCodeRequest || isImageResponse || isLoginRequest || isAIChatRequest) {
+    // 如果是流式响应、二维码请求、图片响应、登录请求、AI聊天请求或blob响应，直接返回原始响应
+    if (isStreamResponse || isQrCodeRequest || isImageResponse || isLoginRequest || isAIChatRequest || isBlobResponse) {
         return response; // 返回完整的response对象
     }
 
