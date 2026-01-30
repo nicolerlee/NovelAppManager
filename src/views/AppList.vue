@@ -67,43 +67,42 @@
     <el-card class="app-table">
       <template #header>
         <div class="header">
-          <h3>
-            {{
-              selectedPlatform
-                ? selectedPlatform + "小程序列表"
-                : "全部小程序列表"
-            }}
-            <el-tag
-              v-if="selectedPlatform"
-              class="platform-tag"
-              :type="getPlatformType(selectedPlatform)"
-              effect="light"
-              closable
-              @close="clearPlatformSelect"
-            >
-              {{ selectedPlatform }}
-            </el-tag>
-          </h3>
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              gap: 15px;
-              margin-left: 15px;
-            "
-          >
+          <div class="header-left">
+            <h3>
+              {{
+                selectedPlatform
+                  ? selectedPlatform + "小程序列表"
+                  : "全部小程序列表"
+              }}
+              <el-tag
+                v-if="selectedPlatform"
+                class="platform-tag"
+                :type="getPlatformType(selectedPlatform)"
+                effect="light"
+                closable
+                @close="clearPlatformSelect"
+              >
+                {{ selectedPlatform }}
+              </el-tag>
+            </h3>
             <el-input
               v-model="searchQuery"
               placeholder="搜索小程序"
-              style="width: 220px"
+              style="width: 220px; margin-left: 15px;"
               clearable
             >
               <template #prefix>
                 <el-icon><Search /></el-icon>
               </template>
             </el-input>
-            <!-- <el-button type="primary" @click="handleAddApp">快速创建小程序</el-button> -->
           </div>
+          <el-button 
+            type="success" 
+            @click="handleIncrementVersions"
+            :loading="incrementLoading"
+          >
+            版本号+1
+          </el-button>
         </div>
       </template>
 
@@ -281,6 +280,7 @@ const appList = ref([]);
 const selectedPlatform = ref("");
 const loading = ref(false);
 const searchQuery = ref("");
+const incrementLoading = ref(false); // 版本号+1加载状态
 
 // 获取小程序列表
 const fetchAppList = async () => {
@@ -584,6 +584,133 @@ const clearPlatformSelect = () => {
   selectedPlatform.value = "";
 };
 
+// 版本号递增函数
+const incrementVersionLocal = (version) => {
+  if (!version) return '1.0.0'
+  
+  const parts = version.split('.')
+  if (parts.length !== 3) return version
+  
+  try {
+    let major = parseInt(parts[0])
+    let minor = parseInt(parts[1])
+    let patch = parseInt(parts[2])
+    
+    // 规则1: 如果最后一位不是9，就+1
+    if (patch !== 9) {
+      return `${major}.${minor}.${patch + 1}`
+    }
+    
+    // 规则2: 如果最后一位是9，中间位+1，最后一位归零
+    if (minor !== 9) {
+      return `${major}.${minor + 1}.0`
+    }
+    
+    // 规则3: 如果中间位也是9，第一位+1，中间位归零，最后一位保持不变
+    return `${major + 1}.0.${patch}`
+  } catch {
+    return version
+  }
+}
+
+// 批量版本号+1处理
+const handleIncrementVersions = async () => {
+  if (!auth.isLogin.value) {
+    auth.showLogin();
+    return;
+  }
+
+  // 获取当前显示的应用列表（考虑平台筛选）
+  const targetApps = filteredAppList.value;
+  
+  if (targetApps.length === 0) {
+    ElMessage.warning('没有可更新的应用');
+    return;
+  }
+
+  // 确认操作
+  try {
+    const platformText = selectedPlatform.value 
+      ? `${selectedPlatform.value}平台的` 
+      : '所有';
+    await ElMessageBox.confirm(
+      `确定要将${platformText} ${targetApps.length} 个应用的版本号+1吗？`,
+      '确认操作',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    );
+  } catch {
+    return; // 用户取消操作
+  }
+  
+  // 设置加载状态
+  incrementLoading.value = true;
+  
+  try {
+    // 获取所有应用的ID
+    const appIds = targetApps.map(app => app.appid).filter(id => id);
+    
+    if (appIds.length === 0) {
+      ElMessage.warning('没有有效的应用ID');
+      return;
+    }
+    
+    // 调用后端API批量递增版本号
+    const response = await request.post('/api/novel-apps/incrementVersions', {
+      appIds: appIds
+    });
+    
+    if (response.code === 200) {
+      const result = response.data;
+      const successCount = result.successCount || 0;
+      const failedCount = result.failedCount || 0;
+      
+      // 更新本地版本号
+      if (result.details && Array.isArray(result.details)) {
+        result.details.forEach(detail => {
+          if (detail.success) {
+            // 找到对应的应用并更新版本号
+            const app = appList.value.find(a => a.appid === detail.appId);
+            if (app) {
+              // 从消息中提取新版本号
+              const match = detail.message.match(/更新到 (\d+\.\d+\.\d+)/);
+              if (match) {
+                app.version = match[1];
+              } else {
+                // 如果无法从消息中提取，手动递增
+                app.version = incrementVersionLocal(app.version);
+              }
+            }
+          }
+        });
+      }
+      
+      // 显示成功信息
+      if (failedCount === 0) {
+        ElMessage.success(`批量版本号+1成功，共更新 ${successCount} 个应用`);
+      } else {
+        ElMessage.warning(`批量版本号+1完成，成功 ${successCount} 个，失败 ${failedCount} 个`);
+        
+        // 显示失败的详细信息
+        const failedDetails = result.details?.filter(detail => !detail.success) || [];
+        if (failedDetails.length > 0) {
+          console.warn('批量版本号+1失败详情:', failedDetails);
+        }
+      }
+    } else {
+      ElMessage.error(`批量版本号+1失败: ${response.message}`);
+    }
+  } catch (error) {
+    console.error('批量版本号+1时发生错误:', error);
+    ElMessage.error(`批量版本号+1失败: ${error.message}`);
+  } finally {
+    incrementLoading.value = false;
+  }
+};
+
 // 修改表格列配置
 const tableColumns = [
   {
@@ -806,7 +933,12 @@ onMounted(() => {
 
 .header {
   display: flex;
-  /* justify-content: space-between; */
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
   align-items: center;
 }
 

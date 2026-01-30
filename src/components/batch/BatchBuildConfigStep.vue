@@ -5,6 +5,9 @@
       <el-button type="primary" @click="openBatchConfigDialog">
         批量配置
       </el-button>
+      <el-button type="success" @click="incrementAllVersions" :loading="incrementLoading">
+        版本号+1
+      </el-button>
       <el-button @click="resetAllConfigs">
         重置所有配置
       </el-button>
@@ -266,7 +269,7 @@
 
 <script setup>
 import { ref, watch, onMounted, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
 
 // Props
@@ -296,6 +299,7 @@ const appConfigs = ref([])
 const selectedAppConfigs = ref([])
 const loading = ref(false) // 用于控制批量配置的加载状态
 const batchVersionLoading = ref(false) // 用于控制批量版本更新的加载状态
+const incrementLoading = ref(false) // 用于控制版本号+1的加载状态
 
 // 描述字段验证规则
 const descriptionRules = [
@@ -597,6 +601,120 @@ const applyVersion = async (app) => {
   } catch (error) {
     console.error('应用版本时发生错误:', error);
     ElMessage.error(`应用版本失败: ${error.message}`);
+  }
+}
+
+// 方法 - 批量版本号+1
+const incrementAllVersions = async () => {
+  // 确认操作
+  try {
+    await ElMessageBox.confirm(
+      '确定要将所有应用的版本号+1吗？',
+      '确认操作',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+  } catch {
+    return // 用户取消操作
+  }
+  
+  // 设置加载状态
+  incrementLoading.value = true
+  
+  try {
+    // 获取所有应用的ID
+    const appIds = appConfigs.value.map(app => app.appId).filter(id => id)
+    
+    if (appIds.length === 0) {
+      ElMessage.warning('没有可更新的应用')
+      return
+    }
+    
+    // 调用后端API批量递增版本号
+    const response = await request.post('/api/novel-apps/incrementVersions', {
+      appIds: appIds
+    })
+    
+    if (response.code === 200) {
+      const result = response.data
+      const successCount = result.successCount || 0
+      const failedCount = result.failedCount || 0
+      
+      // 更新本地版本号
+      if (result.details && Array.isArray(result.details)) {
+        result.details.forEach(detail => {
+          if (detail.success) {
+            // 找到对应的应用并递增版本号
+            const appConfig = appConfigs.value.find(app => app.appId === detail.appId)
+            if (appConfig) {
+              // 从消息中提取新版本号
+              const match = detail.message.match(/更新到 (\d+\.\d+\.\d+)/)
+              if (match) {
+                const newVersion = match[1]
+                appConfig.config.version = newVersion
+                appConfig.version = newVersion
+              } else {
+                // 如果无法从消息中提取，手动递增
+                appConfig.config.version = incrementVersionLocal(appConfig.config.version)
+                appConfig.version = appConfig.config.version
+              }
+            }
+          }
+        })
+      }
+      
+      // 显示成功信息
+      if (failedCount === 0) {
+        ElMessage.success(`批量版本号+1成功，共更新 ${successCount} 个应用`)
+      } else {
+        ElMessage.warning(`批量版本号+1完成，成功 ${successCount} 个，失败 ${failedCount} 个`)
+        
+        // 显示失败的详细信息
+        const failedDetails = result.details?.filter(detail => !detail.success) || []
+        if (failedDetails.length > 0) {
+          console.warn('批量版本号+1失败详情:', failedDetails)
+        }
+      }
+    } else {
+      ElMessage.error(`批量版本号+1失败: ${response.message}`)
+    }
+  } catch (error) {
+    console.error('批量版本号+1时发生错误:', error)
+    ElMessage.error(`批量版本号+1失败: ${error.message}`)
+  } finally {
+    incrementLoading.value = false
+  }
+}
+
+// 本地版本号递增函数（用于前端显示）
+const incrementVersionLocal = (version) => {
+  if (!version) return '1.0.0'
+  
+  const parts = version.split('.')
+  if (parts.length !== 3) return version
+  
+  try {
+    let major = parseInt(parts[0])
+    let minor = parseInt(parts[1])
+    let patch = parseInt(parts[2])
+    
+    // 规则1: 如果最后一位不是9，就+1
+    if (patch !== 9) {
+      return `${major}.${minor}.${patch + 1}`
+    }
+    
+    // 规则2: 如果最后一位是9，中间位+1，最后一位归零
+    if (minor !== 9) {
+      return `${major}.${minor + 1}.0`
+    }
+    
+    // 规则3: 如果中间位也是9，第一位+1，中间位归零，最后一位保持不变
+    return `${major + 1}.0.${patch}`
+  } catch {
+    return version
   }
 }
 
