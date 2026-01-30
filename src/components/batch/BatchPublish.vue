@@ -115,7 +115,7 @@ const fetchApps = async () => {
             platform: platformApp.platformCode,  // 使用平台代码而不是平台名称
             platformName: platformApp.platformName,  // 保存平台名称用于显示
             product: platformApp.product,
-            lastBuildTime: platformApp.lastBuildTime,
+            lastBuildTime: platformApp.buildTime, // 修正：后端返回的是buildTime，不是lastBuildTime
             version: platformApp.version,
             status: platformApp.status, // 使用接口返回的status值，并转换为中文显示
             avatar: '', // 可以根据需要添加头像URL
@@ -146,7 +146,7 @@ const fetchApps = async () => {
               platform: platformCode,
               platformName: app.platformName || getPlatformDisplayName(platformCode),
               product: app.product,
-              lastBuildTime: app.lastBuildTime,
+              lastBuildTime: app.buildTime || app.lastBuildTime, // 修正：优先使用buildTime
               version: app.version,
               status: app.status,
               avatar: '',
@@ -162,83 +162,10 @@ const fetchApps = async () => {
     availableApps.value = appList
   } catch (error) {
     console.error('获取小程序列表失败:', error)
-    ElMessage.error('获取小程序列表失败')
+    ElMessage.error('获取小程序列表失败: ' + (error.message || '未知错误'))
     
-    // 使用模拟数据以便开发和测试，结构与后端返回的数据一致
-    const mockData = [
-      {
-        appName: '小说阅读器',
-        platforms: [
-          {
-            platformCode: 'mp-weixin',
-            platformName: '微信小程序',
-            version: '1.0.0',
-            status: 1,
-            appId: 'wx1234567890abcdef',
-            projectPath: '/path/to/project1'
-          }
-        ]
-      },
-      {
-        appName: '视频播放器',
-        platforms: [
-          {
-            platformCode: 'mp-toutiao',
-            platformName: '抖音小程序',
-            version: '2.1.0',
-            status: 1,
-            appId: 'tt1234567890abcdef',
-            projectPath: '/path/to/project2'
-          }
-        ]
-      },
-      {
-        appName: '音乐播放器',
-        platforms: [
-          {
-            platformCode: 'mp-baidu',
-            platformName: '百度小程序',
-            version: '1.5.0',
-            status: 0,
-            appId: 'bd1234567890abcdef',
-            projectPath: '/path/to/project3'
-          }
-        ]
-      },
-      {
-        appName: '游戏中心',
-        platforms: [
-          {
-            platformCode: 'mp-kuaishou',
-            platformName: '快手小程序',
-            version: '3.2.0',
-            status: 1,
-            appId: 'ks1234567890abcdef',
-            projectPath: '/path/to/project4'
-          }
-        ]
-      }
-    ]
-    
-    // 处理模拟数据，使其与真实数据结构一致
-    let appList = []
-    mockData.forEach(appItem => {
-      appItem.platforms.forEach(platformApp => {
-        appList.push({
-          id: platformApp.appId,
-          name: appItem.appName,
-          platform: platformApp.platformCode,
-          platformName: platformApp.platformName,
-          version: platformApp.version,
-          status: getStatusText(platformApp.status),
-          avatar: '',
-          projectPath: platformApp.projectPath,
-          appId: platformApp.appId
-        })
-      })
-    })
-    
-    availableApps.value = appList
+    // 获取失败时不使用 mock 数据，保持空列表
+    availableApps.value = []
   }
 }
 
@@ -421,13 +348,9 @@ const startBatchPublish = async () => {
         })
       })
       
-      // 连接WebSocket
-      try {
-        await batchBuildWebSocket.connect(batchTaskId, 'publish')
-        ElMessage.success('批量发布任务已启动')
-      } catch (error) {
-        ElMessage.error('WebSocket连接失败: ' + (error.message || '未知错误'))
-      }
+      // 不在这里连接WebSocket，让进度页面在onMounted时连接
+      // 这样可以确保WebSocket连接建立后，后端才开始发送日志
+      ElMessage.success('批量发布任务已启动')
     } else {
       ElMessage.error('启动批量发布失败: ' + (res.message || '未知错误'))
       publishStarted.value = false

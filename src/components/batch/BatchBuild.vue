@@ -113,7 +113,7 @@ const fetchApps = async () => {
         product: app.product,
         version: app.version,
         status: app.status,
-        lastBuildTime: app.lastBuildTime,
+        lastBuildTime: app.lastBuildTime, // 后端现在会返回lastBuildTime字段
         avatar: '' // 可以根据需要添加头像URL
       }))]
     })
@@ -121,47 +121,10 @@ const fetchApps = async () => {
     availableApps.value = appList
   } catch (error) {
     console.error('获取小程序列表失败:', error)
-    ElMessage.error('获取小程序列表失败')
+    ElMessage.error('获取小程序列表失败: ' + (error.message || '未知错误'))
     
-    // 使用模拟数据以便开发和测试
-    availableApps.value = [
-      {
-        id: 1,
-        name: '小说阅读器',
-        platform: 'mp-weixin',
-        platformName: '微信',
-        version: '1.0.0',
-        status: '正常',
-        avatar: ''
-      },
-      {
-        id: 2,
-        name: '视频播放器',
-        platform: 'mp-alipay', // 支付宝小程序的平台代码，如果不确定具体代码，可以先用这个
-        platformName: '支付宝',
-        version: '2.1.0',
-        status: '正常',
-        avatar: ''
-      },
-      {
-        id: 3,
-        name: '音乐播放器',
-        platform: 'mp-baidu',
-        platformName: '百度',
-        version: '1.5.0',
-        status: '维护中',
-        avatar: ''
-      },
-      {
-        id: 4,
-        name: '游戏中心',
-        platform: 'mp-toutiao', // 字节跳动小程序的平台代码通常是mp-toutiao
-        platformName: '字节',
-        version: '3.2.0',
-        status: '正常',
-        avatar: ''
-      }
-    ]
+    // 获取失败时不使用 mock 数据，保持空列表
+    availableApps.value = []
   }
 }
 
@@ -377,13 +340,9 @@ const startBatchBuild = async () => {
         })
       })
       
-      // 连接WebSocket
-      try {
-        await batchBuildWebSocket.connect(batchTaskId)
-        ElMessage.success('批量构建任务已启动')
-      } catch (error) {
-        ElMessage.error('WebSocket连接失败: ' + (error.message || '未知错误'))
-      }
+      // 不在这里连接WebSocket，让进度页面在onMounted时连接
+      // 这样可以确保WebSocket连接建立后，后端才开始发送日志
+      ElMessage.success('批量构建任务已启动')
     } else {
       ElMessage.error('启动批量构建失败: ' + (res.message || '未知错误'))
       buildStarted.value = false

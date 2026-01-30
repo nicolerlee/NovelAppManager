@@ -6,7 +6,7 @@
       type="info"
       show-icon
       title="排队提示"
-      :description="`当前队列中有 ${queueStats?.totalPending || 0} 个用户在等待，您的任务正在排队中...`"
+      :description="`当前队列有 ${queueStats?.pendingUsers || 0} 个用户在等待，${queueStats?.totalPending || 0} 个任务在等待；您的任务正在排队中...`"
       style="margin-bottom: 20px;"
     />
     
@@ -383,22 +383,16 @@ const showQueueInfo = computed(() => {
   // 如果发布状态不是pending或running，不显示排队信息
   if (publishStatus.value !== 'pending' && publishStatus.value !== '') return false
   
-  // 获取当前执行的任务ID
-  const currentTaskId = queueStats.value.currentTaskId
+  // 检查当前用户是否有任务正在运行
+  const hasRunningTask = props.appConfigs.some(app => app.status === 'running')
   
-  // 检查是否有任何任务正在等待
-  const hasPendingTask = props.appConfigs.some(app => app.taskId && app.status === 'pending')
-  
-  // 如果当前执行的任务属于我们的任务，则不显示排队信息
-  if (currentTaskId) {
-    const isOurTaskRunning = props.appConfigs.some(app => app.taskId === currentTaskId)
-    if (isOurTaskRunning) {
-      return false
-    }
+  // 如果当前用户有任务正在运行，不显示排队提示
+  if (hasRunningTask) {
+    return false
   }
   
-  // 如果我们有任务在等待，且队列中有其他任务在等待，则显示排队信息
-  return hasPendingTask && queueStats.value.totalPending > 0
+  // 如果当前用户没有任务在运行，且队列中有待处理任务，显示排队提示
+  return queueStats.value.totalPending > 0
 })
 
 // 存储注册的回调函数引用，用于取消注册

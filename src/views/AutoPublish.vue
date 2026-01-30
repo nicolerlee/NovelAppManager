@@ -138,6 +138,12 @@
               </div>
             </div>
             <el-form :model="publishConfig" label-width="120px" class="config-form">
+              <el-form-item label="发布模式">
+                <el-radio-group v-model="publishConfig.publishMode">
+                  <el-radio label="preview">仅预览</el-radio>
+                  <el-radio label="publish">发布并预览</el-radio>
+                </el-radio-group>
+              </el-form-item>
               <el-form-item label="发布类型">
                 <el-tag type="info">体验版</el-tag>
               </el-form-item>
@@ -209,7 +215,12 @@
           <div v-if="currentStep === 3" class="step-panel">
             <el-card class="log-card">
               <template #header>
-                <span>发布日志</span>
+                <div class="log-card-header">
+                  <span>发布日志</span>
+                  <el-tag :type="publishConfig.publishMode === 'preview' ? 'warning' : 'success'" effect="dark" size="small">
+                    {{ publishConfig.publishMode === 'preview' ? '仅预览模式' : '发布并预览模式' }}
+                  </el-tag>
+                </div>
               </template>
               <div class="log-content" ref="logContentRef">
                 <pre v-for="(log, idx) in publishLogs" :key="idx" class="log-line">{{ log }}</pre>
@@ -409,7 +420,8 @@ const selectedPlatform = ref('')
 const publishConfig = ref({
   type: 'trial',
   version: '',
-  description: '修复已知问题，增加产品稳定性'
+  description: '修复已知问题，增加产品稳定性',
+  publishMode: 'preview' // 默认为仅预览模式
 })
 
 // 获取可用的平台列表
@@ -651,6 +663,7 @@ const handleStartPublish = async () => {
     projectPath: platformInfo.projectPath,
     version: publishConfig.value.version,
     log: publishConfig.value.description,
+    publishMode: publishConfig.value.publishMode // 添加发布模式参数
   }
   // 仅抖音需要 douyinAppToken
   if (platformInfo.platformCode === 'mp-toutiao' && publishCommonConfig.value.douyinAppToken) {
@@ -694,7 +707,8 @@ const resetPublish = () => {
   publishConfig.value = {
     type: 'trial',
     version: '',
-    description: '修复已知问题，增加产品稳定性'
+    description: '修复已知问题，增加产品稳定性',
+    publishMode: 'preview' // 重置时也设置为仅预览模式
   }
 }
 
@@ -1035,6 +1049,11 @@ const generateQRCodeWithUrl = async (qrCodeUrl) => {
   margin-top: 24px;
   margin-bottom: 24px;
   max-height: 350px;
+}
+.log-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .log-content {
   background: #111;

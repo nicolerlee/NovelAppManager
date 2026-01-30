@@ -69,12 +69,7 @@ export const useBatchBuildStore = defineStore('batchBuild', () => {
         app.logs.push(`[错误] ${errorMessage}`)
       }
       
-      // 如果构建完成或失败，显示通知
-      if (status === 'completed') {
-        console.log(`${app.name} 构建完成`)
-      } else if (status === 'failed') {
-        console.log(`${app.name} 构建失败${errorMessage ? ': ' + errorMessage : ''}`)
-      }
+
     }
     
     // 检查是否所有任务都已完成

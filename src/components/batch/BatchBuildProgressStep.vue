@@ -6,7 +6,7 @@
       type="info"
       show-icon
       title="排队提示"
-      :description="`当前队列中有 ${queueStats?.totalPending || 0} 个用户在等待，您的任务正在排队中...`"
+      :description="`当前队列有 ${queueStats?.pendingUsers || 0} 个用户在等待，${queueStats?.totalPending || 0} 个任务在等待；您的任务正在排队中...`"
       style="margin-bottom: 20px;"
     />
 
@@ -280,17 +280,21 @@ const formattedElapsedTime = computed(() => {
 
 // 计算是否显示排队提示
 const showQueueInfo = computed(() => {
+  // 如果没有队列统计信息，不显示排队提示
   if (!queueStats.value) return false
+  
+  // 如果构建状态不是 pending 或 running，不显示排队提示
   if (buildStatus.value !== 'pending' && buildStatus.value !== 'running') return false
   
-  const currentTaskId = queueStats.value.currentTaskId
-  const hasRunningTask = props.appConfigs.some(app => app.taskId && app.status === 'running')
+  // 检查当前用户是否有任务正在运行
+  const hasRunningTask = props.appConfigs.some(app => app.status === 'running')
   
-  if (hasRunningTask && currentTaskId) {
-    const isOurTaskRunning = props.appConfigs.some(app => app.taskId === currentTaskId)
-    return !isOurTaskRunning
+  // 如果当前用户有任务正在运行，不显示排队提示
+  if (hasRunningTask) {
+    return false
   }
   
+  // 如果当前用户没有任务在运行，且队列中有待处理任务，显示排队提示
   return queueStats.value.totalPending > 0
 })
 

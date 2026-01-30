@@ -33,14 +33,12 @@ class BatchBuildWebSocket {
     return new Promise((resolve, reject) => {
       // 如果已经连接到相同的任务，直接返回
       if (this.isConnected && this.batchTaskId === batchTaskId && this.taskType === taskType) {
-        console.log('[WebSocket] 已连接到相同任务，无需重新连接')
         resolve()
         return
       }
 
       // 如果正在连接中，等待连接完成
       if (this.isConnecting) {
-        console.log('[WebSocket] 正在连接中，请稍候...')
         setTimeout(() => {
           if (this.isConnected) {
             resolve()
@@ -60,8 +58,6 @@ class BatchBuildWebSocket {
       this.taskType = taskType
       this.isConnecting = true
 
-      console.log('[WebSocket] 正在连接 STOMP，batchTaskId:', batchTaskId, 'taskType:', taskType)
-
       try {
         // 创建SockJS连接（不带认证，因为/ws/**已经在白名单中）
         const socket = new SockJS(`${window.location.protocol}//${window.location.host}/ws`)
@@ -73,14 +69,11 @@ class BatchBuildWebSocket {
           // connectHeaders: token ? {
           //   'Authorization': `Bearer ${token}`
           // } : {},
-          debug: (str) => {
-            console.log('[STOMP Debug]', str)
-          },
+          debug: () => {},
           reconnectDelay: this.reconnectDelay,
           heartbeatIncoming: 10000,
           heartbeatOutgoing: 10000,
           onConnect: () => {
-            console.log('[WebSocket] STOMP连接成功')
             this.isConnected = true
             this.isConnecting = false
             this.reconnectAttempts = 0
@@ -91,14 +84,12 @@ class BatchBuildWebSocket {
             resolve()
           },
           onStompError: (frame) => {
-            console.error('[WebSocket] STOMP错误:', frame)
             this.isConnecting = false
             if (!this.isConnected) {
               reject(new Error('STOMP连接错误: ' + (frame.headers?.message || '未知错误')))
             }
           },
-          onWebSocketClose: (event) => {
-            console.log('[WebSocket] 连接关闭:', event)
+          onWebSocketClose: () => {
             this.isConnected = false
             this.isConnecting = false
             
@@ -106,7 +97,6 @@ class BatchBuildWebSocket {
             this.subscriptions = []
           },
           onWebSocketError: (error) => {
-            console.error('[WebSocket] 连接错误:', error)
             this.isConnecting = false
             if (!this.isConnected) {
               reject(error)
@@ -118,7 +108,6 @@ class BatchBuildWebSocket {
         this.stompClient.activate()
       } catch (error) {
         this.isConnecting = false
-        console.error('[WebSocket] 创建连接失败:', error)
         reject(error)
       }
     })
@@ -129,7 +118,6 @@ class BatchBuildWebSocket {
    */
   subscribeToBatchTask() {
     if (!this.stompClient || !this.isConnected) {
-      console.warn('[WebSocket] 未连接，无法订阅')
       return
     }
 
@@ -139,10 +127,9 @@ class BatchBuildWebSocket {
       (message) => {
         try {
           const data = JSON.parse(message.body)
-          console.log('[WebSocket] 收到状态更新:', data)
           this.handleMessage({ type: 'status', ...data })
         } catch (error) {
-          console.error('[WebSocket] 解析状态消息失败:', error)
+          // 静默处理解析错误
         }
       }
     )
@@ -154,19 +141,13 @@ class BatchBuildWebSocket {
       (message) => {
         try {
           const data = JSON.parse(message.body)
-          console.log('[WebSocket] 收到日志:', data)
           this.handleMessage({ type: 'log', ...data })
         } catch (error) {
-          console.error('[WebSocket] 解析日志消息失败:', error)
+          // 静默处理解析错误
         }
       }
     )
     this.subscriptions.push(logSubscription)
-
-    console.log('[WebSocket] 已订阅主题:', [
-      `/topic/batch-${this.taskType}-status/${this.batchTaskId}`,
-      `/topic/batch-${this.taskType}-logs/${this.batchTaskId}`
-    ])
   }
 
   /**
@@ -174,14 +155,12 @@ class BatchBuildWebSocket {
    */
   disconnect() {
     if (this.stompClient) {
-      console.log('[WebSocket] 主动断开连接')
-      
       // 取消所有订阅
       this.subscriptions.forEach(subscription => {
         try {
           subscription.unsubscribe()
         } catch (error) {
-          console.error('[WebSocket] 取消订阅失败:', error)
+          // 静默处理取消订阅错误
         }
       })
       this.subscriptions = []
@@ -263,8 +242,6 @@ class BatchBuildWebSocket {
         destination: destination,
         body: JSON.stringify(data)
       })
-    } else {
-      console.warn('[WebSocket] 未连接，无法发送消息')
     }
   }
 }

@@ -447,7 +447,7 @@ const handleStartBuild = async () => {
 
   try {
     const res = await request.post(
-      `/api/novel-build/build?cmd="${buildCmd.value}"`
+      `/api/novel-build/build?cmd=${buildCmd.value}`
     );
 
     if (res.code === 200 && res.data) {

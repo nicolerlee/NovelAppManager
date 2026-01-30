@@ -118,7 +118,7 @@ const goToBatchPublish = () => {
 }
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px;
   margin-top: 32px;
   max-width: 1400px;
